@@ -11,6 +11,8 @@ import java.util.Random;
 public class Fetch {
     private final int ID_SIZE = 16;
 
+    private final int PACKET_SIZE = 16000;
+
     private final DatagramSocket socket;
 
     private final int timeout;
@@ -59,7 +61,7 @@ public class Fetch {
     public byte[] sendReceive(byte[] request) throws IOException {
         DatagramPacket requestPacket = new DatagramPacket(request, request.length);
         socket.send(requestPacket);
-        DatagramPacket responsePacket = new DatagramPacket(new byte[1000], 1000);
+        DatagramPacket responsePacket = new DatagramPacket(new byte[PACKET_SIZE], PACKET_SIZE);
         socket.receive(responsePacket);
         return responsePacket.getData();
     }
