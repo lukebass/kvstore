@@ -1,10 +1,9 @@
 package com.s62023080.CPEN431.A1;
-import java.io.*;
-import java.net.*;
+
+import java.io.IOException;
 import java.net.http.HttpTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Random;
 
 public class Assignment1 {
     public static void main(String[] args) throws IOException {

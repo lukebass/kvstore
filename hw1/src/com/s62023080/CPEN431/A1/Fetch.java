@@ -1,9 +1,11 @@
 package com.s62023080.CPEN431.A1;
-import java.io.*;
+
 import java.net.*;
+import java.io.IOException;
 import java.net.http.HttpTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Random;
 
 public class Fetch {
@@ -83,6 +85,11 @@ public class Fetch {
                 // First 16 bytes are response ID
                 byte[] responseId = new byte[ID_SIZE];
                 buffer.get(responseId);
+
+                // Ensure request and response IDs match
+                if (!Arrays.equals(requestId, responseId)) {
+                    throw new SocketTimeoutException("Mismatched request and response IDs");
+                }
 
                 // Next length bytes are response
                 formattedResponse = new byte[response.length - ID_SIZE];
