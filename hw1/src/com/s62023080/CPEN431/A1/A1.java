@@ -1,11 +1,10 @@
 package com.s62023080.CPEN431.A1;
 
 import java.io.IOException;
-import java.net.http.HttpTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class Assignment1 {
+public class A1 {
     public static byte[] generateCode(String studentId, Fetch fetch) throws IOException {
         byte[] request = new byte[4];
         ByteBuffer buffer = ByteBuffer.wrap(request);
