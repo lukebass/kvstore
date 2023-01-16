@@ -2,7 +2,6 @@ package com.s62023080.CPEN431.A1;
 
 import java.net.*;
 import java.io.IOException;
-import java.net.http.HttpTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -90,7 +89,7 @@ public class Fetch {
 
                 // Ensure request and response IDs match
                 if (!Arrays.equals(requestId, responseId)) {
-                    throw new SocketTimeoutException("Mismatched request and response IDs");
+                    throw new IOException("Mismatched request and response IDs");
                 }
 
                 // Next length bytes are response
@@ -98,7 +97,7 @@ public class Fetch {
                 buffer.get(formattedResponse);
 
                 break;
-            } catch (SocketTimeoutException e) {
+            } catch (IOException e) {
                 setTimeout(socket.getSoTimeout() * 2);
                 retries -= 1;
             }
@@ -107,7 +106,7 @@ public class Fetch {
         reset();
 
         if (formattedResponse == null) {
-            throw new HttpTimeoutException("Request Failed");
+            throw new IOException("Request Failed");
         }
 
         return formattedResponse;

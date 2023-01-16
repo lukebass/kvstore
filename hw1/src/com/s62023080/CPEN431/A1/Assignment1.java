@@ -14,16 +14,15 @@ public class Assignment1 {
         return fetch.fetch(request);
     }
 
-    public static void main(String[] args) throws IOException {
-//        // Requires 3 arguments
+    public static void main(String[] args) {
+        // Requires 3 arguments
 //        if (args.length != 3) {
 //            System.out.println("This requires an address, port, and student ID");
 //            return;
 //        }
-//
-        Fetch fetch = new Fetch("34.213.181.35", "43101", 100, 4);
 
         try {
+            Fetch fetch = new Fetch("34.213.181.35", "43101", 100, 4);
             ByteBuffer buffer = ByteBuffer.wrap(generateCode("1381632", fetch));
             // First 4 bytes are secret code length
             buffer.order(ByteOrder.BIG_ENDIAN);
@@ -35,10 +34,9 @@ public class Assignment1 {
             System.out.println("Student ID: " + "1381632");
             System.out.println("Secret Code Length: " + length);
             System.out.println("Secret Code: " + StringUtils.byteArrayToHexString(code));
-        } catch (HttpTimeoutException e) {
+            fetch.close();
+        } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-
-        fetch.close();
     }
 }
