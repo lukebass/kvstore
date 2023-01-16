@@ -29,7 +29,7 @@ public class A1 {
             // Next length bytes are secret code
             byte[] code = new byte[length];
             buffer.get(code);
-            System.out.println("Student ID: " + "1381632");
+            System.out.println("Student ID: " + args[2]);
             System.out.println("Secret Code Length: " + length);
             System.out.println("Secret Code: " + StringUtils.byteArrayToHexString(code));
             fetch.close();
