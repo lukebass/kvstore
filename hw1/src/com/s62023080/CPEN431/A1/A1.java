@@ -14,15 +14,14 @@ public class A1 {
     }
 
     public static void main(String[] args) {
-        // Requires 3 arguments
-//        if (args.length != 3) {
-//            System.out.println("This requires an address, port, and student ID");
-//            return;
-//        }
+        if (args.length != 3) {
+            System.out.println("This requires an address, port, and student ID");
+            return;
+        }
 
         try {
-            Fetch fetch = new Fetch("34.213.181.35", "43101", 100, 4);
-            ByteBuffer buffer = ByteBuffer.wrap(generateCode("1381632", fetch));
+            Fetch fetch = new Fetch(args[0], args[1], 100, 4);
+            ByteBuffer buffer = ByteBuffer.wrap(generateCode(args[2], fetch));
             // First 4 bytes are secret code length
             buffer.order(ByteOrder.BIG_ENDIAN);
             int length = buffer.getInt();
