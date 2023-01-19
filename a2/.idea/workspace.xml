@@ -6,15 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="cefd341e-64c8-4dbc-932e-4c79bc6fb032" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/Message.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/Message.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/RequestPayload.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/RequestPayload.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/ResponsePayload.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/ResponsePayload.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A2/App.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A2_62023080-1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A2_62023080-1.0.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A2.AppTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A2.AppTest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A2.AppTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A2.AppTest.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,8 +47,8 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A2" />
       <recent name="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers" />
+      <recent name="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A2" />
       <recent name="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A2/proto" />
     </key>
   </component>
