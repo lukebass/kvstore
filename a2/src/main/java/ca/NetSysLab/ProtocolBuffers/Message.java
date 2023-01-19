@@ -67,15 +67,15 @@ public final class Message {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return Message.internal_static_Msg_descriptor;
+      return ca.NetSysLab.ProtocolBuffers.Message.internal_static_Msg_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return Message.internal_static_Msg_fieldAccessorTable
+      return ca.NetSysLab.ProtocolBuffers.Message.internal_static_Msg_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              Message.Msg.class, Message.Msg.Builder.class);
+              ca.NetSysLab.ProtocolBuffers.Message.Msg.class, ca.NetSysLab.ProtocolBuffers.Message.Msg.Builder.class);
     }
 
     public static final int MESSAGEID_FIELD_NUMBER = 1;
@@ -165,10 +165,10 @@ public final class Message {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof Message.Msg)) {
+      if (!(obj instanceof ca.NetSysLab.ProtocolBuffers.Message.Msg)) {
         return super.equals(obj);
       }
-      Message.Msg other = (Message.Msg) obj;
+      ca.NetSysLab.ProtocolBuffers.Message.Msg other = (ca.NetSysLab.ProtocolBuffers.Message.Msg) obj;
 
       if (!getMessageID()
           .equals(other.getMessageID())) return false;
@@ -199,69 +199,69 @@ public final class Message {
       return hash;
     }
 
-    public static Message.Msg parseFrom(
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static Message.Msg parseFrom(
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static Message.Msg parseFrom(
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static Message.Msg parseFrom(
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static Message.Msg parseFrom(byte[] data)
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static Message.Msg parseFrom(
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static Message.Msg parseFrom(java.io.InputStream input)
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static Message.Msg parseFrom(
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static Message.Msg parseDelimitedFrom(java.io.InputStream input)
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static Message.Msg parseDelimitedFrom(
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static Message.Msg parseFrom(
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static Message.Msg parseFrom(
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -274,7 +274,7 @@ public final class Message {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(Message.Msg prototype) {
+    public static Builder newBuilder(ca.NetSysLab.ProtocolBuffers.Message.Msg prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -295,18 +295,18 @@ public final class Message {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:Msg)
-        Message.MsgOrBuilder {
+        ca.NetSysLab.ProtocolBuffers.Message.MsgOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return Message.internal_static_Msg_descriptor;
+        return ca.NetSysLab.ProtocolBuffers.Message.internal_static_Msg_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return Message.internal_static_Msg_fieldAccessorTable
+        return ca.NetSysLab.ProtocolBuffers.Message.internal_static_Msg_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                Message.Msg.class, Message.Msg.Builder.class);
+                ca.NetSysLab.ProtocolBuffers.Message.Msg.class, ca.NetSysLab.ProtocolBuffers.Message.Msg.Builder.class);
       }
 
       // Construct using ca.NetSysLab.ProtocolBuffers.Message.Msg.newBuilder()
@@ -332,17 +332,17 @@ public final class Message {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return Message.internal_static_Msg_descriptor;
+        return ca.NetSysLab.ProtocolBuffers.Message.internal_static_Msg_descriptor;
       }
 
       @java.lang.Override
-      public Message.Msg getDefaultInstanceForType() {
-        return Message.Msg.getDefaultInstance();
+      public ca.NetSysLab.ProtocolBuffers.Message.Msg getDefaultInstanceForType() {
+        return ca.NetSysLab.ProtocolBuffers.Message.Msg.getDefaultInstance();
       }
 
       @java.lang.Override
-      public Message.Msg build() {
-        Message.Msg result = buildPartial();
+      public ca.NetSysLab.ProtocolBuffers.Message.Msg build() {
+        ca.NetSysLab.ProtocolBuffers.Message.Msg result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -350,14 +350,14 @@ public final class Message {
       }
 
       @java.lang.Override
-      public Message.Msg buildPartial() {
-        Message.Msg result = new Message.Msg(this);
+      public ca.NetSysLab.ProtocolBuffers.Message.Msg buildPartial() {
+        ca.NetSysLab.ProtocolBuffers.Message.Msg result = new ca.NetSysLab.ProtocolBuffers.Message.Msg(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(Message.Msg result) {
+      private void buildPartial0(ca.NetSysLab.ProtocolBuffers.Message.Msg result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.messageID_ = messageID_;
@@ -404,16 +404,16 @@ public final class Message {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof Message.Msg) {
-          return mergeFrom((Message.Msg)other);
+        if (other instanceof ca.NetSysLab.ProtocolBuffers.Message.Msg) {
+          return mergeFrom((ca.NetSysLab.ProtocolBuffers.Message.Msg)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(Message.Msg other) {
-        if (other == Message.Msg.getDefaultInstance()) return this;
+      public Builder mergeFrom(ca.NetSysLab.ProtocolBuffers.Message.Msg other) {
+        if (other == ca.NetSysLab.ProtocolBuffers.Message.Msg.getDefaultInstance()) return this;
         if (other.getMessageID() != com.google.protobuf.ByteString.EMPTY) {
           setMessageID(other.getMessageID());
         }
@@ -593,12 +593,12 @@ public final class Message {
     }
 
     // @@protoc_insertion_point(class_scope:Msg)
-    private static final Message.Msg DEFAULT_INSTANCE;
+    private static final ca.NetSysLab.ProtocolBuffers.Message.Msg DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new Message.Msg();
+      DEFAULT_INSTANCE = new ca.NetSysLab.ProtocolBuffers.Message.Msg();
     }
 
-    public static Message.Msg getDefaultInstance() {
+    public static ca.NetSysLab.ProtocolBuffers.Message.Msg getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -634,7 +634,7 @@ public final class Message {
     }
 
     @java.lang.Override
-    public Message.Msg getDefaultInstanceForType() {
+    public ca.NetSysLab.ProtocolBuffers.Message.Msg getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
