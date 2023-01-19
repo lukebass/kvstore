@@ -11,6 +11,8 @@ ca/NetSysLab/ProtocolBuffers/ResponsePayload$ResPayload$Builder.class
 ca/NetSysLab/ProtocolBuffers/ResponsePayload.class
 ca/NetSysLab/ProtocolBuffers/RequestPayload$ReqPayload.class
 ca/NetSysLab/ProtocolBuffers/RequestPayload$ReqPayloadOrBuilder.class
+com/s62023080/CPEN431/A2/Fetch.class
 ca/NetSysLab/ProtocolBuffers/Message.class
 ca/NetSysLab/ProtocolBuffers/Message$Msg$1.class
 ca/NetSysLab/ProtocolBuffers/ResponsePayload$ResPayload.class
+com/s62023080/CPEN431/A2/StringUtils.class

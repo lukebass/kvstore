@@ -1,6 +1,4 @@
 syntax = "proto3";
-
-
 option java_package = "ca.NetSysLab.ProtocolBuffers";
 option java_outer_classname = "ResponsePayload";
 
