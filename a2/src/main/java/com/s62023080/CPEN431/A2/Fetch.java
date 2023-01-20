@@ -94,15 +94,16 @@ public class Fetch {
                     throw new IOException("Mismatched request and response IDs");
                 }
 
+                // Ensure checksum is valid
                 if (resMsg.getCheckSum() != createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray())) {
-                    throw new IOException("Mismatched request and response checksums");
+                    throw new IOException("Checksum invalid, message potentially corrupted");
                 }
 
                 formattedResponse = resMsg.getPayload().toByteArray();
 
                 break;
             } catch (IOException e) {
-                System.out.println("Error: " + e.getMessage());
+                System.out.println(e.getMessage());
                 setTimeout(socket.getSoTimeout() * 2);
                 retries -= 1;
             }
