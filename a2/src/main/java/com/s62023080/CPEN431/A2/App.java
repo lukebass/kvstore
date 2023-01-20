@@ -3,8 +3,6 @@ package com.s62023080.CPEN431.A2;
 import ca.NetSysLab.ProtocolBuffers.RequestPayload.ReqPayload;
 import ca.NetSysLab.ProtocolBuffers.ResponsePayload.ResPayload;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 public class App {
     public static byte[] generateReqPayload(String studentId) {
@@ -22,19 +20,10 @@ public class App {
         try {
             Fetch fetch = new Fetch(args[0], args[1], 100, 4);
             ResPayload resPayload = ResPayload.parseFrom(fetch.fetch(generateReqPayload(args[2])));
-            ByteBuffer buffer = ByteBuffer.wrap(resPayload.getSecretKey().toByteArray());
-
-            // First 4 bytes are secret code length
-            buffer.order(ByteOrder.BIG_ENDIAN);
-            int length = buffer.getInt();
-            buffer.order(ByteOrder.LITTLE_ENDIAN);
-            // Next length bytes are secret code
-            byte[] code = new byte[length];
-            buffer.get(code);
 
             System.out.println("Student ID: " + args[2]);
-            System.out.println("Secret Code Length: " + length);
-            System.out.println("Secret Code: " + StringUtils.byteArrayToHexString(code));
+            System.out.println("Secret Code Length: " + resPayload.getSecretKey().size());
+            System.out.println("Secret Code: " + StringUtils.byteArrayToHexString(resPayload.getSecretKey().toByteArray()));
 
             fetch.close();
         } catch (IOException e) {

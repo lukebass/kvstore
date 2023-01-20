@@ -10,10 +10,6 @@ import java.nio.ByteOrder;
 import java.util.Random;
 
 public class Fetch {
-    private final int ID_SIZE = 16;
-
-    private final int PACKET_SIZE = 16000;
-
     private final DatagramSocket socket;
 
     private final int timeout;
@@ -41,7 +37,7 @@ public class Fetch {
     }
 
     public byte[] createMessageID() {
-        byte[] messageID = new byte[ID_SIZE];
+        byte[] messageID = new byte[16];
         ByteBuffer buffer = ByteBuffer.wrap(messageID);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
 
@@ -59,10 +55,21 @@ public class Fetch {
         return messageID;
     }
 
+    public long createCheckSum(byte[] messageID, byte[] payload) {
+        byte[] checkSum = new byte[messageID.length + payload.length];
+        ByteBuffer buffer = ByteBuffer.wrap(checkSum);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer.put(messageID);
+        buffer.put(payload);
+        CRC32 crc = new CRC32();
+        crc.update(checkSum);
+        return crc.getValue();
+    }
+
     public byte[] sendReceive(byte[] request) throws IOException {
         DatagramPacket requestPacket = new DatagramPacket(request, request.length);
         socket.send(requestPacket);
-        DatagramPacket responsePacket = new DatagramPacket(new byte[PACKET_SIZE], PACKET_SIZE);
+        DatagramPacket responsePacket = new DatagramPacket(new byte[16000], 16000);
         socket.receive(responsePacket);
         ByteBuffer buffer = ByteBuffer.wrap(responsePacket.getData());
         byte[] response = new byte[responsePacket.getLength()];
@@ -72,18 +79,12 @@ public class Fetch {
 
     public byte[] fetch(byte[] payload) throws IOException {
         byte[] messageID = createMessageID();
-        byte[] concat = new byte[messageID.length + payload.length];
-        ByteBuffer buffer = ByteBuffer.wrap(concat);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
-        buffer.put(messageID);
-        buffer.put(payload);
-        CRC32 crc = new CRC32();
-        crc.update(concat);
+        long checkSum = createCheckSum(messageID, payload);
 
         Msg.Builder reqMsg = Msg.newBuilder();
         reqMsg.setMessageID(ByteString.copyFrom(messageID));
         reqMsg.setPayload(ByteString.copyFrom(payload));
-        reqMsg.setCheckSum(crc.getValue());
+        reqMsg.setCheckSum(checkSum);
 
         byte[] formattedResponse = null;
         int retries = this.retries;
@@ -96,11 +97,12 @@ public class Fetch {
                     throw new IOException("Mismatched request and response IDs");
                 }
 
-//                if (reqMsg.getCheckSum() != resMsg.getCheckSum()) {
-//                    System.out.println(reqMsg.getCheckSum());
-//                    System.out.println(resMsg.getCheckSum());
-//                    throw new IOException("Mismatched request and response checksums");
-//                }
+                if (reqMsg.getCheckSum() != resMsg.getCheckSum()) {
+                    System.out.println(checkSum);
+                    System.out.println(reqMsg.getCheckSum());
+                    System.out.println(resMsg.getCheckSum());
+                    throw new IOException("Mismatched request and response checksums");
+                }
 
                 formattedResponse = resMsg.getPayload().toByteArray();
 
