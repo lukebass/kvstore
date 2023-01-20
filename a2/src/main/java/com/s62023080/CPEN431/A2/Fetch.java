@@ -1,10 +1,12 @@
 package com.s62023080.CPEN431.A2;
 
+import ca.NetSysLab.ProtocolBuffers.Message.Msg;
+import com.google.protobuf.ByteString;
+import java.util.zip.CRC32;
 import java.net.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.Random;
 
 public class Fetch {
@@ -38,9 +40,9 @@ public class Fetch {
         socket.setSoTimeout(timeout);
     }
 
-    public byte[] createRequestId() {
-        byte[] requestId = new byte[ID_SIZE];
-        ByteBuffer buffer = ByteBuffer.wrap(requestId);
+    public byte[] createMessageID() {
+        byte[] messageID = new byte[ID_SIZE];
+        ByteBuffer buffer = ByteBuffer.wrap(messageID);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
 
         // First 4 bytes are client IP
@@ -54,7 +56,7 @@ public class Fetch {
         // Next 8 bytes are time
         buffer.putLong(System.nanoTime());
 
-        return requestId;
+        return messageID;
     }
 
     public byte[] sendReceive(byte[] request) throws IOException {
@@ -62,42 +64,49 @@ public class Fetch {
         socket.send(requestPacket);
         DatagramPacket responsePacket = new DatagramPacket(new byte[PACKET_SIZE], PACKET_SIZE);
         socket.receive(responsePacket);
-        return responsePacket.getData();
+        ByteBuffer buffer = ByteBuffer.wrap(responsePacket.getData());
+        byte[] response = new byte[responsePacket.getLength()];
+        buffer.get(response);
+        return response;
     }
 
-    public byte[] fetch(byte [] request) throws IOException {
-        byte[] formattedRequest = new byte[ID_SIZE + request.length];
-        ByteBuffer buffer = ByteBuffer.wrap(formattedRequest);
+    public byte[] fetch(byte[] payload) throws IOException {
+        byte[] messageID = createMessageID();
+        byte[] concat = new byte[messageID.length + payload.length];
+        ByteBuffer buffer = ByteBuffer.wrap(concat);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer.put(messageID);
+        buffer.put(payload);
+        CRC32 crc = new CRC32();
+        crc.update(concat);
 
-        // First 16 bytes are request ID
-        byte[] requestId = createRequestId();
-        buffer.put(requestId);
-        // Next length bytes are request
-        buffer.put(request);
+        Msg.Builder reqMsg = Msg.newBuilder();
+        reqMsg.setMessageID(ByteString.copyFrom(messageID));
+        reqMsg.setPayload(ByteString.copyFrom(payload));
+        reqMsg.setCheckSum(crc.getValue());
 
         byte[] formattedResponse = null;
         int retries = this.retries;
         while (retries > 0) {
             try {
-                byte[] response = sendReceive(formattedRequest);
-                buffer = ByteBuffer.wrap(response);
-
-                // First 16 bytes are response ID
-                byte[] responseId = new byte[ID_SIZE];
-                buffer.get(responseId);
+                Msg resMsg = Msg.parseFrom(sendReceive(reqMsg.build().toByteArray()));
 
                 // Ensure request and response IDs match
-                if (!Arrays.equals(requestId, responseId)) {
+                if (!reqMsg.getMessageID().equals(resMsg.getMessageID())) {
                     throw new IOException("Mismatched request and response IDs");
                 }
 
-                // Next length bytes are response
-                formattedResponse = new byte[response.length - ID_SIZE];
-                buffer.get(formattedResponse);
+//                if (reqMsg.getCheckSum() != resMsg.getCheckSum()) {
+//                    System.out.println(reqMsg.getCheckSum());
+//                    System.out.println(resMsg.getCheckSum());
+//                    throw new IOException("Mismatched request and response checksums");
+//                }
+
+                formattedResponse = resMsg.getPayload().toByteArray();
 
                 break;
             } catch (IOException e) {
+                System.out.println("Error: " + e.getMessage());
                 setTimeout(socket.getSoTimeout() * 2);
                 retries -= 1;
             }

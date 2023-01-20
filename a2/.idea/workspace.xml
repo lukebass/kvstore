@@ -6,14 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="cefd341e-64c8-4dbc-932e-4c79bc6fb032" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/Message.proto" beforeDir="false" afterPath="$PROJECT_DIR$/proto/Message.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/RequestPayload.proto" beforeDir="false" afterPath="$PROJECT_DIR$/proto/RequestPayload.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/ResponsePayload.proto" beforeDir="false" afterPath="$PROJECT_DIR$/proto/ResponsePayload.proto" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A2/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A2/App.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A2/Fetch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A2/Fetch.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A2_62023080-1.0-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A2_62023080-1.0-jar-with-dependencies.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A2_62023080-1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A2_62023080-1.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A2/App.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A2/App.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A2.AppTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A2.AppTest.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,15 +40,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "settings.editor.selected.configurable": "reference.settings.project.maven.repository.indices"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.project.maven.repository.indices&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A2/proto" />

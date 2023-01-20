@@ -21,9 +21,9 @@ public class App {
 
         try {
             Fetch fetch = new Fetch(args[0], args[1], 100, 4);
-            byte[] reqPayload = generateReqPayload(args[2]);
-            ResPayload resPayload = ResPayload.parseFrom(fetch.fetch(reqPayload));
-            ByteBuffer buffer = ByteBuffer.wrap(resPayload.toByteArray());
+            ResPayload resPayload = ResPayload.parseFrom(fetch.fetch(generateReqPayload(args[2])));
+            ByteBuffer buffer = ByteBuffer.wrap(resPayload.getSecretKey().toByteArray());
+
             // First 4 bytes are secret code length
             buffer.order(ByteOrder.BIG_ENDIAN);
             int length = buffer.getInt();
@@ -31,9 +31,11 @@ public class App {
             // Next length bytes are secret code
             byte[] code = new byte[length];
             buffer.get(code);
+
             System.out.println("Student ID: " + args[2]);
             System.out.println("Secret Code Length: " + length);
             System.out.println("Secret Code: " + StringUtils.byteArrayToHexString(code));
+
             fetch.close();
         } catch (IOException e) {
             System.out.println(e.getMessage());
