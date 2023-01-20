@@ -6,7 +6,6 @@ import java.util.zip.CRC32;
 import java.net.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Random;
 
 public class Fetch {
@@ -39,8 +38,6 @@ public class Fetch {
     public byte[] createMessageID() {
         byte[] messageID = new byte[16];
         ByteBuffer buffer = ByteBuffer.wrap(messageID);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
-
         // First 4 bytes are client IP
         buffer.put(socket.getLocalAddress().getAddress());
         // Next 2 bytes are client port
@@ -51,15 +48,15 @@ public class Fetch {
         buffer.put(random);
         // Next 8 bytes are time
         buffer.putLong(System.nanoTime());
-
         return messageID;
     }
 
     public long createCheckSum(byte[] messageID, byte[] payload) {
         byte[] checkSum = new byte[messageID.length + payload.length];
         ByteBuffer buffer = ByteBuffer.wrap(checkSum);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        // First bytes are message ID
         buffer.put(messageID);
+        // Next bytes are payload
         buffer.put(payload);
         CRC32 crc = new CRC32();
         crc.update(checkSum);
@@ -97,10 +94,7 @@ public class Fetch {
                     throw new IOException("Mismatched request and response IDs");
                 }
 
-                if (reqMsg.getCheckSum() != resMsg.getCheckSum()) {
-                    System.out.println(checkSum);
-                    System.out.println(reqMsg.getCheckSum());
-                    System.out.println(resMsg.getCheckSum());
+                if (resMsg.getCheckSum() != createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray())) {
                     throw new IOException("Mismatched request and response checksums");
                 }
 
