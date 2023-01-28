@@ -5,29 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cefd341e-64c8-4dbc-932e-4c79bc6fb032" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../a4/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/.idea/jarRepositories.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/src/main/java/com/s62023080/CPEN431/A4/App.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/src/test/java/com/s62023080/CPEN431/A4/AppTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/target/CPEN431_2023_A4-1.0-jar-with-dependencies.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/target/CPEN431_2023_A4-1.0.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/target/maven-archiver/pom.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/target/surefire-reports/TEST-com.s62023080.CPEN431.A4.AppTest.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../a4/target/test-classes/com/s62023080/CPEN431/A4/AppTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../a4/src/main/java/ca/NetSysLab/ProtocolBuffers/KeyValueRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../a4/src/main/java/ca/NetSysLab/ProtocolBuffers/KeyValueResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../a4/src/main/java/ca/NetSysLab/ProtocolBuffers/Message.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A2_62023080-1.0-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A2_62023080-1.0-jar-with-dependencies.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A2_62023080-1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A2_62023080-1.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A2.AppTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A2.AppTest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A2.AppTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A2.AppTest.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../a4/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
