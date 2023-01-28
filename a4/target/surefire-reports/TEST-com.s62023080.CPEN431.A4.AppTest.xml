@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite tests="1" failures="0" name="com.s62023080.CPEN431.A2.AppTest" time="0" errors="0" skipped="0">
+<testsuite tests="1" failures="0" name="com.s62023080.CPEN431.A4.AppTest" time="0.001" errors="0" skipped="0">
   <properties>
     <property name="idea.version" value="2022.3.1"/>
     <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
     <property name="java.vm.version" value="17.0.6+10-LTS"/>
     <property name="sun.boot.library.path" value="/Users/lukebasso/Library/Java/JavaVirtualMachines/corretto-17.0.6/Contents/Home/lib"/>
-    <property name="maven.multiModuleProjectDirectory" value="/Users/lukebasso/Desktop/CPEN533/cpen533/a2"/>
+    <property name="maven.multiModuleProjectDirectory" value="/Users/lukebasso/Desktop/CPEN533/cpen533/a4"/>
     <property name="java.vm.vendor" value="Amazon.com Inc."/>
     <property name="java.vendor.url" value="https://aws.amazon.com/corretto/"/>
     <property name="guice.disable.misplaced.annotation.check" value="true"/>
@@ -14,7 +14,7 @@
     <property name="user.country" value="CA"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-    <property name="user.dir" value="/Users/lukebasso/Desktop/CPEN533/cpen533/a2"/>
+    <property name="user.dir" value="/Users/lukebasso/Desktop/CPEN533/cpen533/a4"/>
     <property name="java.vm.compressedOopsMode" value="Zero based"/>
     <property name="java.runtime.version" value="17.0.6+10-LTS"/>
     <property name="os.arch" value="aarch64"/>
@@ -61,5 +61,5 @@
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
   </properties>
-  <testcase classname="com.s62023080.CPEN431.A2.AppTest" name="testApp" time="0"/>
+  <testcase classname="com.s62023080.CPEN431.A4.AppTest" name="testApp" time="0.001"/>
 </testsuite>
