@@ -5,16 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3a799034-b100-4701-ad9e-797c029ae117" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/KeyValueRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/KeyValueResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/Message.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Client.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Fetch.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../a2/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../a2/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/proto/Message.proto" beforeDir="false" afterPath="$PROJECT_DIR$/proto/Message.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0-jar-with-dependencies.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
