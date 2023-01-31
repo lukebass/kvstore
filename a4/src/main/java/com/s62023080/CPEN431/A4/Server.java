@@ -1,6 +1,8 @@
 package com.s62023080.CPEN431.A4;
 
-import ca.NetSysLab.ProtocolBuffers.Message;
+import ca.NetSysLab.ProtocolBuffers.Message.Msg;
+import ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest;
+import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.net.*;
@@ -14,7 +16,6 @@ public class Server extends Thread {
 
     public Server(String port) throws SocketException {
         socket = new DatagramSocket(Integer.parseInt(port));
-        running = true;
     }
 
     public long createCheckSum(byte[] messageID, byte[] payload) {
@@ -39,20 +40,32 @@ public class Server extends Thread {
     }
 
     public void run() {
+        this.running = true;
+
         while (running) {
             try {
-                Message.Msg reqMsg = Message.Msg.parseFrom(receive());
+                Msg reqMsg = Msg.parseFrom(receive());
 
                 // Ensure checksum is valid
                 if (reqMsg.getCheckSum() != createCheckSum(reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                     continue;
                 }
 
-                // Continue
+                KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload().toByteArray());
+                int command = kvRequest.getCommand();
+
+                // Shut down if command 4
+                if (command == 4) {
+                    this.running = false;
+                    continue;
+                } else if (command == 6) {
+                    // Success
+                }
+
 
             } catch (IOException e) {
                 e.printStackTrace();
-                running = false;
+                this.running = false;
             }
         }
 
