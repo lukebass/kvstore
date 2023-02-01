@@ -70,7 +70,13 @@ public class Server extends Thread {
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
                     case 7:
-                        // GetPID
+                        byte[] pid = new byte[8];
+                        ByteBuffer buffer = ByteBuffer.wrap(pid);
+                        buffer.putLong(ProcessHandle.current().pid());
+                        kvResponse.setErrCode(0);
+                        kvResponse.setValue(ByteString.copyFrom(pid));
+                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
+                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
                     case 8:
                         kvResponse.setErrCode(0);
