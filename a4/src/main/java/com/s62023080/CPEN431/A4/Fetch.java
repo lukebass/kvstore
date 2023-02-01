@@ -51,18 +51,6 @@ public class Fetch {
         return messageID;
     }
 
-    public long createCheckSum(byte[] messageID, byte[] payload) {
-        byte[] checkSum = new byte[messageID.length + payload.length];
-        ByteBuffer buffer = ByteBuffer.wrap(checkSum);
-        // First bytes are message ID
-        buffer.put(messageID);
-        // Next bytes are payload
-        buffer.put(payload);
-        CRC32 crc = new CRC32();
-        crc.update(checkSum);
-        return crc.getValue();
-    }
-
     public byte[] sendReceive(byte[] request) throws IOException {
         DatagramPacket requestPacket = new DatagramPacket(request, request.length);
         socket.send(requestPacket);
@@ -76,12 +64,10 @@ public class Fetch {
 
     public byte[] fetch(byte[] payload) throws IOException {
         byte[] messageID = createMessageID();
-        long checkSum = createCheckSum(messageID, payload);
-
         Msg.Builder reqMsg = Msg.newBuilder();
         reqMsg.setMessageID(ByteString.copyFrom(messageID));
         reqMsg.setPayload(ByteString.copyFrom(payload));
-        reqMsg.setCheckSum(checkSum);
+        reqMsg.setCheckSum(Utils.createCheckSum(messageID, payload));
 
         byte[] formattedResponse = null;
         int retries = this.retries;
@@ -95,7 +81,7 @@ public class Fetch {
                 }
 
                 // Ensure checksum is valid
-                if (resMsg.getCheckSum() != createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray())) {
+                if (resMsg.getCheckSum() != Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray())) {
                     throw new IOException("Checksum invalid, message potentially corrupted");
                 }
 

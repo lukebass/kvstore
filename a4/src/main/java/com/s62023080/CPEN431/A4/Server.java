@@ -8,26 +8,15 @@ import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.zip.CRC32;
+import java.util.HashMap;
 
 public class Server extends Thread {
     private final DatagramSocket socket;
 
-    private boolean running;
+    private HashMap<ByteBuffer, HashMap<Integer, byte[]>> store;
 
     public Server(String port) throws SocketException {
         socket = new DatagramSocket(Integer.parseInt(port));
-    }
-
-    public long createCheckSum(byte[] messageID, byte[] payload) {
-        byte[] checkSum = new byte[messageID.length + payload.length];
-        ByteBuffer buffer = ByteBuffer.wrap(checkSum);
-        // First bytes are message ID
-        buffer.put(messageID);
-        // Next bytes are payload
-        buffer.put(payload);
-        CRC32 crc = new CRC32();
-        crc.update(checkSum);
-        return crc.getValue();
     }
 
     public byte[] receive() throws IOException {
@@ -40,32 +29,59 @@ public class Server extends Thread {
     }
 
     public void run() {
-        this.running = true;
+        boolean running = true;
 
         while (running) {
             try {
                 Msg reqMsg = Msg.parseFrom(receive());
 
                 // Ensure checksum is valid
-                if (reqMsg.getCheckSum() != createCheckSum(reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
+                if (reqMsg.getCheckSum() != Utils.createCheckSum(reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                     continue;
                 }
 
-                KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload().toByteArray());
-                int command = kvRequest.getCommand();
+                KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
+                Msg.Builder resMsg = Msg.newBuilder();
+                resMsg.setMessageID(reqMsg.getMessageID());
+                KVResponse.Builder kvResponse = KVResponse.newBuilder();
 
-                // Shut down if command 4
-                if (command == 4) {
-                    this.running = false;
-                    continue;
-                } else if (command == 6) {
-                    // Success
+                switch(kvRequest.getCommand()) {
+                    case 1:
+                        // Put
+                        break;
+                    case 2:
+                        // Get
+                        break;
+                    case 3:
+                        // Remove
+                        break;
+                    case 4:
+                        kvResponse.setErrCode(0);
+                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
+                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
+                        System.exit(0);
+                        break;
+                    case 5:
+                        // Clear
+                        break;
+                    case 6:
+                        kvResponse.setErrCode(0);
+                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
+                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
+                        break;
+                    case 7:
+                        // GetPID
+                        break;
+                    case 8:
+                        kvResponse.setErrCode(0);
+                        kvResponse.setValue(ByteString.copyFrom(new byte[]{1}));
+                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
+                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
+                        break;
                 }
-
-
             } catch (IOException e) {
                 e.printStackTrace();
-                this.running = false;
+                running = false;
             }
         }
 
