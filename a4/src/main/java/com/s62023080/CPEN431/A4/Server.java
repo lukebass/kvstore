@@ -7,16 +7,15 @@ import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.util.zip.CRC32;
-import java.util.HashMap;
 
 public class Server extends Thread {
     private final DatagramSocket socket;
 
-    private HashMap<ByteBuffer, HashMap<Integer, byte[]>> store;
+    private final Store store;
 
     public Server(String port) throws SocketException {
         socket = new DatagramSocket(Integer.parseInt(port));
+        store = new Store();
     }
 
     public void run() {
@@ -52,6 +51,7 @@ public class Server extends Thread {
                         // Remove
                         break;
                     case 4:
+                        // Shutdown
                         kvResponse.setErrCode(0);
                         resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
@@ -59,13 +59,19 @@ public class Server extends Thread {
                         break;
                     case 5:
                         // Clear
+                        int errCode = store.clear();
+                        kvResponse.setErrCode(errCode);
+                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
+                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
                     case 6:
+                        // Health
                         kvResponse.setErrCode(0);
                         resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
                     case 7:
+                        // PID
                         byte[] pid = new byte[8];
                         buffer = ByteBuffer.wrap(pid);
                         buffer.putLong(ProcessHandle.current().pid());
@@ -75,6 +81,7 @@ public class Server extends Thread {
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
                     case 8:
+                        // Membership Count
                         byte[] count = new byte[4];
                         buffer = ByteBuffer.wrap(count);
                         buffer.putInt(1);

@@ -2,7 +2,6 @@ package com.s62023080.CPEN431.A4;
 
 import ca.NetSysLab.ProtocolBuffers.Message.Msg;
 import com.google.protobuf.ByteString;
-import java.util.zip.CRC32;
 import java.net.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
