@@ -13,6 +13,18 @@ public class Server extends Thread {
 
     private final Store store;
 
+    private final static int SUCCESS = 0;
+
+    private final static int MISSING_KEY_ERROR = 1;
+
+    private final static int SPACE_ERROR = 2;
+
+    private final static int STORE_ERROR = 4;
+
+    private final static int INVALID_KEY_ERROR = 6;
+
+    private final static int INVALID_VALUE_ERROR = 7;
+
     public Server(String port) throws SocketException {
         socket = new DatagramSocket(Integer.parseInt(port));
         store = new Store();
@@ -52,21 +64,21 @@ public class Server extends Thread {
                         break;
                     case 4:
                         // Shutdown
-                        kvResponse.setErrCode(0);
+                        kvResponse.setErrCode(SUCCESS);
                         resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         System.exit(0);
                         break;
                     case 5:
                         // Clear
-                        int errCode = store.clear();
-                        kvResponse.setErrCode(errCode);
+                        store.clear();
+                        kvResponse.setErrCode(SUCCESS);
                         resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
                     case 6:
                         // Health
-                        kvResponse.setErrCode(0);
+                        kvResponse.setErrCode(SUCCESS);
                         resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
@@ -75,7 +87,7 @@ public class Server extends Thread {
                         byte[] pid = new byte[8];
                         buffer = ByteBuffer.wrap(pid);
                         buffer.putLong(ProcessHandle.current().pid());
-                        kvResponse.setErrCode(0);
+                        kvResponse.setErrCode(SUCCESS);
                         kvResponse.setValue(ByteString.copyFrom(pid));
                         resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
@@ -85,7 +97,7 @@ public class Server extends Thread {
                         byte[] count = new byte[4];
                         buffer = ByteBuffer.wrap(count);
                         buffer.putInt(1);
-                        kvResponse.setErrCode(0);
+                        kvResponse.setErrCode(SUCCESS);
                         kvResponse.setValue(ByteString.copyFrom(count));
                         resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
