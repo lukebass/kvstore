@@ -19,21 +19,17 @@ public class Server extends Thread {
         socket = new DatagramSocket(Integer.parseInt(port));
     }
 
-    public byte[] receive() throws IOException {
-        DatagramPacket responsePacket = new DatagramPacket(new byte[16000], 16000);
-        socket.receive(responsePacket);
-        ByteBuffer buffer = ByteBuffer.wrap(responsePacket.getData());
-        byte[] response = new byte[responsePacket.getLength()];
-        buffer.get(response);
-        return response;
-    }
-
     public void run() {
         boolean running = true;
 
         while (running) {
             try {
-                Msg reqMsg = Msg.parseFrom(receive());
+                DatagramPacket requestPacket = new DatagramPacket(new byte[16000], 16000);
+                socket.receive(requestPacket);
+                ByteBuffer buffer = ByteBuffer.wrap(requestPacket.getData());
+                byte[] request = new byte[requestPacket.getLength()];
+                buffer.get(request);
+                Msg reqMsg = Msg.parseFrom(request);
 
                 // Ensure checksum is valid
                 if (reqMsg.getCheckSum() != Utils.createCheckSum(reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
@@ -71,7 +67,7 @@ public class Server extends Thread {
                         break;
                     case 7:
                         byte[] pid = new byte[8];
-                        ByteBuffer buffer = ByteBuffer.wrap(pid);
+                        buffer = ByteBuffer.wrap(pid);
                         buffer.putLong(ProcessHandle.current().pid());
                         kvResponse.setErrCode(0);
                         kvResponse.setValue(ByteString.copyFrom(pid));
@@ -79,8 +75,11 @@ public class Server extends Thread {
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
                     case 8:
+                        byte[] count = new byte[4];
+                        buffer = ByteBuffer.wrap(count);
+                        buffer.putInt(1);
                         kvResponse.setErrCode(0);
-                        kvResponse.setValue(ByteString.copyFrom(new byte[]{1}));
+                        kvResponse.setValue(ByteString.copyFrom(count));
                         resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
