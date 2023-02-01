@@ -21,6 +21,8 @@ public class Server extends Thread {
 
     private final static int STORE_ERROR = 4;
 
+    private final static int UNRECOGNIZED_ERROR = 5;
+
     private final static int INVALID_KEY_ERROR = 6;
 
     private final static int INVALID_VALUE_ERROR = 7;
@@ -51,6 +53,18 @@ public class Server extends Thread {
                 Msg.Builder resMsg = Msg.newBuilder();
                 resMsg.setMessageID(reqMsg.getMessageID());
                 KVResponse.Builder kvResponse = KVResponse.newBuilder();
+
+                if (kvRequest.getKey().size() > 32) {
+                    kvResponse.setErrCode(INVALID_KEY_ERROR);
+                    resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
+                    resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
+                    return;
+                } else if (kvRequest.getValue().size() > 10000) {
+                    kvResponse.setErrCode(INVALID_VALUE_ERROR);
+                    resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
+                    resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
+                    return;
+                }
 
                 switch(kvRequest.getCommand()) {
                     case 1:
@@ -102,6 +116,11 @@ public class Server extends Thread {
                         resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
                         resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
+                    default:
+                        // Unknown
+                        kvResponse.setErrCode(UNRECOGNIZED_ERROR);
+                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
+                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
