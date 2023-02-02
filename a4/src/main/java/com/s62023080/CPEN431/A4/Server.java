@@ -50,51 +50,42 @@ public class Server extends Thread {
                 }
 
                 KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
-                Msg.Builder resMsg = Msg.newBuilder();
-                resMsg.setMessageID(reqMsg.getMessageID());
                 KVResponse.Builder kvResponse = KVResponse.newBuilder();
 
                 if (kvRequest.getKey().size() > 32) {
                     kvResponse.setErrCode(INVALID_KEY_ERROR);
-                    resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
-                    resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                     return;
                 } else if (kvRequest.getValue().size() > 10000) {
                     kvResponse.setErrCode(INVALID_VALUE_ERROR);
-                    resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
-                    resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                     return;
                 }
 
                 switch(kvRequest.getCommand()) {
                     case 1:
                         // Put
+                        store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
                         break;
                     case 2:
                         // Get
+                        byte[] value = store.get(kvRequest.getKey().toByteArray());
                         break;
                     case 3:
                         // Remove
+                        byte[] removed = store.remove(kvRequest.getKey().toByteArray());
                         break;
                     case 4:
                         // Shutdown
                         kvResponse.setErrCode(SUCCESS);
-                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
-                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         System.exit(0);
                         break;
                     case 5:
                         // Clear
                         store.clear();
                         kvResponse.setErrCode(SUCCESS);
-                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
-                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
                     case 6:
                         // Health
                         kvResponse.setErrCode(SUCCESS);
-                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
-                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
                     case 7:
                         // PID
@@ -103,8 +94,6 @@ public class Server extends Thread {
                         buffer.putLong(ProcessHandle.current().pid());
                         kvResponse.setErrCode(SUCCESS);
                         kvResponse.setValue(ByteString.copyFrom(pid));
-                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
-                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
                     case 8:
                         // Membership Count
@@ -113,15 +102,18 @@ public class Server extends Thread {
                         buffer.putInt(1);
                         kvResponse.setErrCode(SUCCESS);
                         kvResponse.setValue(ByteString.copyFrom(count));
-                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
-                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                         break;
                     default:
                         // Unknown
                         kvResponse.setErrCode(UNRECOGNIZED_ERROR);
-                        resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
-                        resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
+
                 }
+
+                Msg.Builder resMsg = Msg.newBuilder();
+                resMsg.setMessageID(reqMsg.getMessageID());
+                resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
+                resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
+                // Return response
             } catch (IOException e) {
                 e.printStackTrace();
                 running = false;
