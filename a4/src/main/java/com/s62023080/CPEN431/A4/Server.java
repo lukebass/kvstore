@@ -17,7 +17,7 @@ public class Server extends Thread {
 
     private final static int MISSING_KEY_ERROR = 1;
 
-    private final static int SPACE_ERROR = 2;
+    private final static int MEMORY_ERROR = 2;
 
     private final static int OVERLOAD_ERROR = 3;
 
@@ -30,21 +30,23 @@ public class Server extends Thread {
     private final static int INVALID_VALUE_ERROR = 7;
 
     public Server(String port) throws SocketException {
-        socket = new DatagramSocket(Integer.parseInt(port));
-        store = new Store();
+        this.socket = new DatagramSocket(Integer.parseInt(port));
+        this.store = new Store();
     }
 
     public void run() {
-        boolean running = true;
+        while (true) {
+            DatagramPacket reqPacket = new DatagramPacket(new byte[16000], 16000);
+            Msg.Builder resMsg = Msg.newBuilder();
+            KVResponse.Builder kvResponse = KVResponse.newBuilder();
 
-        while (running) {
             try {
-                DatagramPacket requestPacket = new DatagramPacket(new byte[16000], 16000);
-                socket.receive(requestPacket);
-                ByteBuffer buffer = ByteBuffer.wrap(requestPacket.getData());
-                byte[] request = new byte[requestPacket.getLength()];
+                this.socket.receive(reqPacket);
+                ByteBuffer buffer = ByteBuffer.wrap(reqPacket.getData());
+                byte[] request = new byte[reqPacket.getLength()];
                 buffer.get(request);
                 Msg reqMsg = Msg.parseFrom(request);
+                resMsg.setMessageID(reqMsg.getMessageID());
 
                 // Ensure checksum is valid
                 if (reqMsg.getCheckSum() != Utils.createCheckSum(reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
@@ -52,8 +54,6 @@ public class Server extends Thread {
                 }
 
                 KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
-                KVResponse.Builder kvResponse = KVResponse.newBuilder();
-
                 switch (kvRequest.getCommand()) {
                     // Put
                     case 1 -> {
@@ -62,7 +62,7 @@ public class Server extends Thread {
                         } else if (kvRequest.getValue().size() > 10000) {
                             kvResponse.setErrCode(INVALID_VALUE_ERROR);
                         } else {
-                            store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
+                            this.store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
                         }
                     }
                     // Get
@@ -70,7 +70,7 @@ public class Server extends Thread {
                         if (kvRequest.getKey().size() > 32) {
                             kvResponse.setErrCode(INVALID_KEY_ERROR);
                         } else {
-                            byte[] composite = store.get(kvRequest.getKey().toByteArray());
+                            byte[] composite = this.store.get(kvRequest.getKey().toByteArray());
                             if (composite == null) {
                                 kvResponse.setErrCode(MISSING_KEY_ERROR);
                             } else {
@@ -89,25 +89,22 @@ public class Server extends Thread {
                         if (kvRequest.getKey().size() > 32) {
                             kvResponse.setErrCode(INVALID_KEY_ERROR);
                         } else {
-                            byte[] composite = store.remove(kvRequest.getKey().toByteArray());
+                            byte[] composite = this.store.remove(kvRequest.getKey().toByteArray());
                             if (composite == null) {
                                 kvResponse.setErrCode(MISSING_KEY_ERROR);
                             } else {
                                 kvResponse.setErrCode(SUCCESS);
-                                buffer = ByteBuffer.wrap(composite);
-                                int version = buffer.getInt();
-                                byte[] value = new byte[composite.length - 4];
-                                buffer.get(value);
-                                kvResponse.setValue(ByteString.copyFrom(value));
-                                kvResponse.setVersion(version);
                             }
                         }
                     }
                     // Shutdown
-                    case 4 -> System.exit(0);
+                    case 4 -> {
+                        this.socket.close();
+                        System.exit(0);
+                    }
                     // Clear
                     case 5 -> {
-                        store.clear();
+                        this.store.clear();
                         kvResponse.setErrCode(SUCCESS);
                     }
                     // Health
@@ -131,18 +128,27 @@ public class Server extends Thread {
                     // Unknown
                     default -> kvResponse.setErrCode(UNRECOGNIZED_ERROR);
                 }
-
-                Msg.Builder resMsg = Msg.newBuilder();
-                resMsg.setMessageID(reqMsg.getMessageID());
-                resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
-                resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
-                // Return response
+            } catch (OutOfMemoryError e) {
+                kvResponse.setErrCode(MEMORY_ERROR);
             } catch (IOException e) {
-                e.printStackTrace();
-                running = false;
+                kvResponse.setErrCode(STORE_ERROR);
+            } catch (Exception e) {
+                byte[] wait = new byte[4];
+                ByteBuffer buffer = ByteBuffer.wrap(wait);
+                buffer.putInt(5000);
+                kvResponse.setErrCode(OVERLOAD_ERROR);
+                kvResponse.setValue(ByteString.copyFrom(wait));
+            } finally {
+                try {
+                    resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
+                    resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
+                    byte[] response = resMsg.build().toByteArray();
+                    DatagramPacket resPacket = new DatagramPacket(response, response.length, reqPacket.getAddress(), reqPacket.getPort());
+                    this.socket.send(resPacket);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
-
-        socket.close();
     }
 }

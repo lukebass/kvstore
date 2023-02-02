@@ -15,32 +15,32 @@ public class Fetch {
     private final int retries;
 
     public Fetch(String host, String port, int timeout, int retries) throws SocketException, UnknownHostException {
-        socket = new DatagramSocket();
-        socket.connect(InetAddress.getByName(host), Integer.parseInt(port));
+        this.socket = new DatagramSocket();
+        this.socket.connect(InetAddress.getByName(host), Integer.parseInt(port));
         this.timeout = timeout;
-        socket.setSoTimeout(timeout);
+        this.socket.setSoTimeout(timeout);
         this.retries = retries;
     }
 
     public void close() {
-        socket.close();
+        this.socket.close();
     }
 
     public void reset() throws SocketException {
-        socket.setSoTimeout(this.timeout);
+        this.socket.setSoTimeout(this.timeout);
     }
 
     public void setTimeout(int timeout) throws SocketException {
-        socket.setSoTimeout(timeout);
+        this.socket.setSoTimeout(timeout);
     }
 
     public byte[] createMessageID() {
         byte[] messageID = new byte[16];
         ByteBuffer buffer = ByteBuffer.wrap(messageID);
         // First 4 bytes are client IP
-        buffer.put(socket.getLocalAddress().getAddress());
+        buffer.put(this.socket.getLocalAddress().getAddress());
         // Next 2 bytes are client port
-        buffer.putShort((short) socket.getLocalPort());
+        buffer.putShort((short) this.socket.getLocalPort());
         // Next 2 bytes are random
         byte[] random = new byte[2];
         new Random().nextBytes(random);
@@ -51,12 +51,12 @@ public class Fetch {
     }
 
     public byte[] sendReceive(byte[] request) throws IOException {
-        DatagramPacket requestPacket = new DatagramPacket(request, request.length);
-        socket.send(requestPacket);
-        DatagramPacket responsePacket = new DatagramPacket(new byte[16000], 16000);
-        socket.receive(responsePacket);
-        ByteBuffer buffer = ByteBuffer.wrap(responsePacket.getData());
-        byte[] response = new byte[responsePacket.getLength()];
+        DatagramPacket reqPacket = new DatagramPacket(request, request.length);
+        this.socket.send(reqPacket);
+        DatagramPacket resPacket = new DatagramPacket(new byte[16000], 16000);
+        this.socket.receive(resPacket);
+        ByteBuffer buffer = ByteBuffer.wrap(resPacket.getData());
+        byte[] response = new byte[resPacket.getLength()];
         buffer.get(response);
         return response;
     }
@@ -89,7 +89,7 @@ public class Fetch {
                 break;
             } catch (IOException e) {
                 System.out.println(e.getMessage());
-                setTimeout(socket.getSoTimeout() * 2);
+                setTimeout(this.socket.getSoTimeout() * 2);
                 retries -= 1;
             }
         }
