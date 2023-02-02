@@ -52,61 +52,66 @@ public class Server extends Thread {
                 KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
                 KVResponse.Builder kvResponse = KVResponse.newBuilder();
 
-                if (kvRequest.getKey().size() > 32) {
-                    kvResponse.setErrCode(INVALID_KEY_ERROR);
-                    return;
-                } else if (kvRequest.getValue().size() > 10000) {
-                    kvResponse.setErrCode(INVALID_VALUE_ERROR);
-                    return;
-                }
-
-                switch(kvRequest.getCommand()) {
-                    case 1:
+                switch (kvRequest.getCommand()) {
+                    case 1 -> {
                         // Put
-                        store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
-                        break;
-                    case 2:
+                        if (kvRequest.getKey().size() > 32) {
+                            kvResponse.setErrCode(INVALID_KEY_ERROR);
+                        } else if (kvRequest.getValue().size() > 10000) {
+                            kvResponse.setErrCode(INVALID_VALUE_ERROR);
+                        } else {
+                            store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
+                        }
+                    }
+                    case 2 -> {
                         // Get
-                        byte[] value = store.get(kvRequest.getKey().toByteArray());
-                        break;
-                    case 3:
+                        if (kvRequest.getKey().size() > 32) {
+                            kvResponse.setErrCode(INVALID_KEY_ERROR);
+                        } else {
+                            byte[] value = store.get(kvRequest.getKey().toByteArray());
+                        }
+                    }
+                    case 3 -> {
                         // Remove
-                        byte[] removed = store.remove(kvRequest.getKey().toByteArray());
-                        break;
-                    case 4:
+                        if (kvRequest.getKey().size() > 32) {
+                            kvResponse.setErrCode(INVALID_KEY_ERROR);
+                        } else {
+                            byte[] removed = store.remove(kvRequest.getKey().toByteArray());
+                        }
+                    }
+                    case 4 -> {
                         // Shutdown
                         kvResponse.setErrCode(SUCCESS);
                         System.exit(0);
-                        break;
-                    case 5:
+                    }
+                    case 5 -> {
                         // Clear
                         store.clear();
                         kvResponse.setErrCode(SUCCESS);
-                        break;
-                    case 6:
+                    }
+                    case 6 ->
                         // Health
-                        kvResponse.setErrCode(SUCCESS);
-                        break;
-                    case 7:
+                            kvResponse.setErrCode(SUCCESS);
+                    case 7 -> {
                         // PID
                         byte[] pid = new byte[8];
                         buffer = ByteBuffer.wrap(pid);
                         buffer.putLong(ProcessHandle.current().pid());
                         kvResponse.setErrCode(SUCCESS);
                         kvResponse.setValue(ByteString.copyFrom(pid));
-                        break;
-                    case 8:
+                    }
+                    case 8 -> {
                         // Membership Count
                         byte[] count = new byte[4];
                         buffer = ByteBuffer.wrap(count);
                         buffer.putInt(1);
                         kvResponse.setErrCode(SUCCESS);
                         kvResponse.setValue(ByteString.copyFrom(count));
-                        break;
-                    default:
+                    }
+                    default -> {
                         // Unknown
                         kvResponse.setErrCode(UNRECOGNIZED_ERROR);
-
+                    }
                 }
 
                 Msg.Builder resMsg = Msg.newBuilder();
