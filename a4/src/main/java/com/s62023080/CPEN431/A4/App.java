@@ -9,13 +9,8 @@ import java.io.IOException;
 public class App 
 {
     public static void main( String[] args ) {
-        if (args.length != 1) {
-            System.out.println("This requires a port number");
-            return;
-        }
-
         try {
-            new Server(Integer.parseInt(args[0])).start();
+            new Server(3080).start();
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

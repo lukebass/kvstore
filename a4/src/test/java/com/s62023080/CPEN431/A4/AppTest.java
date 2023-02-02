@@ -30,9 +30,15 @@ public class AppTest extends TestCase {
     }
 
     @Override
-    public void setUp () throws SocketException, UnknownHostException {
-        this.server = new Server(3080);
-        this.client = new Client("localhost", 3080, 100, 4);
+    public void setUp() throws SocketException, UnknownHostException {
+         this.server = new Server(3080);
+         this.client = new Client("localhost", 3080, 100, 4);
+    }
+
+    @Override
+    public void tearDown() {
+        this.client.close();
+        this.server.close();
     }
 
     public void testPut()

@@ -13,6 +13,8 @@ public class Server extends Thread {
 
     private final Store store;
 
+    private boolean running;
+
     private final static int SUCCESS = 0;
 
     private final static int MISSING_KEY_ERROR = 1;
@@ -32,12 +34,18 @@ public class Server extends Thread {
     public Server(int port) throws SocketException {
         this.socket = new DatagramSocket(port);
         this.store = new Store();
+        this.running = false;
+    }
+
+    public void close() {
+        this.socket.close();
+        this.running = false;
     }
 
     public void run() {
-        boolean running = true;
+        this.running = true;
 
-        while (running) {
+        while (this.running) {
             DatagramPacket reqPacket = new DatagramPacket(new byte[16000], 16000);
             Msg.Builder resMsg = Msg.newBuilder();
             KVResponse.Builder kvResponse = KVResponse.newBuilder();
@@ -101,7 +109,7 @@ public class Server extends Thread {
                     }
                     // Shutdown
                     case 4 -> {
-                        running = false;
+                        this.running = false;
                         kvResponse.setErrCode(SUCCESS);
                     }
                     // Clear
@@ -153,7 +161,7 @@ public class Server extends Thread {
             }
         }
 
-        this.socket.close();
+        this.close();
         System.exit(0);
     }
 }
