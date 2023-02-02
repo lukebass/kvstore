@@ -15,7 +15,7 @@ public class App
         }
 
         try {
-            new Server(args[0]).start();
+            new Server(Integer.parseInt(args[0])).start();
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

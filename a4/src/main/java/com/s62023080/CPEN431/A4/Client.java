@@ -7,16 +7,16 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
-public class Fetch {
+public class Client {
     private final DatagramSocket socket;
 
     private final int timeout;
 
     private final int retries;
 
-    public Fetch(String host, String port, int timeout, int retries) throws SocketException, UnknownHostException {
+    public Client(String host, int port, int timeout, int retries) throws SocketException, UnknownHostException {
         this.socket = new DatagramSocket();
-        this.socket.connect(InetAddress.getByName(host), Integer.parseInt(port));
+        this.socket.connect(InetAddress.getByName(host), port);
         this.timeout = timeout;
         this.socket.setSoTimeout(timeout);
         this.retries = retries;

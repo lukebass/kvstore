@@ -15,6 +15,6 @@ ca/NetSysLab/ProtocolBuffers/KeyValueRequest.class
 ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponse$Builder.class
 com/s62023080/CPEN431/A4/Store.class
 ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequestOrBuilder.class
-com/s62023080/CPEN431/A4/Fetch.class
 ca/NetSysLab/ProtocolBuffers/Message.class
 ca/NetSysLab/ProtocolBuffers/Message$Msg$1.class
+com/s62023080/CPEN431/A4/Client.class

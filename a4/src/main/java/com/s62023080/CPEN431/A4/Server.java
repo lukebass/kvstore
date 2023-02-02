@@ -29,8 +29,8 @@ public class Server extends Thread {
 
     private final static int INVALID_VALUE_ERROR = 7;
 
-    public Server(String port) throws SocketException {
-        this.socket = new DatagramSocket(Integer.parseInt(port));
+    public Server(int port) throws SocketException {
+        this.socket = new DatagramSocket(port);
         this.store = new Store();
     }
 
@@ -101,7 +101,6 @@ public class Server extends Thread {
                     }
                     // Shutdown
                     case 4 -> {
-                        this.socket.close();
                         running = false;
                         kvResponse.setErrCode(SUCCESS);
                     }
@@ -154,6 +153,7 @@ public class Server extends Thread {
             }
         }
 
+        this.socket.close();
         System.exit(0);
     }
 }
