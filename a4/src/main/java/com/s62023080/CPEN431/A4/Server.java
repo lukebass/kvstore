@@ -19,6 +19,8 @@ public class Server extends Thread {
 
     private final static int SPACE_ERROR = 2;
 
+    private final static int OVERLOAD_ERROR = 3;
+
     private final static int STORE_ERROR = 4;
 
     private final static int UNRECOGNIZED_ERROR = 5;
@@ -53,8 +55,8 @@ public class Server extends Thread {
                 KVResponse.Builder kvResponse = KVResponse.newBuilder();
 
                 switch (kvRequest.getCommand()) {
+                    // Put
                     case 1 -> {
-                        // Put
                         if (kvRequest.getKey().size() > 32) {
                             kvResponse.setErrCode(INVALID_KEY_ERROR);
                         } else if (kvRequest.getValue().size() > 10000) {
@@ -63,55 +65,71 @@ public class Server extends Thread {
                             store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
                         }
                     }
+                    // Get
                     case 2 -> {
-                        // Get
                         if (kvRequest.getKey().size() > 32) {
                             kvResponse.setErrCode(INVALID_KEY_ERROR);
                         } else {
-                            byte[] value = store.get(kvRequest.getKey().toByteArray());
+                            byte[] composite = store.get(kvRequest.getKey().toByteArray());
+                            if (composite == null) {
+                                kvResponse.setErrCode(MISSING_KEY_ERROR);
+                            } else {
+                                kvResponse.setErrCode(SUCCESS);
+                                buffer = ByteBuffer.wrap(composite);
+                                int version = buffer.getInt();
+                                byte[] value = new byte[composite.length - 4];
+                                buffer.get(value);
+                                kvResponse.setValue(ByteString.copyFrom(value));
+                                kvResponse.setVersion(version);
+                            }
                         }
                     }
+                    // Remove
                     case 3 -> {
-                        // Remove
                         if (kvRequest.getKey().size() > 32) {
                             kvResponse.setErrCode(INVALID_KEY_ERROR);
                         } else {
-                            byte[] removed = store.remove(kvRequest.getKey().toByteArray());
+                            byte[] composite = store.remove(kvRequest.getKey().toByteArray());
+                            if (composite == null) {
+                                kvResponse.setErrCode(MISSING_KEY_ERROR);
+                            } else {
+                                kvResponse.setErrCode(SUCCESS);
+                                buffer = ByteBuffer.wrap(composite);
+                                int version = buffer.getInt();
+                                byte[] value = new byte[composite.length - 4];
+                                buffer.get(value);
+                                kvResponse.setValue(ByteString.copyFrom(value));
+                                kvResponse.setVersion(version);
+                            }
                         }
                     }
-                    case 4 -> {
-                        // Shutdown
-                        kvResponse.setErrCode(SUCCESS);
-                        System.exit(0);
-                    }
+                    // Shutdown
+                    case 4 -> System.exit(0);
+                    // Clear
                     case 5 -> {
-                        // Clear
                         store.clear();
                         kvResponse.setErrCode(SUCCESS);
                     }
-                    case 6 ->
-                        // Health
-                            kvResponse.setErrCode(SUCCESS);
+                    // Health
+                    case 6 -> kvResponse.setErrCode(SUCCESS);
+                    // PID
                     case 7 -> {
-                        // PID
                         byte[] pid = new byte[8];
                         buffer = ByteBuffer.wrap(pid);
                         buffer.putLong(ProcessHandle.current().pid());
                         kvResponse.setErrCode(SUCCESS);
                         kvResponse.setValue(ByteString.copyFrom(pid));
                     }
+                    // Membership Count
                     case 8 -> {
-                        // Membership Count
                         byte[] count = new byte[4];
                         buffer = ByteBuffer.wrap(count);
                         buffer.putInt(1);
                         kvResponse.setErrCode(SUCCESS);
                         kvResponse.setValue(ByteString.copyFrom(count));
                     }
-                    default -> {
-                        // Unknown
-                        kvResponse.setErrCode(UNRECOGNIZED_ERROR);
-                    }
+                    // Unknown
+                    default -> kvResponse.setErrCode(UNRECOGNIZED_ERROR);
                 }
 
                 Msg.Builder resMsg = Msg.newBuilder();
