@@ -59,28 +59,29 @@ public class Server extends Thread {
                 switch (kvRequest.getCommand()) {
                     // Put
                     case 1 -> {
-                        if (kvRequest.getKey().size() > 32) {
+                        if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                             kvResponse.setErrCode(INVALID_KEY_ERROR);
-                        } else if (kvRequest.getValue().size() > 10000) {
+                        } else if (kvRequest.getValue().size() == 0 || kvRequest.getValue().size() > 10000) {
                             kvResponse.setErrCode(INVALID_VALUE_ERROR);
                         } else {
                             this.store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
+                            kvResponse.setErrCode(SUCCESS);
                         }
                     }
                     // Get
                     case 2 -> {
-                        if (kvRequest.getKey().size() > 32) {
+                        if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                             kvResponse.setErrCode(INVALID_KEY_ERROR);
                         } else {
                             byte[] composite = this.store.get(kvRequest.getKey().toByteArray());
                             if (composite == null) {
                                 kvResponse.setErrCode(MISSING_KEY_ERROR);
                             } else {
-                                kvResponse.setErrCode(SUCCESS);
                                 buffer = ByteBuffer.wrap(composite);
                                 int version = buffer.getInt();
                                 byte[] value = new byte[composite.length - 4];
                                 buffer.get(value);
+                                kvResponse.setErrCode(SUCCESS);
                                 kvResponse.setValue(ByteString.copyFrom(value));
                                 kvResponse.setVersion(version);
                             }
@@ -88,7 +89,7 @@ public class Server extends Thread {
                     }
                     // Remove
                     case 3 -> {
-                        if (kvRequest.getKey().size() > 32) {
+                        if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                             kvResponse.setErrCode(INVALID_KEY_ERROR);
                         } else {
                             byte[] composite = this.store.remove(kvRequest.getKey().toByteArray());

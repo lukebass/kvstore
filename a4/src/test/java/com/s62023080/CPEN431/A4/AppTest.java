@@ -1,5 +1,6 @@
 package com.s62023080.CPEN431.A4;
 
+import com.google.protobuf.ByteString;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.net.SocketException;
@@ -23,6 +24,118 @@ public class AppTest {
     }
 
     @Test
+    void testPutKeyFail()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(1);
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(6, kvResponse.getErrCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testPutValueFail()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(1);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(7, kvResponse.getErrCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testPutSuccess()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(1);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvRequest.setValue(ByteString.copyFrom(new byte[]{1}));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(0, kvResponse.getErrCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testPutPutSuccess()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(1);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvRequest.setValue(ByteString.copyFrom(new byte[]{1}));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(0, kvResponse.getErrCode());
+
+            kvRequest.setCommand(1);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvRequest.setValue(ByteString.copyFrom(new byte[]{1}));
+            kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(0, kvResponse.getErrCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testGetKeyFail()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(2);
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(6, kvResponse.getErrCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testGetMissingFail()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(2);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(1, kvResponse.getErrCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testPutGetSuccess()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(1);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(0, kvResponse.getErrCode());
+
+            kvRequest.setCommand(2);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(0, kvResponse.getErrCode());
+            assertEquals(0, kvResponse.getVersion());
+            assertEquals(ByteString.copyFrom(new byte[]{1,2,3}), kvResponse.getValue());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     void testClear()
     {
         try {
@@ -41,7 +154,7 @@ public class AppTest {
         try {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
             kvRequest.setCommand(6);
-            KVResponse kvResponse = KVResponse.parseFrom(this.client.fetch(kvRequest.build().toByteArray()));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
         } catch (Exception e) {
             e.printStackTrace();
