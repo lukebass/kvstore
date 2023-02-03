@@ -1,63 +1,42 @@
 package com.s62023080.CPEN431.A4;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import junit.extensions.TestSetup;
-import java.io.IOException;
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest;
 import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
 
-/**
- * Unit test for simple App.
- */
-public class AppTest extends TestCase {
-    private Client client;
-    private Server server;
+public class AppTest {
+    private static Client client;
 
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest(String testName) {
-        super(testName);
+    @BeforeAll
+    static void setup() throws SocketException, UnknownHostException {
+        new Server(3080).start();
+        client = new Client("localhost", 3080, 100, 4);
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(AppTest.class);
+    @AfterAll
+    static void tearDown() {
+        client.close();
     }
 
-    public void setUp() throws SocketException, UnknownHostException {
-         this.server = new Server(3080);
-         this.server.start();
-         this.client = new Client("localhost", 3080, 100, 4);
-    }
-
-    public void tearDown() {
-        this.client.close();
-        this.server.close();
-    }
-
-    public void testClear()
+    @Test
+    void testClear()
     {
         try {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
             kvRequest.setCommand(5);
-            KVResponse kvResponse = KVResponse.parseFrom(this.client.fetch(kvRequest.build().toByteArray()));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void testIsAlive()
+    @Test
+    void testIsAlive()
     {
         try {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
@@ -69,24 +48,26 @@ public class AppTest extends TestCase {
         }
     }
 
-    public void testPID()
+    @Test
+    void testPID()
     {
         try {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
             kvRequest.setCommand(7);
-            KVResponse kvResponse = KVResponse.parseFrom(this.client.fetch(kvRequest.build().toByteArray()));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void testMembershipCount()
+    @Test
+    void testMembershipCount()
     {
         try {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
             kvRequest.setCommand(8);
-            KVResponse kvResponse = KVResponse.parseFrom(this.client.fetch(kvRequest.build().toByteArray()));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             ByteBuffer buffer = ByteBuffer.wrap(kvResponse.getValue().toByteArray());
             assertEquals(0, kvResponse.getErrCode());
             assertEquals(1, buffer.getInt());
