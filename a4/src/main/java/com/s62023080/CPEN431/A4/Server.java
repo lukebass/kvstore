@@ -7,11 +7,16 @@ import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 
 public class Server extends Thread {
     private final DatagramSocket socket;
 
     private final Store store;
+
+    private HashMap<ByteBuffer, byte[]> cache;
+
+    private final static int MAX_SIZE = 16000;
 
     private final static int SUCCESS = 0;
 
@@ -32,13 +37,18 @@ public class Server extends Thread {
     public Server(int port) throws SocketException {
         this.socket = new DatagramSocket(port);
         this.store = new Store();
+        this.cache = new HashMap<>();
+    }
+
+    public boolean isOutOfMemory() {
+        return Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() < MAX_SIZE;
     }
 
     public void run() {
         boolean running = true;
 
         while (running) {
-            DatagramPacket reqPacket = new DatagramPacket(new byte[16000], 16000);
+            DatagramPacket reqPacket = new DatagramPacket(new byte[MAX_SIZE], MAX_SIZE);
             Msg.Builder resMsg = Msg.newBuilder();
             KVResponse.Builder kvResponse = KVResponse.newBuilder();
 
@@ -59,7 +69,9 @@ public class Server extends Thread {
                 switch (kvRequest.getCommand()) {
                     // Put
                     case 1 -> {
-                        if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
+                        if (isOutOfMemory()) {
+                            kvResponse.setErrCode(MEMORY_ERROR);
+                        } else if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                             kvResponse.setErrCode(INVALID_KEY_ERROR);
                         } else if (kvRequest.getValue().size() == 0 || kvRequest.getValue().size() > 10000) {
                             kvResponse.setErrCode(INVALID_VALUE_ERROR);
@@ -131,16 +143,8 @@ public class Server extends Thread {
                     // Unknown
                     default -> kvResponse.setErrCode(UNRECOGNIZED_ERROR);
                 }
-            } catch (OutOfMemoryError e) {
-                kvResponse.setErrCode(MEMORY_ERROR);
-            } catch (IOException e) {
-                kvResponse.setErrCode(STORE_ERROR);
             } catch (Exception e) {
-                byte[] wait = new byte[4];
-                ByteBuffer buffer = ByteBuffer.wrap(wait);
-                buffer.putInt(5000);
-                kvResponse.setErrCode(OVERLOAD_ERROR);
-                kvResponse.setValue(ByteString.copyFrom(wait));
+                kvResponse.setErrCode(STORE_ERROR);
             } finally {
                 try {
                     resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
