@@ -87,8 +87,8 @@ public class Client {
                 formattedResponse = resMsg.getPayload().toByteArray();
 
                 break;
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
+            } catch (Exception e) {
+                e.printStackTrace();
                 setTimeout(this.socket.getSoTimeout() * 2);
                 retries -= 1;
             }

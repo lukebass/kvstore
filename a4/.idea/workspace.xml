@@ -8,10 +8,17 @@
       <change beforePath="$PROJECT_DIR$/../a2/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../a2/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/App.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Client.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Server.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/com/s62023080/CPEN431/A4/AppTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/s62023080/CPEN431/A4/AppTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0-jar-with-dependencies.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/App.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/App.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Client.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Client.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Server.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A4.AppTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A4.AppTest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/com/s62023080/CPEN431/A4/AppTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/s62023080/CPEN431/A4/AppTest.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,7 +74,7 @@
       <recent name="$PROJECT_DIR$/src/main/java" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="JUnit.AppTest">
     <configuration name="App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.s62023080.CPEN431.A4.App" />
       <module name="CPEN431_2023_A4" />
@@ -81,8 +88,24 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="AppTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="CPEN431_2023_A4" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.s62023080.CPEN431.A4.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.s62023080.CPEN431.A4" />
+      <option name="MAIN_CLASS_NAME" value="com.s62023080.CPEN431.A4.AppTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.AppTest" />
         <item itemvalue="Application.App" />
       </list>
     </recent_temporary>
@@ -100,5 +123,15 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="java.lang.IllegalArgumentException" package="java.lang" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

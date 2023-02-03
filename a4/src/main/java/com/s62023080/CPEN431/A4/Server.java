@@ -155,13 +155,12 @@ public class Server extends Thread {
                     byte[] response = resMsg.build().toByteArray();
                     DatagramPacket resPacket = new DatagramPacket(response, response.length, reqPacket.getAddress(), reqPacket.getPort());
                     this.socket.send(resPacket);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
 
         this.close();
-        System.exit(0);
     }
 }

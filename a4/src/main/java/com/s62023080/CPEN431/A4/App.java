@@ -11,8 +11,8 @@ public class App
     public static void main( String[] args ) {
         try {
             new Server(3080).start();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
