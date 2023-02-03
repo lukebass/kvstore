@@ -178,6 +178,58 @@ public class AppTest {
         }
     }
 
+    // Command 1 + 3 + 2
+    @Test
+    void testPutRemoveGetFail()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(1);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(0, kvResponse.getErrCode());
+
+            kvRequest.setCommand(3);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(0, kvResponse.getErrCode());
+
+            kvRequest.setCommand(2);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(1, kvResponse.getErrCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Command 1 + 3 + 3
+    @Test
+    void testPutRemoveRemoveFail()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(1);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(0, kvResponse.getErrCode());
+
+            kvRequest.setCommand(3);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(0, kvResponse.getErrCode());
+
+            kvRequest.setCommand(3);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(1, kvResponse.getErrCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     // Command 5
     @Test
     void testClear()
