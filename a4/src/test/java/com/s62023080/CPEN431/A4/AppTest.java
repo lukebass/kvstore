@@ -23,6 +23,7 @@ public class AppTest {
         client.close();
     }
 
+    // Command 1
     @Test
     void testPutKeyFail()
     {
@@ -36,6 +37,7 @@ public class AppTest {
         }
     }
 
+    // Command 1
     @Test
     void testPutValueFail()
     {
@@ -50,6 +52,7 @@ public class AppTest {
         }
     }
 
+    // Command 1
     @Test
     void testPutSuccess()
     {
@@ -57,7 +60,7 @@ public class AppTest {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
             kvRequest.setCommand(1);
             kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
-            kvRequest.setValue(ByteString.copyFrom(new byte[]{1}));
+            kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
             KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
         } catch (Exception e) {
@@ -65,6 +68,7 @@ public class AppTest {
         }
     }
 
+    // Command 1 + 1
     @Test
     void testPutPutSuccess()
     {
@@ -72,13 +76,13 @@ public class AppTest {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
             kvRequest.setCommand(1);
             kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
-            kvRequest.setValue(ByteString.copyFrom(new byte[]{1}));
+            kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
             KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
 
             kvRequest.setCommand(1);
             kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
-            kvRequest.setValue(ByteString.copyFrom(new byte[]{1}));
+            kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
             kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
         } catch (Exception e) {
@@ -86,6 +90,7 @@ public class AppTest {
         }
     }
 
+    // Command 2
     @Test
     void testGetKeyFail()
     {
@@ -99,6 +104,7 @@ public class AppTest {
         }
     }
 
+    // Command 2
     @Test
     void testGetMissingFail()
     {
@@ -113,6 +119,7 @@ public class AppTest {
         }
     }
 
+    // Command 1 + 2
     @Test
     void testPutGetSuccess()
     {
@@ -135,6 +142,43 @@ public class AppTest {
         }
     }
 
+    // Command 3
+    @Test
+    void testRemoveMissingFail()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(3);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{3}));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(1, kvResponse.getErrCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Command 1 + 3
+    @Test
+    void testPutRemoveSuccess()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(1);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(0, kvResponse.getErrCode());
+
+            kvRequest.setCommand(3);
+            kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
+            kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(0, kvResponse.getErrCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Command 5
     @Test
     void testClear()
     {
@@ -148,6 +192,7 @@ public class AppTest {
         }
     }
 
+    // Command 6
     @Test
     void testIsAlive()
     {
@@ -161,6 +206,7 @@ public class AppTest {
         }
     }
 
+    // Command 7
     @Test
     void testPID()
     {
@@ -174,6 +220,7 @@ public class AppTest {
         }
     }
 
+    // Command 8
     @Test
     void testMembershipCount()
     {
@@ -184,6 +231,20 @@ public class AppTest {
             ByteBuffer buffer = ByteBuffer.wrap(kvResponse.getValue().toByteArray());
             assertEquals(0, kvResponse.getErrCode());
             assertEquals(1, buffer.getInt());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Command Invalid
+    @Test
+    void testInvalid()
+    {
+        try {
+            KVRequest.Builder kvRequest = KVRequest.newBuilder();
+            kvRequest.setCommand(9);
+            KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
+            assertEquals(5, kvResponse.getErrCode());
         } catch (Exception e) {
             e.printStackTrace();
         }
