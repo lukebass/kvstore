@@ -3,9 +3,10 @@ package com.s62023080.CPEN431.A4;
 import ca.NetSysLab.ProtocolBuffers.Message.Msg;
 import ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest;
 import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
+import com.google.common.cache.Cache;
 import com.google.protobuf.ByteString;
-import java.net.*;
 import java.nio.ByteBuffer;
+import java.net.*;
 
 public class ServerResponse implements Runnable {
     private final DatagramSocket socket;
@@ -13,6 +14,8 @@ public class ServerResponse implements Runnable {
     private final DatagramPacket packet;
 
     private final Store store;
+
+    private final Cache<ByteString, byte[]> cache;
 
     private final static int SUCCESS = 0;
 
@@ -30,10 +33,11 @@ public class ServerResponse implements Runnable {
 
     private final static int INVALID_VALUE_ERROR = 7;
 
-    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store) throws SocketException {
+    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<ByteString, byte[]> cache) throws SocketException {
         this.socket = socket;
         this.packet = packet;
         this.store = store;
+        this.cache = cache;
     }
 
     public void run() {
