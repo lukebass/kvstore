@@ -45,9 +45,7 @@ public class Server extends Thread {
     }
 
     public void run() {
-        boolean running = true;
-
-        while (running) {
+        while (true) {
             DatagramPacket reqPacket = new DatagramPacket(new byte[MAX_SIZE], MAX_SIZE);
             Msg.Builder resMsg = Msg.newBuilder();
             KVResponse.Builder kvResponse = KVResponse.newBuilder();
@@ -114,8 +112,8 @@ public class Server extends Thread {
                     }
                     // Shutdown
                     case 4 -> {
-                        running = false;
-                        kvResponse.setErrCode(SUCCESS);
+                        this.socket.close();
+                        System.exit(0);
                     }
                     // Clear
                     case 5 -> {
@@ -157,8 +155,5 @@ public class Server extends Thread {
                 }
             }
         }
-
-        this.socket.close();
-        System.exit(0);
     }
 }

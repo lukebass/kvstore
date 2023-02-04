@@ -2,13 +2,13 @@ package com.s62023080.CPEN431.A4;
 
 import com.google.protobuf.ByteString;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Store {
-    private HashMap<ByteString, byte[]> store;
+    private ConcurrentHashMap<ByteString, byte[]> store;
 
     public Store() {
-        this.store = new HashMap<>();
+        this.store = new ConcurrentHashMap<>();
     }
 
     public void put(byte[] key, byte[] value, int version) {
@@ -28,6 +28,6 @@ public class Store {
     }
 
     public void clear() {
-        this.store = new HashMap<>();
+        this.store = new ConcurrentHashMap<>();
     }
 }
