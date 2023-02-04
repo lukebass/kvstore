@@ -4,17 +4,13 @@ import ca.NetSysLab.ProtocolBuffers.Message.Msg;
 import ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest;
 import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
 import com.google.protobuf.ByteString;
-import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 
 public class Server extends Thread {
     private final DatagramSocket socket;
 
     private final Store store;
-
-    private HashMap<ByteBuffer, byte[]> cache;
 
     private final static int MAX_SIZE = 16000;
 
@@ -37,11 +33,10 @@ public class Server extends Thread {
     public Server(int port) throws SocketException {
         this.socket = new DatagramSocket(port);
         this.store = new Store();
-        this.cache = new HashMap<>();
     }
 
     public boolean isOutOfMemory() {
-        return Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() < MAX_SIZE;
+        return (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) < MAX_SIZE;
     }
 
     public void run() {
