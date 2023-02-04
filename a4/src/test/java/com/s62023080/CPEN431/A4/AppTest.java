@@ -3,8 +3,7 @@ package com.s62023080.CPEN431.A4;
 import com.google.protobuf.ByteString;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest;
 import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
@@ -13,7 +12,7 @@ public class AppTest {
     private static Client client;
 
     @BeforeAll
-    static void setup() throws SocketException, UnknownHostException {
+    static void setup() throws IOException {
         new Server(3080).start();
         client = new Client("localhost", 3080, 100, 4);
     }

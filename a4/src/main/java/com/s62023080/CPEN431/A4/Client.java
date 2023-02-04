@@ -70,7 +70,7 @@ public class Client {
 
         byte[] formattedResponse = null;
         int retries = this.retries;
-        while (retries > 0) {
+        while(retries > 0) {
             try {
                 Msg resMsg = Msg.parseFrom(sendReceive(reqMsg.build().toByteArray()));
 
