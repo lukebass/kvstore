@@ -14,8 +14,6 @@ public class ServerResponse implements Runnable {
 
     private final Store store;
 
-    private final static int MAX_SIZE = 16000;
-
     private final static int SUCCESS = 0;
 
     private final static int MISSING_KEY_ERROR = 1;
@@ -38,10 +36,6 @@ public class ServerResponse implements Runnable {
         this.store = store;
     }
 
-    public boolean isOutOfMemory() {
-        return (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) < MAX_SIZE;
-    }
-
     public void run() {
         Msg.Builder resMsg = Msg.newBuilder();
         KVResponse.Builder kvResponse = KVResponse.newBuilder();
@@ -62,7 +56,7 @@ public class ServerResponse implements Runnable {
             switch (kvRequest.getCommand()) {
                 // Put
                 case 1 -> {
-                    if (isOutOfMemory()) {
+                    if (Utils.isOutOfMemory()) {
                         kvResponse.setErrCode(MEMORY_ERROR);
                     } else if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                         kvResponse.setErrCode(INVALID_KEY_ERROR);

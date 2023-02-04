@@ -53,7 +53,7 @@ public class Client {
     public byte[] sendReceive(byte[] request) throws IOException {
         DatagramPacket reqPacket = new DatagramPacket(request, request.length);
         this.socket.send(reqPacket);
-        DatagramPacket resPacket = new DatagramPacket(new byte[16000], 16000);
+        DatagramPacket resPacket = new DatagramPacket(new byte[Utils.MAX_REQUEST_SIZE], Utils.MAX_REQUEST_SIZE);
         this.socket.receive(resPacket);
         ByteBuffer buffer = ByteBuffer.wrap(resPacket.getData());
         byte[] response = new byte[resPacket.getLength()];
@@ -70,7 +70,7 @@ public class Client {
 
         byte[] formattedResponse = null;
         int retries = this.retries;
-        while(retries > 0) {
+        while (retries > 0) {
             try {
                 Msg resMsg = Msg.parseFrom(sendReceive(reqMsg.build().toByteArray()));
 

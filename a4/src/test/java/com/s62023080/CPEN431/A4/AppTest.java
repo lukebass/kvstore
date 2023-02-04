@@ -11,15 +11,19 @@ import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
 public class AppTest {
     private static Client client;
 
+    private static Server server;
+
     @BeforeAll
     static void setup() throws IOException {
-        new Server(3080).start();
+        server = new Server(3080);
+        server.start();
         client = new Client("localhost", 3080, 100, 4);
     }
 
     @AfterAll
     static void tearDown() {
         client.close();
+        server.shutdown();
     }
 
     // Command 1

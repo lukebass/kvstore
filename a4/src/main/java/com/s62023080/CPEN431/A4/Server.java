@@ -8,22 +8,27 @@ public class Server extends Thread {
 
     private final Store store;
 
-    private final static int MAX_SIZE = 16000;
+    private boolean running;
 
     public Server(int port) throws IOException {
         this.socket = new DatagramSocket(port);
         this.store = new Store();
+        this.running = true;
     }
 
     public void run() {
-        while(true) {
+        while (this.running) {
             try {
-                DatagramPacket packet = new DatagramPacket(new byte[MAX_SIZE], MAX_SIZE);
+                DatagramPacket packet = new DatagramPacket(new byte[Utils.MAX_REQUEST_SIZE], Utils.MAX_REQUEST_SIZE);
                 this.socket.receive(packet);
                 new Thread(new ServerResponse(this.socket, packet, this.store)).start();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void shutdown() {
+        this.running = false;
     }
 }
