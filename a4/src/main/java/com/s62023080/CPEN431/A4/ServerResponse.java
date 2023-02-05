@@ -49,11 +49,17 @@ public class ServerResponse implements Runnable {
             byte[] request = new byte[this.packet.getLength()];
             buffer.get(request);
             Msg reqMsg = Msg.parseFrom(request);
-            resMsg.setMessageID(reqMsg.getMessageID());
+            byte[] cacheValue = cache.getIfPresent(reqMsg.getMessageID());
 
-            // Ensure checksum is valid
+            // Ensure checksum is valid and check cache
             if (reqMsg.getCheckSum() != Utils.createCheckSum(reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                 return;
+            } else if (cacheValue != null) {
+                DatagramPacket resPacket = new DatagramPacket(cacheValue, cacheValue.length, this.packet.getAddress(), this.packet.getPort());
+                this.socket.send(resPacket);
+                return;
+            } else {
+                resMsg.setMessageID(reqMsg.getMessageID());
             }
 
             KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
@@ -67,7 +73,7 @@ public class ServerResponse implements Runnable {
                     } else if (kvRequest.getValue().size() == 0 || kvRequest.getValue().size() > 10000) {
                         kvResponse.setErrCode(INVALID_VALUE_ERROR);
                     } else {
-                        this.store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
                         kvResponse.setErrCode(SUCCESS);
                     }
                 }
@@ -76,7 +82,7 @@ public class ServerResponse implements Runnable {
                     if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                         kvResponse.setErrCode(INVALID_KEY_ERROR);
                     } else {
-                        byte[] composite = this.store.get(kvRequest.getKey().toByteArray());
+                        byte[] composite = this.store.get(kvRequest.getKey());
                         if (composite == null) {
                             kvResponse.setErrCode(MISSING_KEY_ERROR);
                         } else {
@@ -95,7 +101,7 @@ public class ServerResponse implements Runnable {
                     if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                         kvResponse.setErrCode(INVALID_KEY_ERROR);
                     } else {
-                        byte[] composite = this.store.remove(kvRequest.getKey().toByteArray());
+                        byte[] composite = this.store.remove(kvRequest.getKey());
                         if (composite == null) {
                             kvResponse.setErrCode(MISSING_KEY_ERROR);
                         } else {
@@ -141,8 +147,9 @@ public class ServerResponse implements Runnable {
                 resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
                 resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                 byte[] response = resMsg.build().toByteArray();
-                DatagramPacket resPacket = new DatagramPacket(response, response.length, packet.getAddress(), packet.getPort());
+                DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
+                this.cache.put(resMsg.getMessageID(), response);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -11,20 +11,20 @@ public class Store {
         this.store = new ConcurrentHashMap<>();
     }
 
-    public void put(byte[] key, byte[] value, int version) {
+    public void put(ByteString key, byte[] value, int version) {
         byte[] concat = new byte[value.length + 4];
         ByteBuffer buffer = ByteBuffer.wrap(concat);
         buffer.putInt(version);
         buffer.put(value);
-        this.store.put(ByteString.copyFrom(key), concat);
+        this.store.put(key, concat);
     }
 
-    public byte[] get(byte[] key) {
-        return this.store.get(ByteString.copyFrom(key));
+    public byte[] get(ByteString key) {
+        return this.store.get(key);
     }
 
-    public byte[] remove(byte[] key) {
-        return this.store.remove(ByteString.copyFrom(key));
+    public byte[] remove(ByteString key) {
+        return this.store.remove(key);
     }
 
     public void clear() {
