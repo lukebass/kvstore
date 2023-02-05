@@ -43,9 +43,9 @@ public class ServerResponse implements Runnable {
     public void run() {
         Msg.Builder resMsg = Msg.newBuilder();
         KVResponse.Builder kvResponse = KVResponse.newBuilder();
+        ByteBuffer buffer = ByteBuffer.wrap(this.packet.getData());
 
         try {
-            ByteBuffer buffer = ByteBuffer.wrap(this.packet.getData());
             byte[] request = new byte[this.packet.getLength()];
             buffer.get(request);
             Msg reqMsg = Msg.parseFrom(request);
@@ -54,6 +54,8 @@ public class ServerResponse implements Runnable {
             // Ensure checksum is valid and check cache
             if (reqMsg.getCheckSum() != Utils.createCheckSum(reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                 return;
+            } else if (this.cache.size() > 5000) {
+                throw new OutOfMemoryError();
             } else if (cacheValue != null) {
                 DatagramPacket resPacket = new DatagramPacket(cacheValue, cacheValue.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
@@ -140,6 +142,12 @@ public class ServerResponse implements Runnable {
                 // Unknown
                 default -> kvResponse.setErrCode(UNRECOGNIZED_ERROR);
             }
+        } catch (OutOfMemoryError e) {
+            byte[] wait = new byte[4];
+            buffer = ByteBuffer.wrap(wait);
+            buffer.putInt(1000);
+            kvResponse.setErrCode(OVERLOAD_ERROR);
+            kvResponse.setValue(ByteString.copyFrom(wait));
         } catch (Exception e) {
             kvResponse.setErrCode(STORE_ERROR);
         } finally {
