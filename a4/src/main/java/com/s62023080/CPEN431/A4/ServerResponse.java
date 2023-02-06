@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.net.*;
 import java.util.Base64;
-import java.util.concurrent.ExecutorService;
 
 public class ServerResponse implements Runnable {
     private final DatagramSocket socket;
@@ -19,8 +18,6 @@ public class ServerResponse implements Runnable {
     private final Store store;
 
     private final Cache<String, byte[]> cache;
-
-    private final ExecutorService executor;
 
     private final static int SUCCESS = 0;
 
@@ -38,12 +35,11 @@ public class ServerResponse implements Runnable {
 
     private final static int INVALID_VALUE_ERROR = 7;
 
-    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<String, byte[]> cache, ExecutorService executor) {
+    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<String, byte[]> cache) {
         this.socket = socket;
         this.packet = packet;
         this.store = store;
         this.cache = cache;
-        this.executor = executor;
     }
 
     public void run() {
@@ -116,11 +112,7 @@ public class ServerResponse implements Runnable {
                     }
                 }
                 // Shutdown
-                case 4 -> {
-                    this.executor.shutdownNow();
-                    this.socket.close();
-                    System.exit(0);
-                }
+                case 4 -> System.exit(0);
                 // Clear
                 case 5 -> {
                     this.store.clear();

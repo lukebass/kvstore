@@ -40,7 +40,7 @@ public class Server extends Thread {
             try {
                 DatagramPacket packet = new DatagramPacket(new byte[Utils.MAX_REQUEST_SIZE], Utils.MAX_REQUEST_SIZE);
                 this.socket.receive(packet);
-                this.executor.submit(new ServerResponse(this.socket, packet, this.store, this.cache, this.executor));
+                this.executor.submit(new ServerResponse(this.socket, packet, this.store, this.cache));
                 System.out.println("Cache: " + this.cache.size());
                 System.out.println("Store: " + this.store.size());
             } catch (Exception e) {
