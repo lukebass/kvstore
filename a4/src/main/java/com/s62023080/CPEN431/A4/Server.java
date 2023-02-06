@@ -44,7 +44,6 @@ public class Server extends Thread {
                 this.executor.submit(new ServerResponse(this.socket, packet, this.store, this.cache));
                 System.out.println("Cache: " + this.cache.size());
                 System.out.println("Store: " + this.store.size());
-                System.out.println("Memory: " + Utils.isOutOfMemory());
             } catch (Exception e) {
                 e.printStackTrace();
             }

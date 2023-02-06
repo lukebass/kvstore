@@ -54,7 +54,10 @@ public class ServerResponse implements Runnable {
             byte[] cacheValue = cache.getIfPresent(reqMsg.getMessageID());
 
             if (cacheValue != null) {
-                DatagramPacket resPacket = new DatagramPacket(cacheValue, cacheValue.length, this.packet.getAddress(), this.packet.getPort());
+                resMsg.setPayload(ByteString.copyFrom(cacheValue));
+                resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
+                byte[] response = resMsg.build().toByteArray();
+                DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
                 return;
             } else if (this.cache.size() > Utils.MAX_CACHE_SIZE) {
@@ -148,12 +151,12 @@ public class ServerResponse implements Runnable {
             kvResponse.setErrCode(STORE_ERROR);
         } finally {
             try {
-                resMsg.setPayload(ByteString.copyFrom(kvResponse.build().toByteArray()));
+                resMsg.setPayload(kvResponse.build().toByteString());
                 resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                 byte[] response = resMsg.build().toByteArray();
                 DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
-                this.cache.put(resMsg.getMessageID(), response);
+                this.cache.put(resMsg.getMessageID(), resMsg.getPayload().toByteArray());
             } catch (Exception e) {
                 e.printStackTrace();
             }
