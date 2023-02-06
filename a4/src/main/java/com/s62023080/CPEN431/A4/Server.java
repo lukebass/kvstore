@@ -2,7 +2,6 @@ package com.s62023080.CPEN431.A4;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,7 +15,7 @@ public class Server extends Thread {
 
     private final Store store;
 
-    private final Cache<ByteString, byte[]> cache;
+    private final Cache<String, byte[]> cache;
 
     private boolean running;
 
@@ -32,7 +31,7 @@ public class Server extends Thread {
         return this.store;
     }
 
-    public Cache<ByteString, byte[]> getCache() {
+    public Cache<String, byte[]> getCache() {
         return this.cache;
     }
 
@@ -41,7 +40,7 @@ public class Server extends Thread {
             try {
                 DatagramPacket packet = new DatagramPacket(new byte[Utils.MAX_REQUEST_SIZE], Utils.MAX_REQUEST_SIZE);
                 this.socket.receive(packet);
-                this.executor.submit(new ServerResponse(this.socket, packet, this.store, this.cache));
+                this.executor.submit(new ServerResponse(this.socket, packet, this.store, this.cache, this.executor));
                 System.out.println("Cache: " + this.cache.size());
                 System.out.println("Store: " + this.store.size());
             } catch (Exception e) {

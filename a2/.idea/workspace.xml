@@ -5,17 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cefd341e-64c8-4dbc-932e-4c79bc6fb032" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../a4/.A4-basic.log.swp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../a4/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../a4/A4-basic.log" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/A4-basic.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../a4/src/main/java/com/s62023080/CPEN431/A4/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/src/main/java/com/s62023080/CPEN431/A4/Server.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../a4/A4-dummy.log" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/A4-dummy.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../a4/src/main/java/com/s62023080/CPEN431/A4/ServerResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/src/main/java/com/s62023080/CPEN431/A4/ServerResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../a4/src/main/java/com/s62023080/CPEN431/A4/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/src/main/java/com/s62023080/CPEN431/A4/Utils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../a4/target/CPEN431_2023_A4-1.0-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/target/CPEN431_2023_A4-1.0-jar-with-dependencies.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../a4/target/CPEN431_2023_A4-1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/target/CPEN431_2023_A4-1.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../a4/target/classes/com/s62023080/CPEN431/A4/Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/target/classes/com/s62023080/CPEN431/A4/Server.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../a4/target/classes/com/s62023080/CPEN431/A4/ServerResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/target/classes/com/s62023080/CPEN431/A4/ServerResponse.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../a4/target/classes/com/s62023080/CPEN431/A4/Utils.class" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/target/classes/com/s62023080/CPEN431/A4/Utils.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../a4/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../a4/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

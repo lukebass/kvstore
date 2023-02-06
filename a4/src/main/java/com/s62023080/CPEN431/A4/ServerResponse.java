@@ -8,6 +8,8 @@ import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.net.*;
+import java.util.Base64;
+import java.util.concurrent.ExecutorService;
 
 public class ServerResponse implements Runnable {
     private final DatagramSocket socket;
@@ -16,7 +18,9 @@ public class ServerResponse implements Runnable {
 
     private final Store store;
 
-    private final Cache<ByteString, byte[]> cache;
+    private final Cache<String, byte[]> cache;
+
+    private final ExecutorService executor;
 
     private final static int SUCCESS = 0;
 
@@ -34,11 +38,12 @@ public class ServerResponse implements Runnable {
 
     private final static int INVALID_VALUE_ERROR = 7;
 
-    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<ByteString, byte[]> cache) {
+    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<String, byte[]> cache, ExecutorService executor) {
         this.socket = socket;
         this.packet = packet;
         this.store = store;
         this.cache = cache;
+        this.executor = executor;
     }
 
     public void run() {
@@ -51,7 +56,7 @@ public class ServerResponse implements Runnable {
             buffer.get(request);
             Msg reqMsg = Msg.parseFrom(request);
             resMsg.setMessageID(reqMsg.getMessageID());
-            byte[] cacheValue = cache.getIfPresent(reqMsg.getMessageID());
+            byte[] cacheValue = cache.getIfPresent(Base64.getEncoder().encodeToString(reqMsg.getMessageID().toByteArray()));
 
             if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                 return;
@@ -74,7 +79,7 @@ public class ServerResponse implements Runnable {
                     } else if (kvRequest.getValue().size() == 0 || kvRequest.getValue().size() > 10000) {
                         kvResponse.setErrCode(INVALID_VALUE_ERROR);
                     } else {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
+                        this.store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
                         kvResponse.setErrCode(SUCCESS);
                     }
                 }
@@ -83,7 +88,7 @@ public class ServerResponse implements Runnable {
                     if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                         kvResponse.setErrCode(INVALID_KEY_ERROR);
                     } else {
-                        byte[] composite = this.store.get(kvRequest.getKey());
+                        byte[] composite = this.store.get(kvRequest.getKey().toByteArray());
                         if (composite == null) {
                             kvResponse.setErrCode(MISSING_KEY_ERROR);
                         } else {
@@ -102,7 +107,7 @@ public class ServerResponse implements Runnable {
                     if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                         kvResponse.setErrCode(INVALID_KEY_ERROR);
                     } else {
-                        byte[] composite = this.store.remove(kvRequest.getKey());
+                        byte[] composite = this.store.remove(kvRequest.getKey().toByteArray());
                         if (composite == null) {
                             kvResponse.setErrCode(MISSING_KEY_ERROR);
                         } else {
@@ -112,6 +117,7 @@ public class ServerResponse implements Runnable {
                 }
                 // Shutdown
                 case 4 -> {
+                    this.executor.shutdownNow();
                     this.socket.close();
                     System.exit(0);
                 }
@@ -155,7 +161,7 @@ public class ServerResponse implements Runnable {
                 byte[] response = resMsg.build().toByteArray();
                 DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
-                this.cache.put(resMsg.getMessageID(), response);
+                this.cache.put(Base64.getEncoder().encodeToString(resMsg.getMessageID().toByteArray()), response);
             } catch (Exception e) {
                 e.printStackTrace();
             }
