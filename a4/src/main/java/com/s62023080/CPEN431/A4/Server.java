@@ -23,6 +23,10 @@ public class Server extends Thread {
         this.running = true;
     }
 
+    public Store getStore() {
+        return this.store;
+    }
+
     public Cache<ByteString, byte[]> getCache() {
         return this.cache;
     }
@@ -39,7 +43,14 @@ public class Server extends Thread {
         }
     }
 
+    public void clear() {
+        this.store.clear();
+        this.cache.invalidateAll();
+    }
+
     public void shutdown() {
         this.running = false;
+        this.store.clear();
+        this.cache.invalidateAll();
     }
 }
