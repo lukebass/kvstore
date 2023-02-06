@@ -87,7 +87,7 @@ public class Client {
                 formattedResponse = resMsg.getPayload().toByteArray();
 
                 break;
-            } catch (Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 setTimeout(this.socket.getSoTimeout() * 2);
                 retries -= 1;
