@@ -34,7 +34,7 @@ public class ServerResponse implements Runnable {
 
     private final static int INVALID_VALUE_ERROR = 7;
 
-    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<ByteString, byte[]> cache) throws SocketException {
+    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<ByteString, byte[]> cache) {
         this.socket = socket;
         this.packet = packet;
         this.store = store;
@@ -53,11 +53,10 @@ public class ServerResponse implements Runnable {
             resMsg.setMessageID(reqMsg.getMessageID());
             byte[] cacheValue = cache.getIfPresent(reqMsg.getMessageID());
 
-            if (cacheValue != null) {
-                resMsg.setPayload(ByteString.copyFrom(cacheValue));
-                resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
-                byte[] response = resMsg.build().toByteArray();
-                DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
+            if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
+                return;
+            } else if (cacheValue != null) {
+                DatagramPacket resPacket = new DatagramPacket(cacheValue, cacheValue.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
                 return;
             } else if (this.cache.size() > Utils.MAX_CACHE_SIZE) {
@@ -156,7 +155,7 @@ public class ServerResponse implements Runnable {
                 byte[] response = resMsg.build().toByteArray();
                 DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
-                this.cache.put(resMsg.getMessageID(), resMsg.getPayload().toByteArray());
+                this.cache.put(resMsg.getMessageID(), response);
             } catch (Exception e) {
                 e.printStackTrace();
             }

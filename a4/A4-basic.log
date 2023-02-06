@@ -1,7 +1,7 @@
 CPEN 431 BASIC test Client
-Time: Sun Feb 05 22:46:08 PST 2023
+Time: Mon Feb 06 10:37:17 PST 2023
 Build Date: Fri Jan 27 10:05:21 PST 2023
-Java process ID: 70479
+Java process ID: 85302
 [A4 BASIC TESTS - THIS IS A BASIC TEST CLIENT NOT THE FINAL EVALUATION CLIENT]
 
 [Info] Created server list successfully.
@@ -127,10 +127,10 @@ Total Failed Responses: 0
 % Timeout: 0.0
 % Failed: 0.0
 Response Time (Successful requests):
-[max] 12ms, [min] 0ms
-[avg] 0.08149886136222483 ms, [stdev] 0.2855706688543667ms
-Throughput: 472.32724902216427 requests per second
-Goodput: 472.32724902216427 requests per second
+[max] 24ms, [min] 0ms
+[avg] 0.09871644468980746 ms, [stdev] 0.4055448719302298ms
+Throughput: 467.4516129032258 requests per second
+Goodput: 467.4516129032258 requests per second
 Retry Rate (Successful requests): 1.0
 
 [ TEST Multi Client Performance (2 clients, 60.0 seconds): PUT -> GET (closed loop) ]
@@ -250,29 +250,27 @@ Retry Rate (Successful requests): 1.0
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 Test time limit reached: 60.0s.
-Test completed after 8486 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 9520 closed loops.
+Test completed after 7257 closed loops.
+Test completed after 7260 closed loops.
 [Test] Checking if server is up ...
 Test Passed. Server is ok.
 Test Status: TEST_PASSED
 Clients: 2
-Total Requests (without replies): 36012
-Total Requests (including replies): 36012
-Successful Responses: 36012
+Total Requests (without replies): 29034
+Total Requests (including replies): 29034
+Successful Responses: 29034
 Timeout Responses: 0
 Total Failed Responses: 0
 % Success: 100.0
 % Timeout: 0.0
 % Failed: 0.0
 Response Time (Successful requests):
-[max] 9ms, [min] 0ms
-[avg] 0.1053260024436299 ms, [stdev] 0.32447543397192113ms
-Throughput: 581.5703627143826 requests per second
-Goodput: 581.5703627143826 requests per second
+[max] 15ms, [min] 0ms
+[avg] 0.15716057036577805 ms, [stdev] 0.6131628961813702ms
+Throughput: 475.1959933877805 requests per second
+Goodput: 475.1959933877805 requests per second
 Retry Rate (Successful requests): 1.0
 
 [ TEST Multi Client Performance (4 clients, 60.0 seconds): PUT -> GET (closed loop) ]
@@ -508,31 +506,35 @@ Retry Rate (Successful requests): 1.0
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 Test time limit reached: 60.0s.
+Test completed after 4003 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 4197 closed loops.
-Test completed after 4211 closed loops.
+Test completed after 3872 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 5966 closed loops.
+Test completed after 7026 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 5643 closed loops.
+Test completed after 7592 closed loops.
 [Test] Checking if server is up ...
 Test Passed. Server is ok.
 Test Status: TEST_PASSED
 Clients: 4
-Total Requests (without replies): 40034
-Total Requests (including replies): 40034
-Successful Responses: 40034
+Total Requests (without replies): 44986
+Total Requests (including replies): 44986
+Successful Responses: 44986
 Timeout Responses: 0
 Total Failed Responses: 0
 % Success: 100.0
 % Timeout: 0.0
 % Failed: 0.0
 Response Time (Successful requests):
-[max] 130ms, [min] 0ms
-[avg] 0.1478743068391867 ms, [stdev] 1.0979480571241265ms
-Throughput: 663.8587181825719 requests per second
-Goodput: 663.8587181825719 requests per second
+[max] 89ms, [min] 0ms
+[avg] 0.12483883874983329 ms, [stdev] 0.7888615892973153ms
+Throughput: 732.850044799218 requests per second
+Goodput: 732.850044799218 requests per second
 Retry Rate (Successful requests): 1.0
 
 [ TEST Multi Client Performance (8 clients, 60.0 seconds): PUT -> GET (closed loop) ]
@@ -1009,42 +1011,39 @@ Retry Rate (Successful requests): 1.0
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 Test time limit reached: 60.0s.
-Test completed after 3437 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3597 closed loops.
+Test completed after 3139 closed loops.
+Test completed after 2469 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 4172 closed loops.
+Test completed after 2846 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 4985 closed loops.
+Test completed after 2889 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 2048 closed loops.
+Test completed after 2871 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 1957 closed loops.
+Test completed after 3637 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 2162 closed loops.
+Test completed after 4087 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3050 closed loops.
+Test completed after 2965 closed loops.
 [Test] Checking if server is up ...
 Test Passed. Server is ok.
 Test Status: TEST_PASSED
 Clients: 8
-Total Requests (without replies): 50816
-Total Requests (including replies): 50816
-Successful Responses: 50816
+Total Requests (without replies): 49806
+Total Requests (including replies): 49806
+Successful Responses: 49806
 Timeout Responses: 0
 Total Failed Responses: 0
 % Success: 100.0
 % Timeout: 0.0
 % Failed: 0.0
 Response Time (Successful requests):
-[max] 89ms, [min] 0ms
-[avg] 0.1387161523929471 ms, [stdev] 0.5754131045640267ms
-Throughput: 829.0398890610979 requests per second
-Goodput: 829.0398890610979 requests per second
+[max] 132ms, [min] 0ms
+[avg] 0.18638316668674457 ms, [stdev] 1.5773489329699975ms
+Throughput: 809.9721910523491 requests per second
+Goodput: 809.9721910523491 requests per second
 Retry Rate (Successful requests): 1.0
 
 
@@ -1081,32 +1080,9 @@ Waiting for 5 seconds for the cache to be cleared!
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-ERROR_OUT_OF_SPACE
-Received error code after 5838 closed loops (~55.675506591796875 MiB).
-PUTs sent = 5838(~55.675506591796875 MiB) , Limit = 7340
-[Test isAlive]
-Test Passed. Server is ok.
-TEST_PASSED
+Server timeouts exceeded. Server probably crashed!
+TEST_FAILED
 Pausing for 10 seconds to wait for the cache to be cleared!
 
 [ TEST Single Client Capacity (Value Size = 500 bytes, Limit = 146800 PUTs, ~69.99969482421875 MiB) : PUT -> GET (closed loop) ]
 Sending WIPE-OUT to all servers...
-[ ... Completed in 0.002 seconds ]
-[OK]
-Waiting for 5 seconds for the cache to be cleared!
-ERROR_OUT_OF_SPACE
-Received error code after 18 closed loops (~0.00858306884765625 MiB).
-PUTs sent = 18(~0.00858306884765625 MiB) , Limit = 146800
-[Test isAlive]
-Test Passed. Server is ok.
-TEST_PASSED
-
-[TEST Invalid Key ]
-TEST_PASSED
-
-[TEST Invalid Value ]
-TEST_PASSED
-
-Sending SHUTDOWN to 1 servers.
-[ ... Completed in 6.454 seconds ]
-[Test isAlive] for 127.0.0.1:3080

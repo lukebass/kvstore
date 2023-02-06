@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Store {
-    private final ConcurrentHashMap<ByteString, byte[]> store;
+    private ConcurrentHashMap<ByteString, byte[]> store;
 
     public Store() {
         this.store = new ConcurrentHashMap<>();
@@ -28,8 +28,8 @@ public class Store {
     }
 
     public void clear() {
-        this.store.clear();
+        this.store = new ConcurrentHashMap<>();
     }
 
-    public int size() { return this.store.size(); };
+    public int size() { return this.store.size(); }
 }

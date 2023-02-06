@@ -21,6 +21,10 @@ public class Utils {
         return crc.getValue();
     }
 
+    public static boolean isCheckSumInvalid(long checkSum, byte[] messageID, byte[] payload) {
+        return checkSum != createCheckSum(messageID, payload);
+    }
+
     public static boolean isOutOfMemory() {
         long used = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long free = Runtime.getRuntime().maxMemory() - used;
