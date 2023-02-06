@@ -55,7 +55,7 @@ public class Server extends Thread {
 
     public void shutdown() {
         this.running = false;
-        this.store.clear();
-        this.cache.invalidateAll();
+        this.executor.shutdownNow();
+        this.clear();
     }
 }
