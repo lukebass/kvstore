@@ -16,11 +16,15 @@ public class Server extends Thread {
 
     private boolean running;
 
-    public Server(int port) throws IOException {
+    public Server(int port, int expiration) throws IOException {
         this.socket = new DatagramSocket(port);
         this.store = new Store();
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(1000, TimeUnit.MILLISECONDS).build();
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(expiration, TimeUnit.MILLISECONDS).build();
         this.running = true;
+    }
+
+    public Cache<ByteString, byte[]> getCache() {
+        return this.cache;
     }
 
     public void run() {

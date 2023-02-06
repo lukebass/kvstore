@@ -54,7 +54,7 @@ public class ServerResponse implements Runnable {
             // Ensure checksum is valid and check cache
             if (reqMsg.getCheckSum() != Utils.createCheckSum(reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                 return;
-            } else if (this.cache.size() > 5000) {
+            } else if (this.cache.size() > Utils.MAX_CACHE_SIZE) {
                 throw new OutOfMemoryError();
             } else if (cacheValue != null) {
                 DatagramPacket resPacket = new DatagramPacket(cacheValue, cacheValue.length, this.packet.getAddress(), this.packet.getPort());

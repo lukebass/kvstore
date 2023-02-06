@@ -7,6 +7,8 @@ public class Utils {
 
     public static int MAX_REQUEST_SIZE = 16000;
 
+    public static int MAX_CACHE_SIZE = 5000;
+
     public static long createCheckSum(byte[] messageID, byte[] payload) {
         byte[] checkSum = new byte[messageID.length + payload.length];
         ByteBuffer buffer = ByteBuffer.wrap(checkSum);
@@ -20,6 +22,6 @@ public class Utils {
     }
 
     public static boolean isOutOfMemory() {
-        return (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) < 16000;
+        return (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) < MAX_REQUEST_SIZE;
     }
 }
