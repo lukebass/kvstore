@@ -1,0 +1,48 @@
+CPEN 431 DUMMY test Client
+Time: Sun Feb 05 19:36:13 PST 2023
+Build Date: Fri Jan 27 10:05:06 PST 2023
+Java process ID: 55331
+[A4 DUMMY TESTS - THIS IS A DUMMY TEST CLIENT NOT THE FINAL EVALUATION CLIENT]
+
+[Info] Created server list successfully.
+
+[Test isAlive]
+TEST PASSED
+
+[ TEST Basic PUT/GET (PUT -> GET). Value Length = 32 Bytes ]
+TEST_PASSED
+
+[ TEST Basic REMOVE (PUT -> GET -> REM -> GET). Value Length = 32 Bytes. ]
+TEST_PASSED
+
+[ TEST Back-to-back put requests (PUT -> PUT -> GET). Value Length = 32 Bytes. ]
+TEST_PASSED
+
+[ TEST Double remove (PUT -> REM -> REM). Value Length = 32 Bytes. ]
+TEST_PASSED
+
+[ TEST Invalid Command. ]
+TEST_PASSED
+
+[ TEST Multi Client Performance (1 clients, 100 closed loops per client): PUT -> GET (closed loop) ]
+[Test] Checking if server is up ...
+Test Passed. Server is ok.
+Test Status: TEST_PASSED
+Clients: 1
+Total Requests (without replies): 200
+Total Requests (including replies): 200
+Successful Responses: 200
+Timeout Responses: 0
+Total Failed Responses: 0
+% Success: 100.0
+% Timeout: 0.0
+% Failed: 0.0
+Response Time (Successful requests):
+[max] 1ms, [min] 0ms
+[avg] 0.1 ms, [stdev] 0.30000000000000004ms
+Throughput: 6250.0 requests per second
+Goodput: 6250.0 requests per second
+Retry Rate (Successful requests): 1.0
+
+Completed A4 DUMMY Tests.
+Testing completed in 5.163s

@@ -4,7 +4,8 @@ public class App
 {
     public static void main(String[] args) {
         try {
-            new Server(3080, 1000).start();
+            new Server(Integer.parseInt(args[0]), 1).start();
+            System.out.println("Server running on port: " + args[0]);
         } catch (Exception e) {
             e.printStackTrace();
         }

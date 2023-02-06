@@ -5,6 +5,7 @@ import ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest;
 import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
 import com.google.common.cache.Cache;
 import com.google.protobuf.ByteString;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.net.*;
 
@@ -49,19 +50,15 @@ public class ServerResponse implements Runnable {
             byte[] request = new byte[this.packet.getLength()];
             buffer.get(request);
             Msg reqMsg = Msg.parseFrom(request);
+            resMsg.setMessageID(reqMsg.getMessageID());
             byte[] cacheValue = cache.getIfPresent(reqMsg.getMessageID());
 
-            // Ensure checksum is valid and check cache
-            if (reqMsg.getCheckSum() != Utils.createCheckSum(reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
-                return;
-            } else if (this.cache.size() > Utils.MAX_CACHE_SIZE) {
-                throw new OutOfMemoryError();
-            } else if (cacheValue != null) {
+            if (cacheValue != null) {
                 DatagramPacket resPacket = new DatagramPacket(cacheValue, cacheValue.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
                 return;
-            } else {
-                resMsg.setMessageID(reqMsg.getMessageID());
+            } else if (this.cache.size() > Utils.MAX_CACHE_SIZE) {
+                throw new IOException("Max cache size");
             }
 
             KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
@@ -69,7 +66,7 @@ public class ServerResponse implements Runnable {
                 // Put
                 case 1 -> {
                     if (Utils.isOutOfMemory()) {
-                        kvResponse.setErrCode(MEMORY_ERROR);
+                        throw new OutOfMemoryError("Out of memory");
                     } else if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                         kvResponse.setErrCode(INVALID_KEY_ERROR);
                     } else if (kvRequest.getValue().size() == 0 || kvRequest.getValue().size() > 10000) {
@@ -142,12 +139,11 @@ public class ServerResponse implements Runnable {
                 // Unknown
                 default -> kvResponse.setErrCode(UNRECOGNIZED_ERROR);
             }
-        } catch (OutOfMemoryError e) {
-            byte[] wait = new byte[4];
-            buffer = ByteBuffer.wrap(wait);
-            buffer.putInt(1000);
+        } catch (IOException e) {
             kvResponse.setErrCode(OVERLOAD_ERROR);
-            kvResponse.setValue(ByteString.copyFrom(wait));
+            kvResponse.setOverloadWaitTime(1000);
+        } catch (OutOfMemoryError e) {
+            kvResponse.setErrCode(MEMORY_ERROR);
         } catch (Exception e) {
             kvResponse.setErrCode(STORE_ERROR);
         } finally {

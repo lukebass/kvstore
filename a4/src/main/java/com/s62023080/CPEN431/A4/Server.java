@@ -24,7 +24,7 @@ public class Server extends Thread {
         this.socket = new DatagramSocket(port);
         this.executor = Executors.newCachedThreadPool();
         this.store = new Store();
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(expiration, TimeUnit.MILLISECONDS).build();
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(expiration, TimeUnit.SECONDS).build();
         this.running = true;
     }
 
@@ -42,7 +42,10 @@ public class Server extends Thread {
                 DatagramPacket packet = new DatagramPacket(new byte[Utils.MAX_REQUEST_SIZE], Utils.MAX_REQUEST_SIZE);
                 this.socket.receive(packet);
                 this.executor.submit(new ServerResponse(this.socket, packet, this.store, this.cache));
-            } catch (IOException e) {
+                System.out.println("Cache: " + this.cache.size());
+                System.out.println("Store: " + this.store.size());
+                System.out.println("Memory: " + Utils.isOutOfMemory());
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
