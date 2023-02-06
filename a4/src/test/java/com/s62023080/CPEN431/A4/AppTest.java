@@ -64,6 +64,7 @@ public class AppTest {
             kvRequest.setCommand(1);
             kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
             kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
+            kvRequest.setVersion(1);
             KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
         } catch (Exception e) {
@@ -196,12 +197,14 @@ public class AppTest {
             kvRequest.setCommand(1);
             kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
             kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
+            kvRequest.setVersion(1);
             KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
 
             kvRequest.setCommand(1);
             kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
             kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
+            kvRequest.setVersion(2);
             kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
         } catch (Exception e) {
@@ -218,6 +221,7 @@ public class AppTest {
             kvRequest.setCommand(1);
             kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
             kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
+            kvRequest.setVersion(1);
             KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
 
@@ -225,7 +229,7 @@ public class AppTest {
             kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
             kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
-            assertEquals(0, kvResponse.getVersion());
+            assertEquals(1, kvResponse.getVersion());
             assertEquals(ByteString.copyFrom(new byte[]{1,2,3}), kvResponse.getValue());
         } catch (Exception e) {
             e.printStackTrace();
@@ -241,6 +245,7 @@ public class AppTest {
             kvRequest.setCommand(1);
             kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
             kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
+            kvRequest.setVersion(1);
             KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
 
@@ -262,6 +267,7 @@ public class AppTest {
             kvRequest.setCommand(1);
             kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
             kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
+            kvRequest.setVersion(1);
             KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
 
@@ -288,6 +294,7 @@ public class AppTest {
             kvRequest.setCommand(1);
             kvRequest.setKey(ByteString.copyFrom(new byte[]{1}));
             kvRequest.setValue(ByteString.copyFrom(new byte[]{1,2,3}));
+            kvRequest.setVersion(1);
             KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
 
