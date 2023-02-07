@@ -52,7 +52,7 @@ public class ServerResponse implements Runnable {
             buffer.get(request);
             Msg reqMsg = Msg.parseFrom(request);
             resMsg.setMessageID(reqMsg.getMessageID());
-            byte[] cacheValue = cache.getIfPresent(Base64.getEncoder().encodeToString(reqMsg.getMessageID().toByteArray()));
+            byte[] cacheValue = this.cache.getIfPresent(Base64.getEncoder().encodeToString(reqMsg.getMessageID().toByteArray()));
 
             if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                 return;
@@ -119,6 +119,7 @@ public class ServerResponse implements Runnable {
                 // Clear
                 case 5 -> {
                     this.store.clear();
+                    this.cache.invalidateAll();
                     kvResponse.setErrCode(SUCCESS);
                 }
                 // Health
@@ -138,7 +139,7 @@ public class ServerResponse implements Runnable {
             }
         } catch (IOException e) {
             kvResponse.setErrCode(OVERLOAD_ERROR);
-            kvResponse.setOverloadWaitTime(1000);
+            kvResponse.setOverloadWaitTime(500);
         } catch (OutOfMemoryError e) {
             kvResponse.setErrCode(MEMORY_ERROR);
         } catch (Exception e) {
