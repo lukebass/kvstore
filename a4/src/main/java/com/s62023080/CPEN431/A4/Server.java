@@ -17,13 +17,16 @@ public class Server extends Thread {
 
     private final Cache<String, byte[]> cache;
 
+    private final int waitTime;
+
     private boolean running;
 
-    public Server(int port, int nThreads, int cacheExpiration) throws IOException {
+    public Server(int port, int nThreads, int cacheExpiration, int waitTime) throws IOException {
         this.socket = new DatagramSocket(port);
         this.executor = Executors.newFixedThreadPool(nThreads);
         this.store = new Store();
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpiration, TimeUnit.SECONDS).build();
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpiration, TimeUnit.MILLISECONDS).build();
+        this.waitTime = waitTime;
         this.running = true;
     }
 
@@ -40,7 +43,7 @@ public class Server extends Thread {
             try {
                 DatagramPacket packet = new DatagramPacket(new byte[Utils.MAX_REQUEST_SIZE], Utils.MAX_REQUEST_SIZE);
                 this.socket.receive(packet);
-                this.executor.submit(new ServerResponse(this.socket, packet, this.store, this.cache));
+                this.executor.submit(new ServerResponse(this.socket, packet, this.store, this.cache, this.waitTime));
                 System.out.println("Cache: " + this.cache.size());
                 System.out.println("Store: " + this.store.size());
             } catch (Exception e) {

@@ -19,6 +19,8 @@ public class ServerResponse implements Runnable {
 
     private final Cache<String, byte[]> cache;
 
+    private final int waitTime;
+
     private final static int SUCCESS = 0;
 
     private final static int MISSING_KEY_ERROR = 1;
@@ -35,11 +37,12 @@ public class ServerResponse implements Runnable {
 
     private final static int INVALID_VALUE_ERROR = 7;
 
-    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<String, byte[]> cache) {
+    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<String, byte[]> cache, int waitTime) {
         this.socket = socket;
         this.packet = packet;
         this.store = store;
         this.cache = cache;
+        this.waitTime = waitTime;
     }
 
     public void run() {
@@ -51,19 +54,22 @@ public class ServerResponse implements Runnable {
             byte[] request = new byte[this.packet.getLength()];
             buffer.get(request);
             Msg reqMsg = Msg.parseFrom(request);
-            resMsg.setMessageID(reqMsg.getMessageID());
-            byte[] cacheValue = this.cache.getIfPresent(Base64.getEncoder().encodeToString(reqMsg.getMessageID().toByteArray()));
 
             if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                 return;
-            } else if (cacheValue != null) {
+            }
+
+            resMsg.setMessageID(reqMsg.getMessageID());
+            byte[] cacheValue = this.cache.getIfPresent(Base64.getEncoder().encodeToString(reqMsg.getMessageID().toByteArray()));
+
+            if (cacheValue != null) {
                 resMsg.setPayload(ByteString.copyFrom(cacheValue));
                 resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                 byte[] response = resMsg.build().toByteArray();
                 DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
                 return;
-            } else if (Utils.isOutOfMemory()) {
+            } else if (Utils.isOutOfMemory() && this.cache.size() > 0) {
                 throw new IOException("Out of memory");
             }
 
@@ -139,7 +145,7 @@ public class ServerResponse implements Runnable {
             }
         } catch (IOException e) {
             kvResponse.setErrCode(OVERLOAD_ERROR);
-            kvResponse.setOverloadWaitTime(500);
+            kvResponse.setOverloadWaitTime(this.waitTime);
         } catch (OutOfMemoryError e) {
             kvResponse.setErrCode(MEMORY_ERROR);
         } catch (Exception e) {
@@ -150,8 +156,8 @@ public class ServerResponse implements Runnable {
                 resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                 byte[] response = resMsg.build().toByteArray();
                 DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
-                this.socket.send(resPacket);
                 this.cache.put(Base64.getEncoder().encodeToString(resMsg.getMessageID().toByteArray()), resMsg.getPayload().toByteArray());
+                this.socket.send(resPacket);
             } catch (Exception e) {
                 e.printStackTrace();
             }
