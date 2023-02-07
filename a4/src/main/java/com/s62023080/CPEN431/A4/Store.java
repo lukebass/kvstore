@@ -12,11 +12,11 @@ public class Store {
     }
 
     public void put(byte[] key, byte[] value, int version) {
-        byte[] concat = new byte[value.length + 4];
-        ByteBuffer buffer = ByteBuffer.wrap(concat);
+        byte[] composite = new byte[value.length + 4];
+        ByteBuffer buffer = ByteBuffer.wrap(composite);
         buffer.putInt(version);
         buffer.put(value);
-        this.store.put(Base64.getEncoder().encodeToString(key), concat);
+        this.store.put(Base64.getEncoder().encodeToString(key), composite);
     }
 
     public byte[] get(byte[] key) {
