@@ -45,9 +45,9 @@ public class ServerResponse implements Runnable {
     public void run() {
         Msg.Builder resMsg = Msg.newBuilder();
         KVResponse.Builder kvResponse = KVResponse.newBuilder();
-        ByteBuffer buffer = ByteBuffer.wrap(this.packet.getData());
 
         try {
+            ByteBuffer buffer = ByteBuffer.wrap(this.packet.getData());
             byte[] request = new byte[this.packet.getLength()];
             buffer.get(request);
             Msg reqMsg = Msg.parseFrom(request);
@@ -57,11 +57,14 @@ public class ServerResponse implements Runnable {
             if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                 return;
             } else if (cacheValue != null) {
-                DatagramPacket resPacket = new DatagramPacket(cacheValue, cacheValue.length, this.packet.getAddress(), this.packet.getPort());
+                resMsg.setPayload(ByteString.copyFrom(cacheValue));
+                resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
+                byte[] response = resMsg.build().toByteArray();
+                DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
                 return;
-            } else if (this.cache.size() > Utils.MAX_CACHE_SIZE) {
-                throw new IOException("Max cache size");
+            } else if (Utils.isOutOfMemory()) {
+                throw new IOException("Out of memory");
             }
 
             KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
@@ -122,19 +125,13 @@ public class ServerResponse implements Runnable {
                 case 6 -> kvResponse.setErrCode(SUCCESS);
                 // PID
                 case 7 -> {
-                    byte[] pid = new byte[8];
-                    buffer = ByteBuffer.wrap(pid);
-                    buffer.putLong(ProcessHandle.current().pid());
                     kvResponse.setErrCode(SUCCESS);
-                    kvResponse.setValue(ByteString.copyFrom(pid));
+                    kvResponse.setPid((int) ProcessHandle.current().pid());
                 }
                 // Membership Count
                 case 8 -> {
-                    byte[] count = new byte[4];
-                    buffer = ByteBuffer.wrap(count);
-                    buffer.putInt(1);
                     kvResponse.setErrCode(SUCCESS);
-                    kvResponse.setValue(ByteString.copyFrom(count));
+                    kvResponse.setMembershipCount(1);
                 }
                 // Unknown
                 default -> kvResponse.setErrCode(UNRECOGNIZED_ERROR);
@@ -153,7 +150,7 @@ public class ServerResponse implements Runnable {
                 byte[] response = resMsg.build().toByteArray();
                 DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
-                this.cache.put(Base64.getEncoder().encodeToString(resMsg.getMessageID().toByteArray()), response);
+                this.cache.put(Base64.getEncoder().encodeToString(resMsg.getMessageID().toByteArray()), resMsg.getPayload().toByteArray());
             } catch (Exception e) {
                 e.printStackTrace();
             }

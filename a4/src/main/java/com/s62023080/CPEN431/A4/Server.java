@@ -19,11 +19,11 @@ public class Server extends Thread {
 
     private boolean running;
 
-    public Server(int port, int expiration) throws IOException {
+    public Server(int port, int nThreads, int cacheExpiration) throws IOException {
         this.socket = new DatagramSocket(port);
-        this.executor = Executors.newCachedThreadPool();
+        this.executor = Executors.newFixedThreadPool(nThreads);
         this.store = new Store();
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(expiration, TimeUnit.SECONDS).build();
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpiration, TimeUnit.SECONDS).build();
         this.running = true;
     }
 
@@ -56,7 +56,7 @@ public class Server extends Thread {
 
     public void shutdown() {
         this.running = false;
-        this.executor.shutdownNow();
+        this.executor.shutdown();
         this.clear();
     }
 }

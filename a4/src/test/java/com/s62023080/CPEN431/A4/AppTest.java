@@ -15,7 +15,7 @@ public class AppTest {
 
     @BeforeAll
     static void setup() throws IOException {
-        server = new Server(3080, 3000);
+        server = new Server(3080, 4, 1);
         server.start();
         client = new Client("localhost", 3080, 100, 3);
     }
@@ -199,9 +199,8 @@ public class AppTest {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
             kvRequest.setCommand(8);
             KVResponse kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
-            ByteBuffer buffer = ByteBuffer.wrap(kvResponse.getValue().toByteArray());
             assertEquals(0, kvResponse.getErrCode());
-            assertEquals(1, buffer.getInt());
+            assertEquals(1, kvResponse.getMembershipCount());
             assertEquals(0, server.getStore().size());
             assertEquals(1, server.getCache().size());
         } catch (Exception e) {
