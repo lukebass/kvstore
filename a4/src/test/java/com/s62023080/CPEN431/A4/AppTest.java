@@ -4,7 +4,6 @@ import com.google.protobuf.ByteString;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest;
 import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
 
@@ -153,7 +152,7 @@ public class AppTest {
             kvResponse = KVResponse.parseFrom(client.fetch(kvRequest.build().toByteArray()));
             assertEquals(0, kvResponse.getErrCode());
             assertEquals(0, server.getStore().size());
-            assertEquals(2, server.getCache().size());
+            assertEquals(1, server.getCache().size());
         } catch (Exception e) {
             e.printStackTrace();
         }

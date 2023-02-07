@@ -15,7 +15,7 @@ public class Server extends Thread {
 
     private final Store store;
 
-    private final Cache<String, byte[]> cache;
+    private final Cache<Key, byte[]> cache;
 
     private final int waitTime;
 
@@ -34,7 +34,7 @@ public class Server extends Thread {
         return this.store;
     }
 
-    public Cache<String, byte[]> getCache() {
+    public Cache<Key, byte[]> getCache() {
         return this.cache;
     }
 
@@ -44,8 +44,6 @@ public class Server extends Thread {
                 DatagramPacket packet = new DatagramPacket(new byte[Utils.MAX_REQUEST_SIZE], Utils.MAX_REQUEST_SIZE);
                 this.socket.receive(packet);
                 this.executor.submit(new ServerResponse(this.socket, packet, this.store, this.cache, this.waitTime));
-                System.out.println("Cache: " + this.cache.size());
-                System.out.println("Store: " + this.store.size());
             } catch (Exception e) {
                 e.printStackTrace();
             }

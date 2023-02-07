@@ -1,30 +1,29 @@
 package com.s62023080.CPEN431.A4;
 
 import java.nio.ByteBuffer;
-import java.util.Base64;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Store {
-    private ConcurrentHashMap<String, byte[]> store;
+    private ConcurrentHashMap<Key, byte[]> store;
 
     public Store() {
         this.store = new ConcurrentHashMap<>();
     }
 
-    public void put(byte[] key, byte[] value, int version) {
+    public void put(Key key, byte[] value, int version) {
         byte[] composite = new byte[value.length + 4];
         ByteBuffer buffer = ByteBuffer.wrap(composite);
         buffer.putInt(version);
         buffer.put(value);
-        this.store.put(Base64.getEncoder().encodeToString(key), composite);
+        this.store.put(key, composite);
     }
 
-    public byte[] get(byte[] key) {
-        return this.store.get(Base64.getEncoder().encodeToString(key));
+    public byte[] get(Key key) {
+        return this.store.get(key);
     }
 
-    public byte[] remove(byte[] key) {
-        return this.store.remove(Base64.getEncoder().encodeToString(key));
+    public byte[] remove(Key key) {
+        return this.store.remove(key);
     }
 
     public void clear() {
