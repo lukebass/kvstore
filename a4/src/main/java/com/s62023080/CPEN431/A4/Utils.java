@@ -25,9 +25,11 @@ public class Utils {
         return checkSum != createCheckSum(messageID, payload);
     }
 
+    public static long getFreeMemory() {
+        return Runtime.getRuntime().maxMemory() - (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+    }
+
     public static boolean isOutOfMemory() {
-        long free = Runtime.getRuntime().maxMemory() - (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
-        long init = Runtime.getRuntime().maxMemory() - MAX_MEMORY;
-        return free < init;
+        return getFreeMemory() < (Runtime.getRuntime().maxMemory() - MAX_MEMORY);
     }
 }

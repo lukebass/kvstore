@@ -2,11 +2,11 @@ package com.s62023080.CPEN431.A4;
 
 import java.util.Arrays;
 
-public class Key {
-    private final byte[] array;
+public record Key(byte[] array) {
 
-    public Key(byte[] array) {
-        this.array = array;
+    @Override
+    public byte[] array() {
+        return array.clone();
     }
 
     @Override

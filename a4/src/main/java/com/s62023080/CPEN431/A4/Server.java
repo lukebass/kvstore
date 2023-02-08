@@ -44,6 +44,7 @@ public class Server extends Thread {
                 DatagramPacket packet = new DatagramPacket(new byte[Utils.MAX_REQUEST_SIZE], Utils.MAX_REQUEST_SIZE);
                 this.socket.receive(packet);
                 this.executor.submit(new ServerResponse(this.socket, packet, this.store, this.cache, this.waitTime));
+                System.out.println(this.cache.size() + " / " + this.store.size() + " / " + Utils.getFreeMemory());
             } catch (Exception e) {
                 e.printStackTrace();
             }

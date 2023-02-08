@@ -10,20 +10,20 @@ public class Store {
         this.store = new ConcurrentHashMap<>();
     }
 
-    public void put(Key key, byte[] value, int version) {
+    public void put(byte[] key, byte[] value, int version) {
         byte[] composite = new byte[value.length + 4];
         ByteBuffer buffer = ByteBuffer.wrap(composite);
         buffer.putInt(version);
         buffer.put(value);
-        this.store.put(key, composite);
+        this.store.put(new Key(key), composite);
     }
 
-    public byte[] get(Key key) {
-        return this.store.get(key);
+    public byte[] get(byte[] key) {
+        return this.store.get(new Key(key));
     }
 
-    public byte[] remove(Key key) {
-        return this.store.remove(key);
+    public byte[] remove(byte[] key) {
+        return this.store.remove(new Key(key));
     }
 
     public void clear() {
