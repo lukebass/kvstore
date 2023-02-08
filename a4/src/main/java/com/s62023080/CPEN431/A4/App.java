@@ -4,7 +4,7 @@ public class App
 {
     public static void main(String[] args) {
         if (args.length != 4) {
-            System.out.println("This requires a port, number of threads, cache expiration, and wait time");
+            System.out.println("This requires a port, number of threads, cache expiration (ms), wait time (ms)");
             return;
         }
 
@@ -14,7 +14,6 @@ public class App
             System.out.println("Number of threads: " + args[1]);
             System.out.println("Cache expiration (ms): " + args[2]);
             System.out.println("Wait time (ms): " + args[3]);
-            System.out.println("Memory: " + Runtime.getRuntime().maxMemory());
         } catch (Exception e) {
             e.printStackTrace();
         }

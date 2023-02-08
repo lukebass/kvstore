@@ -55,22 +55,23 @@ public class ServerResponse implements Runnable {
             buffer.get(request);
             Msg reqMsg = Msg.parseFrom(request);
 
-            resMsg.setMessageID(reqMsg.getMessageID());
-            byte[] cacheValue = this.cache.getIfPresent(Base64.getEncoder().encodeToString(reqMsg.getMessageID().toByteArray()));
+            if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) return;
 
+            byte[] cacheValue = this.cache.getIfPresent(Base64.getEncoder().encodeToString(reqMsg.getMessageID().toByteArray()));
             if (cacheValue != null) {
                 DatagramPacket resPacket = new DatagramPacket(cacheValue, cacheValue.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
                 return;
-            } else if (Utils.isOutOfMemory()) {
-                throw new IOException("Out of memory");
+            } else if (Utils.isOutOfMemory(Utils.MAX_REQUEST_SIZE * 200L) && this.cache.size() > 100) {
+                throw new IOException("Too many requests");
             }
 
+            resMsg.setMessageID(reqMsg.getMessageID());
             KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
             switch (kvRequest.getCommand()) {
                 // Put
                 case 1 -> {
-                    if (Utils.isOutOfMemory()) {
+                    if (Utils.isOutOfMemory(Utils.MAX_REQUEST_SIZE * 100L)) {
                         throw new OutOfMemoryError("Out of memory");
                     } else if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                         kvResponse.setErrCode(INVALID_KEY_ERROR);
@@ -137,6 +138,7 @@ public class ServerResponse implements Runnable {
                 default -> kvResponse.setErrCode(UNRECOGNIZED_ERROR);
             }
         } catch (IOException e) {
+            System.out.println("Overload: " + Utils.getFreeMemory() + " / " + this.waitTime);
             kvResponse.setErrCode(OVERLOAD_ERROR);
             kvResponse.setOverloadWaitTime(this.waitTime);
         } catch (OutOfMemoryError e) {
@@ -155,6 +157,5 @@ public class ServerResponse implements Runnable {
                 e.printStackTrace();
             }
         }
-
     }
 }
