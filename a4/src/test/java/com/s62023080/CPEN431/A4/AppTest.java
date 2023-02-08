@@ -14,7 +14,7 @@ public class AppTest {
 
     @BeforeAll
     static void setup() throws IOException {
-        server = new Server(3080, 4, 1000, 1000);
+        server = new Server(3080, 4, 1000, 1000, 1000);
         server.start();
         client = new Client("localhost", 3080, 100, 3);
     }

@@ -2,6 +2,8 @@ package com.s62023080.CPEN431.A4;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.protobuf.ByteString;
+
 import java.io.IOException;
 import java.util.concurrent.*;
 import java.net.*;
@@ -13,17 +15,17 @@ public class Server extends Thread {
 
     private final Store store;
 
-    private final Cache<String, byte[]> cache;
+    private final Cache<ByteString, byte[]> cache;
 
     private final int waitTime;
 
     private boolean running;
 
-    public Server(int port, int nThreads, int cacheExpiration, int waitTime) throws IOException {
+    public Server(int port, int nThreads, int cacheSize, int cacheExpiration, int waitTime) throws IOException {
         this.socket = new DatagramSocket(port);
         this.executor = new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(nThreads), new ThreadPoolExecutor.CallerRunsPolicy());
         this.store = new Store();
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpiration, TimeUnit.MILLISECONDS).build();
+        this.cache = CacheBuilder.newBuilder().maximumSize(cacheSize).expireAfterWrite(cacheExpiration, TimeUnit.MILLISECONDS).build();
         this.waitTime = waitTime;
         this.running = true;
     }
@@ -32,7 +34,7 @@ public class Server extends Thread {
         return this.store;
     }
 
-    public Cache<String, byte[]> getCache() {
+    public Cache<ByteString, byte[]> getCache() {
         return this.cache;
     }
 
