@@ -55,28 +55,29 @@ public class ServerResponse implements Runnable {
             buffer.get(request);
             Msg reqMsg = Msg.parseFrom(request);
             resMsg.setMessageID(reqMsg.getMessageID());
-
-            if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) return;
+            KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
 
             byte[] cacheValue = this.cache.getIfPresent(Base64.getEncoder().encodeToString(reqMsg.getMessageID().toByteArray()));
-            if (cacheValue != null) {
+            if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
+                return;
+            } else if (cacheValue != null) {
                 resMsg.setPayload(ByteString.copyFrom(cacheValue));
                 resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                 byte[] response = resMsg.build().toByteArray();
                 DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
                 return;
-            } else if (Utils.isOutOfMemory(Utils.MAX_REQUEST_SIZE * 100L)) {
+            } else if (this.cache.size() > 100 && Utils.isOutOfMemory(Utils.MAX_REQUEST_SIZE * 150L)) {
                 throw new IOException("Too many requests");
+            } else if (kvRequest.getCommand() == 1 && Utils.isOutOfMemory(Utils.MAX_REQUEST_SIZE * 100L)) {
+                throw new OutOfMemoryError("Out of memory");
             }
 
-            KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
+
             switch (kvRequest.getCommand()) {
                 // Put
                 case 1 -> {
-                    if (Utils.isOutOfMemory(Utils.MAX_REQUEST_SIZE * 100L)) {
-                        throw new OutOfMemoryError("Out of memory");
-                    } else if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
+                    if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                         kvResponse.setErrCode(INVALID_KEY_ERROR);
                     } else if (kvRequest.getValue().size() == 0 || kvRequest.getValue().size() > 10000) {
                         kvResponse.setErrCode(INVALID_VALUE_ERROR);
@@ -141,10 +142,11 @@ public class ServerResponse implements Runnable {
                 default -> kvResponse.setErrCode(UNRECOGNIZED_ERROR);
             }
         } catch (IOException e) {
-            System.out.println("Overload: " + Utils.getFreeMemory());
+            System.out.println("Overload Error: " + Utils.getFreeMemory());
             kvResponse.setErrCode(OVERLOAD_ERROR);
             kvResponse.setOverloadWaitTime(this.waitTime);
         } catch (OutOfMemoryError e) {
+            System.out.println("Memory Error: " + Utils.getFreeMemory());
             kvResponse.setErrCode(MEMORY_ERROR);
         } catch (Exception e) {
             kvResponse.setErrCode(STORE_ERROR);
@@ -155,9 +157,7 @@ public class ServerResponse implements Runnable {
                 byte[] response = resMsg.build().toByteArray();
                 DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
-                if (kvResponse.getErrCode() == SUCCESS) {
-                    this.cache.put(Base64.getEncoder().encodeToString(resMsg.getMessageID().toByteArray()), resMsg.getPayload().toByteArray());
-                }
+                this.cache.put(Base64.getEncoder().encodeToString(resMsg.getMessageID().toByteArray()), resMsg.getPayload().toByteArray());
             } catch (Exception e) {
                 e.printStackTrace();
             }
