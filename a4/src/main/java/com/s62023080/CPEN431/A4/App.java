@@ -4,7 +4,7 @@ public class App
 {
     public static void main(String[] args) {
         if (args.length != 4) {
-            System.out.println("This requires a port, number of threads, cache expiration (ms), wait time (ms)");
+            System.out.println("This requires port, number of threads, cache expiration (ms), wait time (ms)");
             return;
         }
 
