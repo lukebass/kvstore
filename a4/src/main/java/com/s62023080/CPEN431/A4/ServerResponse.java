@@ -66,7 +66,7 @@ public class ServerResponse implements Runnable {
                 DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
                 return;
-            } else if (this.cache.size() > 100 && Utils.isOutOfMemory(Utils.MAX_REQUEST_SIZE * 150L)) {
+            } else if (this.cache.size() > 1000 && Utils.isOutOfMemory(Utils.MAX_REQUEST_SIZE * 200L)) {
                 throw new IOException("Too many requests");
             } else if (kvRequest.getCommand() == 1 && Utils.isOutOfMemory(Utils.MAX_REQUEST_SIZE * 100L)) {
                 throw new OutOfMemoryError("Out of memory");

@@ -3,10 +3,9 @@ package com.s62023080.CPEN431.A4;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.protobuf.ByteString;
-
 import java.io.IOException;
-import java.util.concurrent.*;
 import java.net.*;
+import java.util.concurrent.*;
 
 public class Server extends Thread {
     private final DatagramSocket socket;
@@ -23,7 +22,7 @@ public class Server extends Thread {
 
     public Server(int port, int nThreads, int cacheSize, int cacheExpiration, int waitTime) throws IOException {
         this.socket = new DatagramSocket(port);
-        this.executor = new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(nThreads), new ThreadPoolExecutor.CallerRunsPolicy());
+        this.executor = Executors.newFixedThreadPool(nThreads);
         this.store = new Store();
         this.cache = CacheBuilder.newBuilder().maximumSize(cacheSize).expireAfterWrite(cacheExpiration, TimeUnit.MILLISECONDS).build();
         this.waitTime = waitTime;
