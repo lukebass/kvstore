@@ -57,7 +57,9 @@ public class ServerResponse implements Runnable {
             KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
 
             byte[] cacheValue = this.cache.getIfPresent(reqMsg.getMessageID());
-            if (cacheValue != null) {
+            if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
+                return;
+            } else if (cacheValue != null) {
                 resMsg.setPayload(ByteString.copyFrom(cacheValue));
                 resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                 byte[] response = resMsg.build().toByteArray();
@@ -122,6 +124,7 @@ public class ServerResponse implements Runnable {
                 case 5 -> {
                     this.store.clear();
                     kvResponse.setErrCode(SUCCESS);
+                    Runtime.getRuntime().gc();
                 }
                 // Health
                 case 6 -> kvResponse.setErrCode(SUCCESS);
@@ -145,6 +148,7 @@ public class ServerResponse implements Runnable {
         } catch (OutOfMemoryError e) {
             System.out.println("Memory Error: " + Utils.getFreeMemory());
             kvResponse.setErrCode(MEMORY_ERROR);
+            Runtime.getRuntime().gc();
         } catch (Exception e) {
             kvResponse.setErrCode(STORE_ERROR);
         } finally {
