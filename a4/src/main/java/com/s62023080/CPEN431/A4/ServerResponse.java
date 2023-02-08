@@ -8,6 +8,7 @@ import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.net.*;
+import java.util.Base64;
 
 public class ServerResponse implements Runnable {
     private final DatagramSocket socket;
@@ -16,7 +17,7 @@ public class ServerResponse implements Runnable {
 
     private final Store store;
 
-    private final Cache<Key, byte[]> cache;
+    private final Cache<String, byte[]> cache;
 
     private final int waitTime;
 
@@ -36,7 +37,7 @@ public class ServerResponse implements Runnable {
 
     private final static int INVALID_VALUE_ERROR = 7;
 
-    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<Key, byte[]> cache, int waitTime) {
+    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<String, byte[]> cache, int waitTime) {
         this.socket = socket;
         this.packet = packet;
         this.store = store;
@@ -55,13 +56,13 @@ public class ServerResponse implements Runnable {
             Msg reqMsg = Msg.parseFrom(request);
 
             resMsg.setMessageID(reqMsg.getMessageID());
-            byte[] cacheValue = this.cache.getIfPresent(new Key(reqMsg.getMessageID().toByteArray()));
+            byte[] cacheValue = this.cache.getIfPresent(Base64.getEncoder().encodeToString(reqMsg.getMessageID().toByteArray()));
 
             if (cacheValue != null) {
                 DatagramPacket resPacket = new DatagramPacket(cacheValue, cacheValue.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
                 return;
-            } else if (Utils.isOutOfMemory() && this.cache.size() > 0) {
+            } else if (Utils.isOutOfMemory()) {
                 throw new IOException("Out of memory");
             }
 
@@ -149,7 +150,7 @@ public class ServerResponse implements Runnable {
                 byte[] response = resMsg.build().toByteArray();
                 DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
-                this.cache.put(new Key(resMsg.getMessageID().toByteArray()), response);
+                this.cache.put(Base64.getEncoder().encodeToString(resMsg.getMessageID().toByteArray()), response);
             } catch (Exception e) {
                 e.printStackTrace();
             }

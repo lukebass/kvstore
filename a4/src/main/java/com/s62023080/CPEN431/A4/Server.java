@@ -15,7 +15,7 @@ public class Server extends Thread {
 
     private final Store store;
 
-    private final Cache<Key, byte[]> cache;
+    private final Cache<String, byte[]> cache;
 
     private final int waitTime;
 
@@ -34,7 +34,7 @@ public class Server extends Thread {
         return this.store;
     }
 
-    public Cache<Key, byte[]> getCache() {
+    public Cache<String, byte[]> getCache() {
         return this.cache;
     }
 

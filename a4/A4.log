@@ -1,7 +1,7 @@
 CPEN 431 EVALUATION test Client
-Time: Tue Feb 07 20:00:13 PST 2023
+Time: Tue Feb 07 21:35:15 PST 2023
 Build Date: Mon Feb 06 08:10:14 PST 2023
-Java process ID: 8747
+Java process ID: 11506
 
 [Info] A4 Client running in TEST mode.
 
@@ -61,445 +61,445 @@ TEST_PASSED
 
 [ TEST Multi Client Performance (1 clients, 60.0 seconds): PUT -> GET (closed loop) ]
 Test time limit reached: 60.0s.
-Test completed after 62230 closed loops.
+Test completed after 89124 closed loops.
 [Test] Checking if server is up ...
 Test Passed. Server is ok.
 Test Status: TEST_PASSED
 Clients: 1
-Total Requests (without replies): 124460
-Total Requests (including replies): 124492
-Successful Responses: 124452
-Timeout Responses: 8
+Total Requests (without replies): 178248
+Total Requests (including replies): 178276
+Successful Responses: 178241
+Timeout Responses: 7
 Total Failed Responses: 0
-% Success: 99.99357223204242
-% Timeout: 0.0064277679575767315
+% Success: 99.99607288721332
+% Timeout: 0.003927112786679233
 % Failed: 0.0
 Response Time (Successful requests):
-[max] 24ms, [min] 0ms
-[avg] 0.07263041172500241 ms, [stdev] 0.2843773652689437ms
-Throughput: 1972.6748240664426 requests per second
-Goodput: 1972.548025106194 requests per second
-Retry Rate (Successful requests): 1.0002571107183031
+[max] 22ms, [min] 0ms
+[avg] 0.07494347540689292 ms, [stdev] 0.28058857818993355ms
+Throughput: 2868.1212589302954 requests per second
+Goodput: 2868.0086245735984 requests per second
+Retry Rate (Successful requests): 1.0001570845114671
 
 [ TEST Multi Client Performance (2 clients, 60.0 seconds): PUT -> GET (closed loop) ]
 Test time limit reached: 60.0s.
+Test completed after 225736 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 191742 closed loops.
-Test completed after 150637 closed loops.
+Test completed after 80204 closed loops.
 [Test] Checking if server is up ...
 Test Passed. Server is ok.
 Test Status: TEST_PASSED
 Clients: 2
-Total Requests (without replies): 684758
-Total Requests (including replies): 684786
-Successful Responses: 684751
-Timeout Responses: 7
+Total Requests (without replies): 611880
+Total Requests (including replies): 611916
+Successful Responses: 611871
+Timeout Responses: 9
 Total Failed Responses: 0
-% Success: 99.99897774104136
-% Timeout: 0.0010222589586394025
+% Success: 99.99852912335751
+% Timeout: 0.0014708766424789174
 % Failed: 0.0
 Response Time (Successful requests):
-[max] 118ms, [min] 0ms
-[avg] 0.08657599623804857 ms, [stdev] 0.35102185779586564ms
-Throughput: 11412.4431259479 requests per second
-Goodput: 11412.326461225646 requests per second
-Retry Rate (Successful requests): 1.0000408903583455
+[max] 27ms, [min] 0ms
+[avg] 0.08458645694925891 ms, [stdev] 0.31240353599756127ms
+Throughput: 9739.589965618236 requests per second
+Goodput: 9739.446708264357 requests per second
+Retry Rate (Successful requests): 1.0000588350656991
 
 [ TEST Multi Client Performance (8 clients, 60.0 seconds): PUT -> GET (closed loop) ]
 Test time limit reached: 60.0s.
 Test time limit reached: 60.0s.
-Test completed after 53497 closed loops.
+Test completed after 45191 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 46292 closed loops.
+Test completed after 44526 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 52721 closed loops.
-Test completed after 52720 closed loops.
+Test completed after 50383 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 53203 closed loops.
+Test completed after 51022 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 59507 closed loops.
+Test completed after 51240 closed loops.
+Test completed after 57595 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 46696 closed loops.
+Test completed after 57537 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 58020 closed loops.
+Test completed after 51671 closed loops.
 [Test] Checking if server is up ...
 Test Passed. Server is ok.
 Test Status: TEST_PASSED
 Clients: 8
-Total Requests (without replies): 845312
-Total Requests (including replies): 845348
-Successful Responses: 845303
+Total Requests (without replies): 818330
+Total Requests (including replies): 818366
+Successful Responses: 818321
 Timeout Responses: 9
 Total Failed Responses: 0
-% Success: 99.998935304361
-% Timeout: 0.0010646956390066625
+% Success: 99.99890019918615
+% Timeout: 0.0010998008138526022
 % Failed: 0.0
 Response Time (Successful requests):
-[max] 49ms, [min] 0ms
-[avg] 0.43352265400690637 ms, [stdev] 0.7878741296582692ms
-Throughput: 13069.342444997603 requests per second
-Goodput: 13069.203296278545 requests per second
-Retry Rate (Successful requests): 1.0000425878255603
+[max] 42ms, [min] 0ms
+[avg] 0.44662546848974916 ms, [stdev] 0.7900594339109971ms
+Throughput: 12368.954050785973 requests per second
+Goodput: 12368.818016928657 requests per second
+Retry Rate (Successful requests): 1.0000439920325541
 
 [ TEST Multi Client Performance (32 clients, 60.0 seconds): PUT -> GET (closed loop) ]
 Test time limit reached: 60.0s.
 Test time limit reached: 60.0s.
-Test completed after 13746 closed loops.
+Test completed after 13174 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 13186 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 13197 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13727 closed loops.
+Test completed after 13172 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13752 closed loops.
+Test completed after 13166 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13750 closed loops.
+Test completed after 13164 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 11873 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13724 closed loops.
-Test completed after 13735 closed loops.
+Test completed after 11659 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13729 closed loops.
+Test completed after 13182 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13751 closed loops.
+Test completed after 13176 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 12233 closed loops.
+Test completed after 13179 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 10679 closed loops.
+Test completed after 13202 closed loops.
+Test completed after 13160 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 9184 closed loops.
+Test completed after 11573 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13750 closed loops.
-Test completed after 13732 closed loops.
-Test completed after 13747 closed loops.
+Test completed after 13218 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13742 closed loops.
+Test completed after 11808 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13740 closed loops.
+Test completed after 13170 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13726 closed loops.
+Test completed after 13191 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13745 closed loops.
+Test completed after 11886 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13728 closed loops.
-Test completed after 13732 closed loops.
+Test completed after 13205 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13746 closed loops.
+Test completed after 13170 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13750 closed loops.
+Test completed after 13182 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13740 closed loops.
+Test completed after 13201 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 13179 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 13189 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 13193 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13737 closed loops.
+Test completed after 13171 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13732 closed loops.
+Test completed after 13183 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13742 closed loops.
-Test completed after 12260 closed loops.
-Test completed after 13733 closed loops.
-Test completed after 13732 closed loops.
+Test completed after 13194 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13723 closed loops.
+Test completed after 13177 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 13800 closed loops.
+Test completed after 11728 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 12472 closed loops.
+Test completed after 10628 closed loops.
 [Test] Checking if server is up ...
 Test Passed. Server is ok.
 Test Status: TEST_PASSED
 Clients: 32
-Total Requests (without replies): 855638
-Total Requests (including replies): 855670
-Successful Responses: 855630
+Total Requests (without replies): 821472
+Total Requests (including replies): 821504
+Successful Responses: 821464
 Timeout Responses: 8
 Total Failed Responses: 0
-% Success: 99.99906502516251
-% Timeout: 9.349748374896861E-4
+% Success: 99.99902613844417
+% Timeout: 9.738615558412216E-4
 % Failed: 0.0
 Response Time (Successful requests):
-[max] 50ms, [min] 0ms
-[avg] 2.1003062071222374 ms, [stdev] 1.9790253371586992ms
-Throughput: 14025.70281124498 requests per second
-Goodput: 14025.571674452915 requests per second
-Retry Rate (Successful requests): 1.0000373989934996
+[max] 51ms, [min] 0ms
+[avg] 2.1875018260082 ms, [stdev] 2.0686701300943677ms
+Throughput: 13410.47407600888 requests per second
+Goodput: 13410.343476557398 requests per second
+Retry Rate (Successful requests): 1.0000389544622337
 
 [ TEST Multi Client Performance (128 clients, 60.0 seconds): PUT -> GET (closed loop) ]
 Test time limit reached: 60.0s.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
+Test completed after 3142 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
+Test completed after 3136 closed loops.
+Test completed after 2808 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3359 closed loops.
+Test completed after 3142 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3140 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3150 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
+Test completed after 3144 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3357 closed loops.
+Test completed after 3145 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3144 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3365 closed loops.
+Test completed after 3150 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3364 closed loops.
-Test completed after 3363 closed loops.
+Test completed after 3140 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3359 closed loops.
+Test completed after 3147 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3359 closed loops.
+Test completed after 3123 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
-Test completed after 3360 closed loops.
+Test completed after 3142 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3150 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3142 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 2973 closed loops.
+Test completed after 3141 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3364 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3365 closed loops.
+Test completed after 3141 closed loops.
+Test completed after 3134 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 2798 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3144 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3140 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3359 closed loops.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3134 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
-Test completed after 3355 closed loops.
+Test completed after 3141 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 2983 closed loops.
+Test completed after 3154 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
+Test completed after 3144 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3359 closed loops.
+Test completed after 3144 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3146 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3364 closed loops.
+Test completed after 2797 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3142 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 2792 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3365 closed loops.
+Test completed after 3145 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3142 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3359 closed loops.
+Test completed after 3134 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 2998 closed loops.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3144 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3137 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3358 closed loops.
+Test completed after 3155 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3366 closed loops.
+Test completed after 3152 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3014 closed loops.
+Test completed after 3143 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3141 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3364 closed loops.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3140 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3144 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3364 closed loops.
+Test completed after 3151 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3147 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3364 closed loops.
+Test completed after 3137 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3356 closed loops.
+Test completed after 3137 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3358 closed loops.
+Test completed after 3152 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3365 closed loops.
+Test completed after 3148 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3148 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3140 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
-Test completed after 3361 closed loops.
-Test completed after 3362 closed loops.
+Test completed after 3141 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3357 closed loops.
+Test completed after 3144 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3145 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
-Test completed after 3361 closed loops.
+Test completed after 3141 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3365 closed loops.
+Test completed after 3143 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3137 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3364 closed loops.
-Test completed after 3359 closed loops.
+Test completed after 3147 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
+Test completed after 3144 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3147 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3135 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
-Test completed after 3368 closed loops.
+Test completed after 3146 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3357 closed loops.
+Test completed after 3141 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3365 closed loops.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3358 closed loops.
+Test completed after 2822 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3151 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3141 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3140 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3147 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
+Test completed after 3136 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3358 closed loops.
+Test completed after 3142 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3358 closed loops.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3160 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 2834 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3356 closed loops.
+Test completed after 3146 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3355 closed loops.
+Test completed after 3150 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3150 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3366 closed loops.
+Test completed after 3137 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3365 closed loops.
+Test completed after 3145 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3358 closed loops.
+Test completed after 3141 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3143 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3001 closed loops.
-Test completed after 3359 closed loops.
+Test completed after 3133 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3366 closed loops.
+Test completed after 3141 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3146 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
-Test completed after 3001 closed loops.
+Test completed after 3143 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3129 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3364 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3138 closed loops.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3146 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3142 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3364 closed loops.
+Test completed after 3149 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
+Test completed after 3151 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 2833 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3151 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3358 closed loops.
-Test completed after 3364 closed loops.
+Test completed after 3137 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3356 closed loops.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3141 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3364 closed loops.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
+Test completed after 3137 closed loops.
 Test time limit reached: 60.0s.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3142 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3144 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
+Test completed after 3138 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3363 closed loops.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3358 closed loops.
+Test completed after 3136 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3364 closed loops.
+Test completed after 3143 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 2970 closed loops.
+Test completed after 3136 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3361 closed loops.
+Test completed after 3135 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3360 closed loops.
-Test completed after 3364 closed loops.
+Test completed after 3136 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3367 closed loops.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3362 closed loops.
+Test completed after 3139 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3357 closed loops.
+Test completed after 3140 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3357 closed loops.
-Test completed after 3360 closed loops.
-Test completed after 3356 closed loops.
-Test completed after 3361 closed loops.
+Test completed after 3152 closed loops.
 Test time limit reached: 60.0s.
-Test completed after 3294 closed loops.
+Test completed after 3025 closed loops.
 [Test] Checking if server is up ...
 Test Passed. Server is ok.
 Test Status: TEST_PASSED
 Clients: 128
-Total Requests (without replies): 855186
-Total Requests (including replies): 855218
-Successful Responses: 855178
+Total Requests (without replies): 799478
+Total Requests (including replies): 799510
+Successful Responses: 799470
 Timeout Responses: 8
 Total Failed Responses: 0
-% Success: 99.99906453099092
-% Timeout: 9.354690090810654E-4
+% Success: 99.99899934707396
+% Timeout: 0.0010006529260342372
 % Failed: 0.0
 Response Time (Successful requests):
-[max] 88ms, [min] 0ms
-[avg] 8.832225571752314 ms, [stdev] 6.9929876902086585ms
-Throughput: 13158.934588930435 requests per second
-Goodput: 13158.81149117543 requests per second
-Retry Rate (Successful requests): 1.0000374187603633
+[max] 96ms, [min] 0ms
+[avg] 9.43355723166598 ms, [stdev] 7.338624146504026ms
+Throughput: 12475.664372766569 requests per second
+Goodput: 12475.53953466598 requests per second
+Retry Rate (Successful requests): 1.0000400261170415
 
 
 [ TEST Multi Client Crash: PUT -> GET (closed loop) + REM -> WIPEOUT (closed loop) ]
@@ -511,6 +511,37 @@ Pausing for 10 seconds to wait for the cache to be cleared!
 [ TEST Single Client Capacity (Value Size = 10000 bytes, Limit = 7340 PUTs, ~69.99969482421875 MiB) : PUT -> GET (closed loop) ]
 Sending WIPE-OUT to all servers...
 [ ... Completed in 0.002 seconds ]
+[OK]
+Waiting for 5 seconds for the cache to be cleared!
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+ERROR_OUT_OF_SPACE
+Received error code after 5958 closed loops (~56.819915771484375 MiB).
+PUTs sent = 5958(~56.819915771484375 MiB) , Limit = 7340
+[Test isAlive]
+Test Passed. Server is ok.
+TEST_PASSED
+Pausing for 10 seconds to wait for the cache to be cleared!
+
+[ TEST Single Client Capacity (Value Size = 5000 bytes, Limit = 14680 PUTs, ~69.99969482421875 MiB) : PUT -> GET (closed loop) ]
+Sending WIPE-OUT to all servers...
+[ ... Completed in 0.003 seconds ]
 [OK]
 Waiting for 5 seconds for the cache to be cleared!
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
@@ -652,272 +683,10 @@ Waiting for 5 seconds for the cache to be cleared!
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
 [Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
-[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+Server timeouts exceeded. Server probably crashed!
+TEST_FAILED
+
+[TEST Invalid Key ]
+TEST_UNDECIDED
+
+[TEST Invalid Value ]

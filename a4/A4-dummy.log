@@ -1,7 +1,7 @@
 CPEN 431 DUMMY test Client
-Time: Tue Feb 07 20:54:34 PST 2023
+Time: Tue Feb 07 21:52:09 PST 2023
 Build Date: Fri Jan 27 10:05:06 PST 2023
-Java process ID: 10374
+Java process ID: 12034
 [A4 DUMMY TESTS - THIS IS A DUMMY TEST CLIENT NOT THE FINAL EVALUATION CLIENT]
 
 [Info] Created server list successfully.
@@ -39,10 +39,10 @@ Total Failed Responses: 0
 % Failed: 0.0
 Response Time (Successful requests):
 [max] 1ms, [min] 0ms
-[avg] 0.165 ms, [stdev] 0.37118054905934966ms
+[avg] 0.2 ms, [stdev] 0.39999999999999947ms
 Throughput: 4166.666666666667 requests per second
 Goodput: 4166.666666666667 requests per second
 Retry Rate (Successful requests): 1.0
 
 Completed A4 DUMMY Tests.
-Testing completed in 5.157s
+Testing completed in 5.176s
