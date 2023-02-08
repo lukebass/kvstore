@@ -24,7 +24,7 @@ public class Utils {
     }
 
     public static long getFreeMemory() {
-        return Runtime.getRuntime().maxMemory() - (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+        return (Runtime.getRuntime().maxMemory() - (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
     }
 
     public static boolean isOutOfMemory(long threshold) {

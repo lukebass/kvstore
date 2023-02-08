@@ -1,7 +1,7 @@
 CPEN 431 BASIC test Client
-Time: Tue Feb 07 23:39:50 PST 2023
+Time: Tue Feb 07 23:57:37 PST 2023
 Build Date: Fri Jan 27 10:05:21 PST 2023
-Java process ID: 14837
+Java process ID: 15508
 [A4 BASIC TESTS - THIS IS A BASIC TEST CLIENT NOT THE FINAL EVALUATION CLIENT]
 
 [Info] Created server list successfully.
@@ -55,24 +55,349 @@ TEST_PASSED
 
 [ TEST Multi Client Performance (1 clients, 60.0 seconds): PUT -> GET (closed loop) ]
 Test time limit reached: 60.0s.
-Test completed after 39478 closed loops.
+Test completed after 81076 closed loops.
 [Test] Checking if server is up ...
 Test Passed. Server is ok.
 Test Status: TEST_PASSED
 Clients: 1
-Total Requests (without replies): 78956
-Total Requests (including replies): 78992
-Successful Responses: 78947
-Timeout Responses: 9
+Total Requests (without replies): 162152
+Total Requests (including replies): 162180
+Successful Responses: 162145
+Timeout Responses: 7
 Total Failed Responses: 0
-% Success: 99.98860124626374
-% Timeout: 0.011398753736258168
+% Success: 99.99568306280527
+% Timeout: 0.00431693719473087
 % Failed: 0.0
 Response Time (Successful requests):
-[max] 48ms, [min] 0ms
-[avg] 0.07562035289498018 ms, [stdev] 0.34580458878444864ms
-Throughput: 1200.7238773058382 requests per second
-Goodput: 1200.5870097480117 requests per second
-Retry Rate (Successful requests): 1.0004559501494503
+[max] 22ms, [min] 0ms
+[avg] 0.07451355268432576 ms, [stdev] 0.28693558781497774ms
+Throughput: 2678.2062928400364 requests per second
+Goodput: 2678.090676356429 requests per second
+Retry Rate (Successful requests): 1.0001726774877893
 
 [ TEST Multi Client Performance (2 clients, 60.0 seconds): PUT -> GET (closed loop) ]
+Test time limit reached: 60.0s.
+Test time limit reached: 60.0s.
+Test completed after 177786 closed loops.
+Test completed after 145179 closed loops.
+[Test] Checking if server is up ...
+Test Passed. Server is ok.
+Test Status: TEST_PASSED
+Clients: 2
+Total Requests (without replies): 645930
+Total Requests (including replies): 645958
+Successful Responses: 645923
+Timeout Responses: 7
+Total Failed Responses: 0
+% Success: 99.99891629123898
+% Timeout: 0.0010837087610112552
+% Failed: 0.0
+Response Time (Successful requests):
+[max] 34ms, [min] 0ms
+[avg] 0.09252960492194891 ms, [stdev] 0.3336619123058749ms
+Throughput: 10765.141161961268 requests per second
+Goodput: 10765.02449918336 requests per second
+Retry Rate (Successful requests): 1.0000433483504405
+
+[ TEST Multi Client Performance (4 clients, 60.0 seconds): PUT -> GET (closed loop) ]
+Test time limit reached: 60.0s.
+Test time limit reached: 60.0s.
+Test completed after 102094 closed loops.
+Test time limit reached: 60.0s.
+Test completed after 88831 closed loops.
+Test completed after 105647 closed loops.
+Test time limit reached: 60.0s.
+Test completed after 119658 closed loops.
+[Test] Checking if server is up ...
+Test Passed. Server is ok.
+Test Status: TEST_PASSED
+Clients: 4
+Total Requests (without replies): 832460
+Total Requests (including replies): 832492
+Successful Responses: 832452
+Timeout Responses: 8
+Total Failed Responses: 0
+% Success: 99.99903899286453
+% Timeout: 9.610071354779809E-4
+% Failed: 0.0
+Response Time (Successful requests):
+[max] 42ms, [min] 0ms
+[avg] 0.17742764747997483 ms, [stdev] 0.5047238287249715ms
+Throughput: 13868.78581900573 requests per second
+Goodput: 13868.652538984406 requests per second
+Retry Rate (Successful requests): 1.0000384402854192
+
+[ TEST Multi Client Performance (8 clients, 60.0 seconds): PUT -> GET (closed loop) ]
+Test time limit reached: 60.0s.
+Test time limit reached: 60.0s.
+Test completed after 56695 closed loops.
+Test time limit reached: 60.0s.
+Test completed after 49877 closed loops.
+Test time limit reached: 60.0s.
+Test completed after 49684 closed loops.
+Test completed after 44665 closed loops.
+Test time limit reached: 60.0s.
+Test completed after 56662 closed loops.
+Test time limit reached: 60.0s.
+Test completed after 50184 closed loops.
+Test time limit reached: 60.0s.
+Test completed after 56650 closed loops.
+Test time limit reached: 60.0s.
+Test completed after 38434 closed loops.
+[Test] Checking if server is up ...
+Test Passed. Server is ok.
+Test Status: TEST_PASSED
+Clients: 8
+Total Requests (without replies): 805702
+Total Requests (including replies): 805734
+Successful Responses: 805694
+Timeout Responses: 8
+Total Failed Responses: 0
+% Success: 99.99900707705827
+% Timeout: 9.929229417327994E-4
+% Failed: 0.0
+Response Time (Successful requests):
+[max] 41ms, [min] 0ms
+[avg] 0.4545559480398265 ms, [stdev] 0.7858966266999537ms
+Throughput: 13411.155683539459 requests per second
+Goodput: 13411.022521097924 requests per second
+Retry Rate (Successful requests): 1.0000397169176694
+
+
+[ TEST Multi Client Crash: PUT -> GET (closed loop) + REM -> WIPEOUT (closed loop) ]
+[Test isAlive]
+Test Passed. Server is ok.
+TEST_PASSED
+Pausing for 10 seconds to wait for the cache to be cleared!
+
+[ TEST Single Client Capacity (Value Size = 10000 bytes, Limit = 7340 PUTs, ~69.99969482421875 MiB) : PUT -> GET (closed loop) ]
+Sending WIPE-OUT to all servers...
+[ ... Completed in 0.003 seconds ]
+[OK]
+Waiting for 5 seconds for the cache to be cleared!
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+ERROR_OUT_OF_SPACE
+Received error code after 6145 closed loops (~58.60328674316406 MiB).
+PUTs sent = 6145(~58.60328674316406 MiB) , Limit = 7340
+[Test isAlive]
+Test Passed. Server is ok.
+TEST_PASSED
+Pausing for 10 seconds to wait for the cache to be cleared!
+
+[ TEST Single Client Capacity (Value Size = 500 bytes, Limit = 146800 PUTs, ~69.99969482421875 MiB) : PUT -> GET (closed loop) ]
+Sending WIPE-OUT to all servers...
+[ ... Completed in 0.003 seconds ]
+[OK]
+Waiting for 5 seconds for the cache to be cleared!
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+[Info] Received OVERLOAD from the server. Sleeping for [1000] ms.
+ERROR_OUT_OF_SPACE
+Received error code after 98305 closed loops (~46.8754768371582 MiB).
+PUTs sent = 98305(~46.8754768371582 MiB) , Limit = 146800
+[Test isAlive]
+Test Passed. Server is ok.
+TEST_PASSED
+
+[TEST Invalid Key ]
+TEST_PASSED
+
+[TEST Invalid Value ]
+TEST_PASSED
+
+Sending SHUTDOWN to 1 servers.
+[ ... Completed in 6.456 seconds ]
+[Test isAlive] for 127.0.0.1:3080
+[ ... Completed in 64.533 seconds ]
+Results Summary:
+Basic PUT GET  : 2.0
+Double PUT with version : 2.0
+Double PUT with version : 2.0
+Double PUT with version : 2.0
+Double PUT with version : 2.0
+Remove Operation : 2.0
+Double Remove : 2.0
+Invalid Command : 2.0
+At-Most-Once Policy : 2.0
+At-Most-Once Policy Empty REMs : 2.0
+At-Most-Once Policy Error Return Code : 2.0
+1 Client(s) Throughput (Requests per Second) : 2679.0
+1 Client(s) Goodput (Requests per Second) : 2679.0
+1 Client(s) Maximum Response Time (ms) : 22.0
+1 Client(s) Average Response Time (ms) : 1.0
+1 Client(s) STDEV Response Time (ms) : 1.0
+2 Client(s) Throughput (Requests per Second) : 10766.0
+2 Client(s) Goodput (Requests per Second) : 10766.0
+2 Client(s) Maximum Response Time (ms) : 34.0
+2 Client(s) Average Response Time (ms) : 1.0
+2 Client(s) STDEV Response Time (ms) : 1.0
+4 Client(s) Throughput (Requests per Second) : 13869.0
+4 Client(s) Goodput (Requests per Second) : 13869.0
+4 Client(s) Maximum Response Time (ms) : 42.0
+4 Client(s) Average Response Time (ms) : 1.0
+4 Client(s) STDEV Response Time (ms) : 1.0
+8 Client(s) Throughput (Requests per Second) : 13412.0
+8 Client(s) Goodput (Requests per Second) : 13412.0
+8 Client(s) Maximum Response Time (ms) : 41.0
+8 Client(s) Average Response Time (ms) : 1.0
+8 Client(s) STDEV Response Time (ms) : 1.0
+Multi-Client Crash : 2.0
+Single Client Capacity (MiB) for value size of 10000 : 59.0
+Single Client Capacity Test 1 : 2.0
+Single Client Capacity (MiB) for value size of 500 : 47.0
+Single Client Capacity Test 2 : 2.0
+Invalid Key Test : 2.0
+Invalid Value Test : 2.0
+Shutdown Test : 2.0
+Result Verification Code : 7254.0
+
+Completed A4 Tests.
+Testing completed in 615.361s
