@@ -16,7 +16,7 @@ public class ServerResponse implements Runnable {
 
     private final Store store;
 
-    private final Cache<ByteString, byte[]> cache;
+    private final Cache<Key, byte[]> cache;
 
     private final int waitTime;
 
@@ -36,7 +36,7 @@ public class ServerResponse implements Runnable {
 
     private final static int INVALID_VALUE_ERROR = 7;
 
-    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<ByteString, byte[]> cache, int waitTime) {
+    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<Key, byte[]> cache, int waitTime) {
         this.socket = socket;
         this.packet = packet;
         this.store = store;
@@ -56,7 +56,7 @@ public class ServerResponse implements Runnable {
             resMsg.setMessageID(reqMsg.getMessageID());
             KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
 
-            byte[] cacheValue = this.cache.getIfPresent(reqMsg.getMessageID());
+            byte[] cacheValue = this.cache.getIfPresent(new Key(reqMsg.getMessageID().toByteArray()));
             if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                 return;
             } else if (cacheValue != null) {
@@ -82,7 +82,7 @@ public class ServerResponse implements Runnable {
                     } else if (kvRequest.getValue().size() == 0 || kvRequest.getValue().size() > 10000) {
                         kvResponse.setErrCode(INVALID_VALUE_ERROR);
                     } else {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
+                        this.store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
                         kvResponse.setErrCode(SUCCESS);
                     }
                 }
@@ -91,7 +91,7 @@ public class ServerResponse implements Runnable {
                     if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                         kvResponse.setErrCode(INVALID_KEY_ERROR);
                     } else {
-                        byte[] composite = this.store.get(kvRequest.getKey());
+                        byte[] composite = this.store.get(kvRequest.getKey().toByteArray());
                         if (composite == null) {
                             kvResponse.setErrCode(MISSING_KEY_ERROR);
                         } else {
@@ -110,7 +110,7 @@ public class ServerResponse implements Runnable {
                     if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
                         kvResponse.setErrCode(INVALID_KEY_ERROR);
                     } else {
-                        byte[] composite = this.store.remove(kvRequest.getKey());
+                        byte[] composite = this.store.remove(kvRequest.getKey().toByteArray());
                         if (composite == null) {
                             kvResponse.setErrCode(MISSING_KEY_ERROR);
                         } else {
@@ -122,9 +122,10 @@ public class ServerResponse implements Runnable {
                 case 4 -> System.exit(0);
                 // Clear
                 case 5 -> {
-                    this.store.clear();
                     kvResponse.setErrCode(SUCCESS);
-                    Runtime.getRuntime().gc();
+                    this.store.clear();
+                    this.cache.invalidateAll();
+                    System.gc();
                 }
                 // Health
                 case 6 -> kvResponse.setErrCode(SUCCESS);
@@ -145,10 +146,11 @@ public class ServerResponse implements Runnable {
             System.out.println("Overload Error: " + Utils.getFreeMemory());
             kvResponse.setErrCode(OVERLOAD_ERROR);
             kvResponse.setOverloadWaitTime(this.waitTime);
+            System.gc();
         } catch (OutOfMemoryError e) {
             System.out.println("Memory Error: " + Utils.getFreeMemory());
             kvResponse.setErrCode(MEMORY_ERROR);
-            Runtime.getRuntime().gc();
+            System.gc();
         } catch (Exception e) {
             kvResponse.setErrCode(STORE_ERROR);
         } finally {
@@ -158,7 +160,7 @@ public class ServerResponse implements Runnable {
                 byte[] response = resMsg.build().toByteArray();
                 DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
                 this.socket.send(resPacket);
-                this.cache.put(resMsg.getMessageID(), resMsg.getPayload().toByteArray());
+                this.cache.put(new Key(resMsg.getMessageID().toByteArray()), resMsg.getPayload().toByteArray());
             } catch (Exception e) {
                 e.printStackTrace();
             }

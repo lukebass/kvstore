@@ -1,5 +1,6 @@
 com/s62023080/CPEN431/A4/ServerResponse.class
 ca/NetSysLab/ProtocolBuffers/Message$Msg.class
+com/s62023080/CPEN431/A4/Key.class
 ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponseOrBuilder.class
 ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequest$1.class
 com/s62023080/CPEN431/A4/Server.class
