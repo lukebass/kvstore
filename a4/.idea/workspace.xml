@@ -5,21 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3a799034-b100-4701-ad9e-797c029ae117" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/a4_2023_eval_tests_v1.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/servers.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Key.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/A4.log" beforeDir="false" afterPath="$PROJECT_DIR$/A4.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/App.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Key.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Key.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Server.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/ServerResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/ServerResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Store.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Store.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/s62023080/CPEN431/A4/AppTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/s62023080/CPEN431/A4/AppTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0-jar-with-dependencies.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/App.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/App.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Server.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/ServerResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/ServerResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Store.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Store.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Utils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Utils.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A4.AppTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A4.AppTest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -78,10 +75,11 @@
       <recent name="$PROJECT_DIR$/src/main/java" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.AppTest">
+  <component name="RunManager" selected="Application.App">
     <configuration name="App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.s62023080.CPEN431.A4.App" />
       <module name="CPEN431_2023_A4" />
+      <option name="PROGRAM_PARAMETERS" value="3080 4 1000 1000" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="com.s62023080.CPEN431.A4.*" />

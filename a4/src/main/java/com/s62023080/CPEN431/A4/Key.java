@@ -3,12 +3,6 @@ package com.s62023080.CPEN431.A4;
 import java.util.Arrays;
 
 public record Key(byte[] array) {
-
-    @Override
-    public byte[] array() {
-        return array.clone();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

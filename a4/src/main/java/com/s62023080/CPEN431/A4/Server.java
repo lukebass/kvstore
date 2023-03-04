@@ -6,26 +6,32 @@ import java.io.IOException;
 import java.net.*;
 import java.util.concurrent.*;
 
-public class Server extends Thread {
-    private final DatagramSocket socket;
-
+public class Server {
     private final ExecutorService executor;
 
     private final Store store;
 
     private final Cache<Key, byte[]> cache;
 
-    private final int waitTime;
-
     private boolean running;
 
-    public Server(int port, int nThreads, int cacheSize, int cacheExpiration, int waitTime) throws IOException {
-        this.socket = new DatagramSocket(port);
+    public Server(int port, int nThreads, int cacheExpiration, int waitTime) throws IOException {
+        DatagramSocket socket = new DatagramSocket(port);
         this.executor = Executors.newFixedThreadPool(nThreads);
         this.store = new Store();
-        this.cache = CacheBuilder.newBuilder().maximumSize(cacheSize).expireAfterWrite(cacheExpiration, TimeUnit.MILLISECONDS).build();
-        this.waitTime = waitTime;
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpiration, TimeUnit.MILLISECONDS).build();
         this.running = true;
+
+        while (this.running) {
+            try {
+                DatagramPacket packet = new DatagramPacket(new byte[Utils.MAX_REQUEST_SIZE], Utils.MAX_REQUEST_SIZE);
+                socket.receive(packet);
+                this.executor.submit(new ServerResponse(socket, packet, this.store, this.cache, waitTime));
+                System.out.println(this.cache.size() + " / " + this.store.size() + " / " + Utils.getFreeMemory());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public Store getStore() {
@@ -34,19 +40,6 @@ public class Server extends Thread {
 
     public Cache<Key, byte[]> getCache() {
         return this.cache;
-    }
-
-    public void run() {
-        while (this.running) {
-            try {
-                DatagramPacket packet = new DatagramPacket(new byte[Utils.MAX_REQUEST_SIZE], Utils.MAX_REQUEST_SIZE);
-                this.socket.receive(packet);
-                this.executor.submit(new ServerResponse(this.socket, packet, this.store, this.cache, this.waitTime));
-                System.out.println(this.cache.size() + " / " + this.store.size() + " / " + Utils.getFreeMemory());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public void clear() {

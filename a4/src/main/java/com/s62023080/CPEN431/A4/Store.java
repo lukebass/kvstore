@@ -1,13 +1,13 @@
 package com.s62023080.CPEN431.A4;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Hashtable;
 
 public class Store {
-    private ConcurrentHashMap<Key, byte[]> store;
+    private Hashtable<Key, byte[]> store;
 
     public Store() {
-        this.store = new ConcurrentHashMap<>();
+        this.store = new Hashtable<>();
     }
 
     public void put(byte[] key, byte[] value, int version) {
@@ -27,7 +27,7 @@ public class Store {
     }
 
     public void clear() {
-        this.store = new ConcurrentHashMap<>();
+        this.store = new Hashtable<>();
     }
 
     public int size() { return this.store.size(); }
