@@ -42,9 +42,11 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.s62023080.CPEN431.A4.App</mainClass>
+              <mainClass>com.s62023080.CPEN431.A4.Server</mainClass>
             </manifest>
           </archive>
+          <outputDirectory>${project.build.directory}/..</outputDirectory>
+          <finalName>server</finalName>
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>

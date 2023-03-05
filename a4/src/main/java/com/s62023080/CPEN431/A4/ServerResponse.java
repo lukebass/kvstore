@@ -8,6 +8,7 @@ import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.net.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class ServerResponse implements Runnable {
     private final DatagramSocket socket;
@@ -18,14 +19,17 @@ public class ServerResponse implements Runnable {
 
     private final Cache<Key, byte[]> cache;
 
-    private final int waitTime;
+    private final ConcurrentSkipListMap<Integer, Integer> addresses;
 
-    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<Key, byte[]> cache, int waitTime) {
+    private final ConcurrentSkipListMap<Integer, int[]> tables;
+
+    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<Key, byte[]> cache, ConcurrentSkipListMap<Integer, Integer> addresses, ConcurrentSkipListMap<Integer, int[]> tables) {
         this.socket = socket;
         this.packet = packet;
         this.store = store;
         this.cache = cache;
-        this.waitTime = waitTime;
+        this.addresses = addresses;
+        this.tables = tables;
     }
 
     public void run() {
@@ -114,7 +118,7 @@ public class ServerResponse implements Runnable {
         } catch (IOException e) {
             System.out.println("Overload Error: " + Utils.getFreeMemory());
             kvResponse.setErrCode(Utils.OVERLOAD_ERROR);
-            kvResponse.setOverloadWaitTime(this.waitTime);
+            kvResponse.setOverloadWaitTime(Utils.OVERLOAD_TIME);
             System.gc();
         } catch (OutOfMemoryError e) {
             System.out.println("Memory Error: " + Utils.getFreeMemory());

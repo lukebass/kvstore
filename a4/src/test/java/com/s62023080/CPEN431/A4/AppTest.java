@@ -4,6 +4,8 @@ import com.google.protobuf.ByteString;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
+import java.util.ArrayList;
+
 import ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest;
 import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
 
@@ -14,8 +16,11 @@ public class AppTest {
 
     @BeforeAll
     static void setup() throws IOException {
-        server = new Server(3080, 4, 1000, 1000);
-        server.start();
+        ArrayList<Integer> nodes = new ArrayList<>();
+        nodes.add(123);
+        nodes.add(456);
+        nodes.add(789);
+        server = new Server(nodes, 3080, 4, 5);
         client = new Client("localhost", 3080, 100, 3);
     }
 
