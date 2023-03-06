@@ -35,6 +35,28 @@ public final class Message {
      * @return The checkSum.
      */
     long getCheckSum();
+
+    /**
+     * <code>optional bytes address = 4;</code>
+     * @return Whether the address field is set.
+     */
+    boolean hasAddress();
+    /**
+     * <code>optional bytes address = 4;</code>
+     * @return The address.
+     */
+    com.google.protobuf.ByteString getAddress();
+
+    /**
+     * <code>optional int32 port = 5;</code>
+     * @return Whether the port field is set.
+     */
+    boolean hasPort();
+    /**
+     * <code>optional int32 port = 5;</code>
+     * @return The port.
+     */
+    int getPort();
   }
   /**
    * Protobuf type {@code Msg}
@@ -51,6 +73,7 @@ public final class Message {
     private Msg() {
       messageID_ = com.google.protobuf.ByteString.EMPTY;
       payload_ = com.google.protobuf.ByteString.EMPTY;
+      address_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
@@ -78,6 +101,7 @@ public final class Message {
               ca.NetSysLab.ProtocolBuffers.Message.Msg.class, ca.NetSysLab.ProtocolBuffers.Message.Msg.Builder.class);
     }
 
+    private int bitField0_;
     public static final int MESSAGEID_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString messageID_ = com.google.protobuf.ByteString.EMPTY;
     /**
@@ -111,6 +135,44 @@ public final class Message {
       return checkSum_;
     }
 
+    public static final int ADDRESS_FIELD_NUMBER = 4;
+    private com.google.protobuf.ByteString address_ = com.google.protobuf.ByteString.EMPTY;
+    /**
+     * <code>optional bytes address = 4;</code>
+     * @return Whether the address field is set.
+     */
+    @java.lang.Override
+    public boolean hasAddress() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional bytes address = 4;</code>
+     * @return The address.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getAddress() {
+      return address_;
+    }
+
+    public static final int PORT_FIELD_NUMBER = 5;
+    private int port_ = 0;
+    /**
+     * <code>optional int32 port = 5;</code>
+     * @return Whether the port field is set.
+     */
+    @java.lang.Override
+    public boolean hasPort() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional int32 port = 5;</code>
+     * @return The port.
+     */
+    @java.lang.Override
+    public int getPort() {
+      return port_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -134,6 +196,12 @@ public final class Message {
       if (checkSum_ != 0L) {
         output.writeFixed64(3, checkSum_);
       }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeBytes(4, address_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeInt32(5, port_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -154,6 +222,14 @@ public final class Message {
       if (checkSum_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeFixed64Size(3, checkSum_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, address_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, port_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -176,6 +252,16 @@ public final class Message {
           .equals(other.getPayload())) return false;
       if (getCheckSum()
           != other.getCheckSum()) return false;
+      if (hasAddress() != other.hasAddress()) return false;
+      if (hasAddress()) {
+        if (!getAddress()
+            .equals(other.getAddress())) return false;
+      }
+      if (hasPort() != other.hasPort()) return false;
+      if (hasPort()) {
+        if (getPort()
+            != other.getPort()) return false;
+      }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -194,6 +280,14 @@ public final class Message {
       hash = (37 * hash) + CHECKSUM_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getCheckSum());
+      if (hasAddress()) {
+        hash = (37 * hash) + ADDRESS_FIELD_NUMBER;
+        hash = (53 * hash) + getAddress().hashCode();
+      }
+      if (hasPort()) {
+        hash = (37 * hash) + PORT_FIELD_NUMBER;
+        hash = (53 * hash) + getPort();
+      }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -326,6 +420,8 @@ public final class Message {
         messageID_ = com.google.protobuf.ByteString.EMPTY;
         payload_ = com.google.protobuf.ByteString.EMPTY;
         checkSum_ = 0L;
+        address_ = com.google.protobuf.ByteString.EMPTY;
+        port_ = 0;
         return this;
       }
 
@@ -368,6 +464,16 @@ public final class Message {
         if (((from_bitField0_ & 0x00000004) != 0)) {
           result.checkSum_ = checkSum_;
         }
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.address_ = address_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.port_ = port_;
+          to_bitField0_ |= 0x00000002;
+        }
+        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -423,6 +529,12 @@ public final class Message {
         if (other.getCheckSum() != 0L) {
           setCheckSum(other.getCheckSum());
         }
+        if (other.hasAddress()) {
+          setAddress(other.getAddress());
+        }
+        if (other.hasPort()) {
+          setPort(other.getPort());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -464,6 +576,16 @@ public final class Message {
                 bitField0_ |= 0x00000004;
                 break;
               } // case 25
+              case 34: {
+                address_ = input.readBytes();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 40: {
+                port_ = input.readInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -576,6 +698,86 @@ public final class Message {
         onChanged();
         return this;
       }
+
+      private com.google.protobuf.ByteString address_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes address = 4;</code>
+       * @return Whether the address field is set.
+       */
+      @java.lang.Override
+      public boolean hasAddress() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <code>optional bytes address = 4;</code>
+       * @return The address.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getAddress() {
+        return address_;
+      }
+      /**
+       * <code>optional bytes address = 4;</code>
+       * @param value The address to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAddress(com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        address_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes address = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAddress() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        address_ = getDefaultInstance().getAddress();
+        onChanged();
+        return this;
+      }
+
+      private int port_ ;
+      /**
+       * <code>optional int32 port = 5;</code>
+       * @return Whether the port field is set.
+       */
+      @java.lang.Override
+      public boolean hasPort() {
+        return ((bitField0_ & 0x00000010) != 0);
+      }
+      /**
+       * <code>optional int32 port = 5;</code>
+       * @return The port.
+       */
+      @java.lang.Override
+      public int getPort() {
+        return port_;
+      }
+      /**
+       * <code>optional int32 port = 5;</code>
+       * @param value The port to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPort(int value) {
+        
+        port_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 port = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPort() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        port_ = 0;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -654,10 +856,11 @@ public final class Message {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rMessage.proto\";\n\003Msg\022\021\n\tmessageID\030\001 \001(" +
-      "\014\022\017\n\007payload\030\002 \001(\014\022\020\n\010checkSum\030\003 \001(\006B\'\n\034" +
-      "ca.NetSysLab.ProtocolBuffersB\007Messageb\006p" +
-      "roto3"
+      "\n\rMessage.proto\"y\n\003Msg\022\021\n\tmessageID\030\001 \001(" +
+      "\014\022\017\n\007payload\030\002 \001(\014\022\020\n\010checkSum\030\003 \001(\006\022\024\n\007" +
+      "address\030\004 \001(\014H\000\210\001\001\022\021\n\004port\030\005 \001(\005H\001\210\001\001B\n\n" +
+      "\010_addressB\007\n\005_portB\'\n\034ca.NetSysLab.Proto" +
+      "colBuffersB\007Messageb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -668,7 +871,7 @@ public final class Message {
     internal_static_Msg_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Msg_descriptor,
-        new java.lang.String[] { "MessageID", "Payload", "CheckSum", });
+        new java.lang.String[] { "MessageID", "Payload", "CheckSum", "Address", "Port", "Address", "Port", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -1,5 +1,6 @@
 package com.s62023080.CPEN431.A4;
 
+import ca.NetSysLab.ProtocolBuffers.KeyValueRequest;
 import ca.NetSysLab.ProtocolBuffers.Message.Msg;
 import ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest;
 import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
@@ -32,15 +33,39 @@ public class ServerResponse implements Runnable {
         this.tables = tables;
     }
 
+    public boolean isKeyInvalid(ByteString key) {
+        return key.size() == 0 || key.size() > 32;
+    }
+
+    public boolean isValueInvalid(ByteString value) {
+        return value.size() == 0 || value.size() > 10000;
+    }
+
+    public void redirectRequest(Msg reqMsg, int nodeID) {
+        try {
+            Msg.Builder resMsg = Msg.newBuilder();
+            resMsg.setMessageID(reqMsg.getMessageID());
+            resMsg.setPayload(reqMsg.getPayload());
+            resMsg.setCheckSum(reqMsg.getCheckSum());
+            resMsg.setAddress(ByteString.copyFrom(this.packet.getAddress().getAddress()));
+            resMsg.setPort(this.packet.getPort());
+            byte[] response = resMsg.build().toByteArray();
+            this.socket.send(new DatagramPacket(response, response.length, InetAddress.getLocalHost(), this.addresses.get(nodeID)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void run() {
         Msg.Builder resMsg = Msg.newBuilder();
         KVResponse.Builder kvResponse = KVResponse.newBuilder();
+        Msg reqMsg = null;
 
         try {
             ByteBuffer buffer = ByteBuffer.wrap(this.packet.getData());
             byte[] request = new byte[this.packet.getLength()];
             buffer.get(request);
-            Msg reqMsg = Msg.parseFrom(request);
+            reqMsg = Msg.parseFrom(request);
             resMsg.setMessageID(reqMsg.getMessageID());
             KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
 
@@ -48,8 +73,7 @@ public class ServerResponse implements Runnable {
             if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                 return;
             } else if (cacheValue != null) {
-                DatagramPacket resPacket = new DatagramPacket(cacheValue, cacheValue.length, this.packet.getAddress(), this.packet.getPort());
-                this.socket.send(resPacket);
+                this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, this.packet.getAddress(), this.packet.getPort()));
                 return;
             } else if (Utils.isOutOfMemory()) {
                 if (cache.size() > Utils.MAX_CACHE_SIZE) throw new IOException("Too many requests");
@@ -58,19 +82,28 @@ public class ServerResponse implements Runnable {
 
             switch (kvRequest.getCommand()) {
                 case Utils.PUT_REQUEST -> {
-                    if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
+                    if (isKeyInvalid(kvRequest.getKey())) {
                         kvResponse.setErrCode(Utils.INVALID_KEY_ERROR);
-                    } else if (kvRequest.getValue().size() == 0 || kvRequest.getValue().size() > 10000) {
+                    } else if (isValueInvalid(kvRequest.getValue())) {
                         kvResponse.setErrCode(Utils.INVALID_VALUE_ERROR);
                     } else {
+                        if (!Utils.isLocalKey(kvRequest.getKey().toByteArray(), this.tables)) {
+                            redirectRequest(reqMsg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables));
+                            return;
+                        }
                         this.store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
                         kvResponse.setErrCode(Utils.SUCCESS);
                     }
                 }
                 case Utils.GET_REQUEST -> {
-                    if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
+                    if (isKeyInvalid(kvRequest.getKey())) {
                         kvResponse.setErrCode(Utils.INVALID_KEY_ERROR);
                     } else {
+                        if (!Utils.isLocalKey(kvRequest.getKey().toByteArray(), this.tables)) {
+                            redirectRequest(reqMsg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables));
+                            return;
+                        }
+
                         byte[] composite = this.store.get(kvRequest.getKey().toByteArray());
                         if (composite == null) {
                             kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
@@ -86,9 +119,14 @@ public class ServerResponse implements Runnable {
                     }
                 }
                 case Utils.REMOVE_REQUEST -> {
-                    if (kvRequest.getKey().size() == 0 || kvRequest.getKey().size() > 32) {
+                    if (isKeyInvalid(kvRequest.getKey())) {
                         kvResponse.setErrCode(Utils.INVALID_KEY_ERROR);
                     } else {
+                        if (!Utils.isLocalKey(kvRequest.getKey().toByteArray(), this.tables)) {
+                            redirectRequest(reqMsg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables));
+                            return;
+                        }
+
                         byte[] composite = this.store.remove(kvRequest.getKey().toByteArray());
                         if (composite == null) {
                             kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
@@ -132,10 +170,14 @@ public class ServerResponse implements Runnable {
                 resMsg.setPayload(kvResponse.build().toByteString());
                 resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                 byte[] response = resMsg.build().toByteArray();
-                DatagramPacket resPacket = new DatagramPacket(response, response.length, this.packet.getAddress(), this.packet.getPort());
-                this.socket.send(resPacket);
                 this.cache.put(new Key(resMsg.getMessageID().toByteArray()), response);
-            } catch (Exception e) {
+                this.socket.send(new DatagramPacket(
+                        response,
+                        response.length,
+                        reqMsg.getAddress().size() > 0 ? InetAddress.getByAddress(reqMsg.getAddress().toByteArray()) : this.packet.getAddress(),
+                        reqMsg.getPort() != 0 ? reqMsg.getPort() : this.packet.getPort()
+                ));
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

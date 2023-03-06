@@ -63,11 +63,13 @@ public class Utils {
     /**
      * Determine if key belongs to local node
      *
-     * @param keyID the request key hash
+     * @param key the request key
      * @param tables ConcurrentSkipListMap of node hashes and finger tables
      * @return boolean indicating if key is local
      */
-    public static boolean isLocalKey(int keyID, ConcurrentSkipListMap<Integer, int[]> tables) {
+    public static boolean isLocalKey(byte[] key, ConcurrentSkipListMap<Integer, int[]> tables) {
+        int keyID = hashKey(key);
+
         // Iterate over virtual nodes
         boolean found = false;
         for (int nodeID : tables.keySet()) {
@@ -86,11 +88,13 @@ public class Utils {
     /**
      * Search finger tables to find key location
      *
-     * @param keyID the request key hash
+     * @param key the request key
      * @param tables ConcurrentSkipListMap of node hashes and finger tables
      * @return node hash to search next
      */
-    public static int searchTables(int keyID, ConcurrentSkipListMap<Integer, int[]> tables) {
+    public static int searchTables(byte[] key, ConcurrentSkipListMap<Integer, int[]> tables) {
+        int keyID = hashKey(key);
+
         // Iterate over virtual nodes
         int nodeID = 0;
         ArrayList<Integer> nodeSet = new ArrayList<>(tables.keySet());
