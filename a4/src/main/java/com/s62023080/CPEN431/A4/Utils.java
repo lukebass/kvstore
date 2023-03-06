@@ -1,7 +1,7 @@
 package com.s62023080.CPEN431.A4;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -47,6 +47,17 @@ public class Utils {
     }
 
     /**
+     * Determine if hash belongs to local node
+     *
+     * @param nodeID the node hash
+     * @param tables SortedMap of node hashes and finger tables
+     * @return boolean indicating if node is local node
+     */
+    public static boolean isLocalNode(int nodeID, ConcurrentSkipListMap<Integer, int[]> tables) {
+        return tables.containsKey(nodeID);
+    }
+
+    /**
      * Determine if request key is between two node hashes
      *
      * @param keyID the request key hash
@@ -55,9 +66,49 @@ public class Utils {
      * @return boolean indicating if key is between
      */
     public static boolean inBetween(int keyID, int firstID, int secondID) {
-        if (secondID > firstID) return keyID >= firstID && keyID < secondID;
-        else if (keyID >= firstID && keyID < secondID + Math.pow(2, M_BITS)) return true;
-        else return keyID + Math.pow(2, M_BITS) >= firstID && keyID < secondID;
+        if (firstID == secondID) return false;
+        else if (secondID > firstID) return keyID >= firstID && keyID < secondID;
+        return keyID >= firstID && keyID < secondID + Math.pow(2, M_BITS)
+                || keyID + Math.pow(2, M_BITS) >= firstID && keyID < secondID;
+    }
+
+    /**
+     * Search finger tables to find key location
+     *
+     * @param keyID the request key hash
+     * @param tables SortedMap of node hashes and finger tables
+     * @return node hash to search next
+     */
+    public static int searchTables(int keyID, ConcurrentSkipListMap<Integer, int[]> tables) {
+        // Iterate over node hashes
+        ArrayList<Integer> nodeSet = new ArrayList<>(tables.keySet());
+        int nodeID = 0;
+        for (int i = 0; i < nodeSet.size(); i++) {
+            int next = (i + 1) % nodeSet.size();
+            // Check if virtual node is responsible
+            if (inBetween(keyID, nodeSet.get(i) + 1, nodeSet.get(next) + 1)) {
+                nodeID = nodeSet.get(next);
+                break;
+            }
+        }
+
+        // Get finger table for closest node to key
+        int[] table = tables.get(nodeID);
+        // Check if current node is responsible
+        if (inBetween(keyID, table[0] + 1, nodeID + 1)) return nodeID;
+        // Check if successor node is responsible
+        else if (inBetween(keyID, nodeID + 1, table[1] + 1)) return table[1];
+
+        // Iterate over finger table
+        for (int i = 1; i < M_BITS + 1; i++) {
+            // Check if finger node is responsible
+            if (inBetween(keyID, table[i], table[(i + 1) % (M_BITS + 1)])) {
+                nodeID = table[i];
+                break;
+            }
+        }
+
+        return nodeID;
     }
 
     /**
