@@ -2,7 +2,6 @@ package com.s62023080.CPEN431.A4;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.zip.CRC32;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -47,17 +46,6 @@ public class Utils {
     }
 
     /**
-     * Determine if hash belongs to local node
-     *
-     * @param nodeID the node hash
-     * @param tables SortedMap of node hashes and finger tables
-     * @return boolean indicating if node is local node
-     */
-    public static boolean isLocalNode(int nodeID, ConcurrentSkipListMap<Integer, int[]> tables) {
-        return tables.containsKey(nodeID);
-    }
-
-    /**
      * Determine if request key is between two node hashes
      *
      * @param keyID the request key hash
@@ -73,31 +61,51 @@ public class Utils {
     }
 
     /**
+     * Determine if key belongs to local node
+     *
+     * @param keyID the request key hash
+     * @param tables ConcurrentSkipListMap of node hashes and finger tables
+     * @return boolean indicating if key is local
+     */
+    public static boolean isLocalKey(int keyID, ConcurrentSkipListMap<Integer, int[]> tables) {
+        // Iterate over virtual nodes
+        boolean found = false;
+        for (int nodeID : tables.keySet()) {
+            // Get finger table for current virtual node
+            int[] table = tables.get(nodeID);
+            // Check if current node is responsible
+            if (inBetween(keyID, table[0] + 1, nodeID + 1)) {
+                found = true;
+                break;
+            }
+        }
+
+        return found;
+    }
+
+    /**
      * Search finger tables to find key location
      *
      * @param keyID the request key hash
-     * @param tables SortedMap of node hashes and finger tables
+     * @param tables ConcurrentSkipListMap of node hashes and finger tables
      * @return node hash to search next
      */
     public static int searchTables(int keyID, ConcurrentSkipListMap<Integer, int[]> tables) {
-        // Iterate over node hashes
-        ArrayList<Integer> nodeSet = new ArrayList<>(tables.keySet());
+        // Iterate over virtual nodes
         int nodeID = 0;
+        ArrayList<Integer> nodeSet = new ArrayList<>(tables.keySet());
         for (int i = 0; i < nodeSet.size(); i++) {
-            int next = (i + 1) % nodeSet.size();
             // Check if virtual node is responsible
-            if (inBetween(keyID, nodeSet.get(i) + 1, nodeSet.get(next) + 1)) {
-                nodeID = nodeSet.get(next);
+            if (inBetween(keyID, nodeSet.get(i), nodeSet.get((i + 1) % nodeSet.size()))) {
+                nodeID = nodeSet.get(i);
                 break;
             }
         }
 
         // Get finger table for closest node to key
         int[] table = tables.get(nodeID);
-        // Check if current node is responsible
-        if (inBetween(keyID, table[0] + 1, nodeID + 1)) return nodeID;
         // Check if successor node is responsible
-        else if (inBetween(keyID, nodeID + 1, table[1] + 1)) return table[1];
+        if (inBetween(keyID, nodeID + 1, table[1])) return table[1];
 
         // Iterate over finger table
         for (int i = 1; i < M_BITS + 1; i++) {
@@ -118,7 +126,7 @@ public class Utils {
      * @param weight the weight of virtual nodes
      * @return ConcurrentSkipListMap of (hash, address) pairs
      */
-    public static ConcurrentSkipListMap<Integer, Integer> generateAddresses(List<Integer> nodes, int weight) {
+    public static ConcurrentSkipListMap<Integer, Integer> generateAddresses(ArrayList<Integer> nodes, int weight) {
         ConcurrentSkipListMap<Integer, Integer> addresses = new ConcurrentSkipListMap<>();
 
         // Iterate over physical nodes
@@ -141,7 +149,7 @@ public class Utils {
      * @param nodeSet sorted list of node hashes
      * @return ConcurrentSkipListMap of node hashes and finger tables
      */
-    public static ConcurrentSkipListMap<Integer, int[]> generateTables(int node, int weight, List<Integer> nodeSet) {
+    public static ConcurrentSkipListMap<Integer, int[]> generateTables(int node, int weight, ArrayList<Integer> nodeSet) {
         ConcurrentSkipListMap<Integer, int[]> tables = new ConcurrentSkipListMap<>();
 
         // Iterate over virtual nodes
@@ -164,9 +172,9 @@ public class Utils {
      * @param index the index for finger generation
      * @param nodeID the virtual node hash
      * @param nodeSet sorted list of node hashes
-     * @return Finger for the given index
+     * @return finger for the given index
      */
-    public static int generateFinger(int index, int nodeID, List<Integer> nodeSet) {
+    public static int generateFinger(int index, int nodeID, ArrayList<Integer> nodeSet) {
         // Get the successor position
         int successor = (int) ((nodeID + Math.pow(2, index - 1)) % Math.pow(2, M_BITS));
         // Get the current position
