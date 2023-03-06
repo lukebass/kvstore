@@ -1,6 +1,5 @@
 package com.s62023080.CPEN431.A4;
 
-import ca.NetSysLab.ProtocolBuffers.KeyValueRequest;
 import ca.NetSysLab.ProtocolBuffers.Message.Msg;
 import ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest;
 import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
@@ -91,6 +90,7 @@ public class ServerResponse implements Runnable {
                             redirectRequest(reqMsg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables));
                             return;
                         }
+
                         this.store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
                         kvResponse.setErrCode(Utils.SUCCESS);
                     }
@@ -154,12 +154,12 @@ public class ServerResponse implements Runnable {
                 default -> kvResponse.setErrCode(Utils.UNRECOGNIZED_ERROR);
             }
         } catch (IOException e) {
-            System.out.println("Overload Error: " + Utils.getFreeMemory());
+            System.out.println("Overload Error: " + Utils.getUsedMemory());
             kvResponse.setErrCode(Utils.OVERLOAD_ERROR);
             kvResponse.setOverloadWaitTime(Utils.OVERLOAD_TIME);
             System.gc();
         } catch (OutOfMemoryError e) {
-            System.out.println("Memory Error: " + Utils.getFreeMemory());
+            System.out.println("Memory Error: " + Utils.getUsedMemory());
             kvResponse.setErrCode(Utils.MEMORY_ERROR);
             System.gc();
         } catch (Exception e) {

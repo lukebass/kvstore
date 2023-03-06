@@ -232,11 +232,11 @@ public class Utils {
         return (int) (crc.getValue() % Math.pow(2, M_BITS));
     }
 
-    public static long getFreeMemory() {
+    public static long getUsedMemory() {
         return (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024;
     }
 
     public static boolean isOutOfMemory() {
-        return getFreeMemory() > MAX_MEMORY;
+        return getUsedMemory() > MAX_MEMORY;
     }
 }

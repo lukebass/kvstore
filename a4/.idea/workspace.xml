@@ -5,8 +5,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3a799034-b100-4701-ad9e-797c029ae117" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.1000.log.swp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.1001.log.swp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.1002.log.swp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.A6.log.swp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/1000.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/1001.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/1002.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/A6.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eval4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eval6.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/a4_2023_eval_tests_v1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/server-jar-with-dependencies.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/servers.txt" beforeDir="false" afterPath="$PROJECT_DIR$/servers.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Server.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/ServerResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/ServerResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Store.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Store.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/Message$Msg$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/Message$Msg$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/Message$Msg$Builder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/Message$Msg$Builder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/Message$Msg.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/Message$Msg.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/Message$MsgOrBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/Message$MsgOrBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/Message.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/Message.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Server.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/ServerResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/ServerResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Utils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Utils.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A4.AppTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A4.AppTest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
