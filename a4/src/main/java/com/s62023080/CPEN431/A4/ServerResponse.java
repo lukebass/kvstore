@@ -47,8 +47,8 @@ public class ServerResponse implements Runnable {
             resMsg.setMessageID(reqMsg.getMessageID());
             resMsg.setPayload(reqMsg.getPayload());
             resMsg.setCheckSum(reqMsg.getCheckSum());
-            resMsg.setAddress(ByteString.copyFrom(this.packet.getAddress().getAddress()));
-            resMsg.setPort(this.packet.getPort());
+            resMsg.setAddress(reqMsg.getAddress().size() > 0 ? reqMsg.getAddress() : ByteString.copyFrom(this.packet.getAddress().getAddress()));
+            resMsg.setPort(reqMsg.getPort() != 0 ? reqMsg.getPort() : this.packet.getPort());
             byte[] response = resMsg.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, InetAddress.getLocalHost(), this.addresses.get(nodeID)));
         } catch (IOException e) {
