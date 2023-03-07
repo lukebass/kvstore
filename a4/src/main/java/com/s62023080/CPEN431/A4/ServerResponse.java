@@ -61,7 +61,6 @@ public class ServerResponse implements Runnable {
             clone.setPort(this.port);
             byte[] response = clone.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, InetAddress.getLocalHost(), this.addresses.get(nodeID)));
-            System.out.println("Redirect to " + this.addresses.get(nodeID));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -108,9 +107,6 @@ public class ServerResponse implements Runnable {
 
                         this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
                         kvResponse.setErrCode(Utils.SUCCESS);
-                        System.out.println("Put key: " + kvRequest.getKey());
-                        System.out.println("Put value: " + kvRequest.getValue());
-                        System.out.println("Put version: " + kvRequest.getVersion());
                     }
                 }
                 case Utils.GET_REQUEST -> {
@@ -129,9 +125,6 @@ public class ServerResponse implements Runnable {
                             kvResponse.setErrCode(Utils.SUCCESS);
                             kvResponse.setValue(data.value);
                             kvResponse.setVersion(data.version);
-                            System.out.println("Get key: " + kvRequest.getKey());
-                            System.out.println("Get value: " + data.value);
-                            System.out.println("Get version: " + data.version);
                         }
                     }
                 }
