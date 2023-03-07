@@ -1,12 +1,11 @@
 package com.s62023080.CPEN431.A4;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.google.protobuf.ByteString;
 
 public class Store {
-    private ConcurrentHashMap<ByteString, byte[]> store;
+    private ConcurrentHashMap<ByteString, Data> store;
 
     private final ReentrantReadWriteLock lock;
 
@@ -15,25 +14,25 @@ public class Store {
         this.lock = new ReentrantReadWriteLock();
     }
 
-    public void put(ByteString key, byte[] value, int version) {
-        byte[] composite = new byte[value.length + 4];
-        ByteBuffer buffer = ByteBuffer.wrap(composite);
-        buffer.putInt(version);
-        buffer.put(value);
-        lock.writeLock().lock();
-        this.store.put(key, composite);
-        lock.writeLock().unlock();
+    public void put(ByteString key, ByteString value, int version) {
+        Data data = new Data(value, version);
+        this.lock.writeLock().lock();
+        this.store.put(key, data);
+        this.lock.writeLock().unlock();
     }
 
-    public byte[] get(ByteString key) {
-        lock.readLock().lock();
-        byte[] value = this.store.get(key);
-        lock.readLock().unlock();
-        return value;
+    public Data get(ByteString key) {
+        this.lock.writeLock().lock();
+        Data data = this.store.get(key);
+        this.lock.writeLock().unlock();
+        return data;
     }
 
-    public byte[] remove(ByteString key) {
-        return this.store.remove(key);
+    public Data remove(ByteString key) {
+        this.lock.writeLock().lock();
+        Data data = this.store.remove(key);
+        this.lock.writeLock().unlock();
+        return data;
     }
 
     public void clear() {
