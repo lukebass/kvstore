@@ -42,7 +42,7 @@ public class Server {
                 DatagramPacket packet = new DatagramPacket(new byte[Utils.MAX_REQUEST_SIZE], Utils.MAX_REQUEST_SIZE);
                 socket.receive(packet);
                 this.executor.submit(new ServerResponse(socket, packet, this.store, this.cache, this.addresses, this.tables));
-                System.out.println(this.cache.size() + " / " + this.store.size() + " / " + Utils.getUsedMemory());
+                System.out.println(this.cache.size() + " / " + this.store.size() + " / " + Utils.getFreeMemory());
             } catch (Exception e) {
                 e.printStackTrace();
             }

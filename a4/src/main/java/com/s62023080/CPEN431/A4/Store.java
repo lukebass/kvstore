@@ -29,10 +29,7 @@ public class Store {
     }
 
     public Data remove(ByteString key) {
-        this.lock.writeLock().lock();
-        Data data = this.store.remove(key);
-        this.lock.writeLock().unlock();
-        return data;
+        return this.store.remove(key);
     }
 
     public void clear() {

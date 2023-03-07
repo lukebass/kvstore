@@ -8,8 +8,9 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class Utils {
     private static final int M_BITS = 11;
     public static final int MAX_REQUEST_SIZE = 16000;
-    public static final int MAX_MEMORY = 55;
-    public static final int MAX_CACHE_SIZE = 500;
+    public static final int LOWER_MIN_MEMORY = 5;
+    public static final int UPPER_MIN_MEMORY = 10;
+    public static final int MAX_CACHE_SIZE = 1000;
     public static final int CACHE_EXPIRATION = 1000;
     public static final int OVERLOAD_TIME = 1000;
     public static final int PUT_REQUEST = 1;
@@ -232,11 +233,11 @@ public class Utils {
         return (int) (crc.getValue() % Math.pow(2, M_BITS));
     }
 
-    public static long getUsedMemory() {
-        return (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024;
+    public static int getFreeMemory() {
+        return (int) ((Runtime.getRuntime().maxMemory() - (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())) / 1024 / 1024);
     }
 
-    public static boolean isOutOfMemory() {
-        return getUsedMemory() > MAX_MEMORY;
+    public static boolean isOutOfMemory(int threshold) {
+        return getFreeMemory() < threshold;
     }
 }
