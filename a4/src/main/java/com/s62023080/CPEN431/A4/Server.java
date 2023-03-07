@@ -2,6 +2,7 @@ package com.s62023080.CPEN431.A4;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.protobuf.ByteString;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -14,7 +15,7 @@ public class Server {
 
     private final Store store;
 
-    private final Cache<Key, byte[]> cache;
+    private final Cache<ByteString, byte[]> cache;
 
     private final ConcurrentSkipListMap<Integer, Integer> addresses;
 
@@ -52,7 +53,7 @@ public class Server {
         return this.store;
     }
 
-    public Cache<Key, byte[]> getCache() {
+    public Cache<ByteString, byte[]> getCache() {
         return this.cache;
     }
 

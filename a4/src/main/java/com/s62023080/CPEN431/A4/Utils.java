@@ -9,7 +9,7 @@ public class Utils {
     private static final int M_BITS = 11;
     public static final int MAX_REQUEST_SIZE = 16000;
     public static final int MAX_MEMORY = 55;
-    public static final int MAX_CACHE_SIZE = 1000;
+    public static final int MAX_CACHE_SIZE = 500;
     public static final int CACHE_EXPIRATION = 1000;
     public static final int OVERLOAD_TIME = 1000;
     public static final int PUT_REQUEST = 1;

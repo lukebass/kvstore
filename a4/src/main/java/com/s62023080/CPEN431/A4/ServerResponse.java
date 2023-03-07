@@ -17,13 +17,13 @@ public class ServerResponse implements Runnable {
 
     private final Store store;
 
-    private final Cache<Key, byte[]> cache;
+    private final Cache<ByteString, byte[]> cache;
 
     private final ConcurrentSkipListMap<Integer, Integer> addresses;
 
     private final ConcurrentSkipListMap<Integer, int[]> tables;
 
-    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<Key, byte[]> cache, ConcurrentSkipListMap<Integer, Integer> addresses, ConcurrentSkipListMap<Integer, int[]> tables) {
+    public ServerResponse(DatagramSocket socket, DatagramPacket packet, Store store, Cache<ByteString, byte[]> cache, ConcurrentSkipListMap<Integer, Integer> addresses, ConcurrentSkipListMap<Integer, int[]> tables) {
         this.socket = socket;
         this.packet = packet;
         this.store = store;
@@ -68,7 +68,7 @@ public class ServerResponse implements Runnable {
             resMsg.setMessageID(reqMsg.getMessageID());
             KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
 
-            byte[] cacheValue = this.cache.getIfPresent(new Key(reqMsg.getMessageID().toByteArray()));
+            byte[] cacheValue = this.cache.getIfPresent(reqMsg.getMessageID());
             if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
                 return;
             } else if (cacheValue != null) {
@@ -91,8 +91,11 @@ public class ServerResponse implements Runnable {
                             return;
                         }
 
-                        this.store.put(kvRequest.getKey().toByteArray(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue().toByteArray(), kvRequest.getVersion());
                         kvResponse.setErrCode(Utils.SUCCESS);
+                        System.out.println("Put key: " + kvRequest.getKey());
+                        System.out.println("Put value: " + kvRequest.getValue());
+                        System.out.println("Put version: " + kvRequest.getVersion());
                     }
                 }
                 case Utils.GET_REQUEST -> {
@@ -104,7 +107,7 @@ public class ServerResponse implements Runnable {
                             return;
                         }
 
-                        byte[] composite = this.store.get(kvRequest.getKey().toByteArray());
+                        byte[] composite = this.store.get(kvRequest.getKey());
                         if (composite == null) {
                             kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
                         } else {
@@ -115,6 +118,9 @@ public class ServerResponse implements Runnable {
                             kvResponse.setErrCode(Utils.SUCCESS);
                             kvResponse.setValue(ByteString.copyFrom(value));
                             kvResponse.setVersion(version);
+                            System.out.println("Get key: " + kvRequest.getKey());
+                            System.out.println("Get value: " + ByteString.copyFrom(value));
+                            System.out.println("Get version: " + version);
                         }
                     }
                 }
@@ -127,7 +133,7 @@ public class ServerResponse implements Runnable {
                             return;
                         }
 
-                        byte[] composite = this.store.remove(kvRequest.getKey().toByteArray());
+                        byte[] composite = this.store.remove(kvRequest.getKey());
                         if (composite == null) {
                             kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
                         } else {
@@ -170,7 +176,7 @@ public class ServerResponse implements Runnable {
                 resMsg.setPayload(kvResponse.build().toByteString());
                 resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
                 byte[] response = resMsg.build().toByteArray();
-                this.cache.put(new Key(resMsg.getMessageID().toByteArray()), response);
+                this.cache.put(resMsg.getMessageID(), response);
                 this.socket.send(new DatagramPacket(
                         response,
                         response.length,
