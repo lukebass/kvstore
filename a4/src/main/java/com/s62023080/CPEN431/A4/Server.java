@@ -10,39 +10,37 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.net.*;
 import java.util.concurrent.*;
 
 public class Server {
     private boolean running;
-
     private final int port;
-
+    private final int weight;
     private final DatagramSocket socket;
-
     private final ExecutorService executor;
-
     private final Store store;
-
     private final Cache<ByteString, byte[]> cache;
-
-    private final ConcurrentSkipListMap<Integer, Integer> addresses;
-
-    private final ConcurrentSkipListMap<Integer, int[]> tables;
-
     private final ConcurrentHashMap<Integer, Long> nodes;
+    private ConcurrentSkipListMap<Integer, Integer> addresses;
+    private ConcurrentSkipListMap<Integer, int[]> tables;
 
     public Server(ArrayList<Integer> nodes, int port, int threads, int weight) throws IOException {
         this.running = true;
         this.port = port;
+        this.weight = weight;
         this.socket = new DatagramSocket(port);
         this.executor = Executors.newFixedThreadPool(threads);
         this.store = new Store();
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
-        this.addresses = Utils.generateAddresses(nodes, weight);
-        this.tables = Utils.generateTables(port, weight, new ArrayList<>(addresses.keySet()));
         this.nodes = new ConcurrentHashMap<>();
         for (int node : nodes) this.nodes.put(node, System.currentTimeMillis());
+        this.addresses = new ConcurrentSkipListMap<>();
+        this.tables = new ConcurrentSkipListMap<>();
+        generateTables();
+        ScheduledExecutorService push = Executors.newScheduledThreadPool(1);
+        push.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
 
         while (this.running) {
             try {
@@ -173,7 +171,15 @@ public class Server {
                     kvResponse.setMembershipCount(1);
                 }
                 case Utils.EPIDEMIC_REQUEST -> {
-                    // Continue
+                    Map<Integer, Long> nodes = kvRequest.getNodesMap();
+                    for (int node: nodes.keySet()) {
+                        if (this.nodes.containsKey(node) && node != this.port) {
+                            this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
+                        } else {
+                            this.nodes.put(node, nodes.get(node));
+                        }
+                    }
+                    return;
                 }
                 default -> kvResponse.setErrCode(Utils.UNRECOGNIZED_ERROR);
             }
@@ -192,8 +198,13 @@ public class Server {
         if (msg != null) respond(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port);
     }
 
+    public void generateTables() {
+        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
+        this.tables = Utils.generateTables(this.port, this.weight, new ArrayList<>(this.addresses.keySet()));
+    }
 
     public void push() {
+        isAlive();
         this.nodes.put(this.port, System.currentTimeMillis());
         ArrayList<Integer> addresses = new ArrayList<>(this.nodes.keySet());
         int rID = addresses.get(ThreadLocalRandom.current().nextInt(addresses.size()));
@@ -203,10 +214,17 @@ public class Server {
             KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
             kvRequest.setCommand(Utils.EPIDEMIC_REQUEST);
             kvRequest.putAllNodes(this.nodes);
-            respond(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port);
+            respond(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), rID);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+    }
+
+    public void isAlive() {
+        int size = this.nodes.size();
+        long threshold = (long) Math.ceil(Utils.EPIDEMIC_TIMEOUT + Utils.EPIDEMIC_PERIOD * ((Math.log(size) / Math.log(2)) + Utils.EPIDEMIC_BUFFER));
+        this.nodes.entrySet().removeIf(node -> System.currentTimeMillis() - node.getValue() > threshold);
+        if (this.nodes.size() < size) generateTables();
     }
 
     public Store getStore() {

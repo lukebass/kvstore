@@ -16,6 +16,9 @@ public class Utils {
     public static final int MAX_CACHE_SIZE = 1000;
     public static final int CACHE_EXPIRATION = 1000;
     public static final int OVERLOAD_TIME = 1000;
+    public static final int EPIDEMIC_PERIOD = 500;
+    public static final int EPIDEMIC_BUFFER = 1000;
+    public static final int EPIDEMIC_TIMEOUT = 10000;
     public static final int PUT_REQUEST = 1;
     public static final int GET_REQUEST = 2;
     public static final int REMOVE_REQUEST = 3;
@@ -118,11 +121,11 @@ public class Utils {
 
         // Iterate over virtual nodes
         int nodeID = 0;
-        ArrayList<Integer> nodeSet = new ArrayList<>(tables.keySet());
-        for (int i = 0; i < nodeSet.size(); i++) {
+        ArrayList<Integer> nodes = new ArrayList<>(tables.keySet());
+        for (int i = 0; i < nodes.size(); i++) {
             // Check if virtual node is responsible
-            if (inBetween(keyID, nodeSet.get(i), nodeSet.get((i + 1) % nodeSet.size()))) {
-                nodeID = nodeSet.get(i);
+            if (inBetween(keyID, nodes.get(i), nodes.get((i + 1) % nodes.size()))) {
+                nodeID = nodes.get(i);
                 break;
             }
         }
@@ -171,10 +174,10 @@ public class Utils {
      *
      * @param node the physical node address
      * @param weight the weight of virtual nodes
-     * @param nodeSet sorted list of node hashes
+     * @param nodes sorted list of node hashes
      * @return ConcurrentSkipListMap of node hashes and finger tables
      */
-    public static ConcurrentSkipListMap<Integer, int[]> generateTables(int node, int weight, ArrayList<Integer> nodeSet) {
+    public static ConcurrentSkipListMap<Integer, int[]> generateTables(int node, int weight, ArrayList<Integer> nodes) {
         ConcurrentSkipListMap<Integer, int[]> tables = new ConcurrentSkipListMap<>();
 
         // Iterate over virtual nodes
@@ -182,9 +185,9 @@ public class Utils {
             int nodeID = hashNode(node, vNode);
             int[] table = new int[M_BITS + 1];
             // Set first finger to be predecessor
-            table[0] = nodeSet.get(nodeSet.indexOf(nodeID) == 0 ? nodeSet.size() - 1 : nodeSet.indexOf(nodeID) - 1);
+            table[0] = nodes.get(nodes.indexOf(nodeID) == 0 ? nodes.size() - 1 : nodes.indexOf(nodeID) - 1);
             // Set remaining fingers to be successors
-            for (int i = 1; i < M_BITS + 1; i++) table[i] = generateFinger(i, nodeID, nodeSet);
+            for (int i = 1; i < M_BITS + 1; i++) table[i] = generateFinger(i, nodeID, nodes);
             tables.put(nodeID, table);
         }
 
@@ -196,29 +199,29 @@ public class Utils {
      *
      * @param index the index for finger generation
      * @param nodeID the virtual node hash
-     * @param nodeSet sorted list of node hashes
+     * @param nodes sorted list of node hashes
      * @return finger for the given index
      */
-    public static int generateFinger(int index, int nodeID, ArrayList<Integer> nodeSet) {
+    public static int generateFinger(int index, int nodeID, ArrayList<Integer> nodes) {
         // Get the successor position
         int successor = (int) ((nodeID + Math.pow(2, index - 1)) % Math.pow(2, M_BITS));
         // Get the current position
-        int curr = nodeSet.indexOf(nodeID);
+        int curr = nodes.indexOf(nodeID);
         // Get the next position
-        int next = (curr + 1) % nodeSet.size();
+        int next = (curr + 1) % nodes.size();
 
-        // Iterate over nodeSet
+        // Iterate over nodes
         int finger = 0;
-        for (int i = 0; i < nodeSet.size(); i++) {
+        for (int i = 0; i < nodes.size(); i++) {
             // Check if successor node is found
-            if (inBetween(successor, nodeSet.get(curr) + 1, nodeSet.get(next) + 1)) {
-                finger = nodeSet.get(next);
+            if (inBetween(successor, nodes.get(curr) + 1, nodes.get(next) + 1)) {
+                finger = nodes.get(next);
                 break;
             }
 
             // Update indices one ahead
             curr = next;
-            next = (next + 1) % nodeSet.size();
+            next = (next + 1) % nodes.size();
         }
 
         return finger;
