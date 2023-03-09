@@ -38,6 +38,10 @@ public class ServerResponse implements Runnable {
         this.tables = tables;
     }
 
+    public boolean isStoreRequest(int command) {
+        return command == Utils.PUT_REQUEST || command == Utils.GET_REQUEST || command == Utils.REMOVE_REQUEST;
+    }
+
     public boolean isKeyInvalid(ByteString key) {
         return key.size() == 0 || key.size() > 32;
     }
@@ -51,7 +55,7 @@ public class ServerResponse implements Runnable {
         if (msg.getPort() != 0) this.port = msg.getPort();
     }
 
-    public void redirectRequest(Msg msg, int nodeID) {
+    public void redirect(Msg msg, int nodeID) {
         try {
             Msg.Builder clone = Msg.newBuilder();
             clone.setMessageID(msg.getMessageID());
@@ -66,23 +70,37 @@ public class ServerResponse implements Runnable {
         }
     }
 
+    public void respond(ByteString messageID, ByteString payload) {
+        try {
+            Msg.Builder msg = Msg.newBuilder();
+            msg.setMessageID(messageID);
+            msg.setPayload(payload);
+            msg.setCheckSum(Utils.createCheckSum(messageID.toByteArray(), payload.toByteArray()));
+            byte[] response = msg.build().toByteArray();
+            this.socket.send(new DatagramPacket(response, response.length, this.address, this.port));
+            this.cache.put(msg.getMessageID(), response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void run() {
-        Msg.Builder resMsg = Msg.newBuilder();
+        ByteBuffer buffer = ByteBuffer.wrap(this.packet.getData());
+        byte[] request = new byte[this.packet.getLength()];
+        buffer.get(request);
+        Msg msg = null;
         KVResponse.Builder kvResponse = KVResponse.newBuilder();
 
         try {
-            ByteBuffer buffer = ByteBuffer.wrap(this.packet.getData());
-            byte[] request = new byte[this.packet.getLength()];
-            buffer.get(request);
-            Msg reqMsg = Msg.parseFrom(request);
-            if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) return;
+            msg = Msg.parseFrom(request);
+            setReturnLocation(msg);
+            KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
+            byte[] cacheValue = this.cache.getIfPresent(msg.getMessageID());
 
-            setReturnLocation(reqMsg);
-            resMsg.setMessageID(reqMsg.getMessageID());
-            KVRequest kvRequest = KVRequest.parseFrom(reqMsg.getPayload());
-
-            byte[] cacheValue = this.cache.getIfPresent(reqMsg.getMessageID());
-            if (Utils.isCheckSumInvalid(reqMsg.getCheckSum(), reqMsg.getMessageID().toByteArray(), reqMsg.getPayload().toByteArray())) {
+            if (Utils.isCheckSumInvalid(msg.getCheckSum(), msg.getMessageID().toByteArray(), msg.getPayload().toByteArray())){
+                return;
+            } else if (isStoreRequest(kvRequest.getCommand()) && !Utils.isLocalKey(kvRequest.getKey().toByteArray(), this.tables)) {
+                redirect(msg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables));
                 return;
             } else if (cacheValue != null) {
                 this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, this.address, this.port));
@@ -100,11 +118,6 @@ public class ServerResponse implements Runnable {
                     } else if (isValueInvalid(kvRequest.getValue())) {
                         kvResponse.setErrCode(Utils.INVALID_VALUE_ERROR);
                     } else {
-                        if (!Utils.isLocalKey(kvRequest.getKey().toByteArray(), this.tables)) {
-                            redirectRequest(reqMsg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables));
-                            return;
-                        }
-
                         this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
                         kvResponse.setErrCode(Utils.SUCCESS);
                     }
@@ -113,11 +126,6 @@ public class ServerResponse implements Runnable {
                     if (isKeyInvalid(kvRequest.getKey())) {
                         kvResponse.setErrCode(Utils.INVALID_KEY_ERROR);
                     } else {
-                        if (!Utils.isLocalKey(kvRequest.getKey().toByteArray(), this.tables)) {
-                            redirectRequest(reqMsg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables));
-                            return;
-                        }
-
                         Data data = this.store.get(kvRequest.getKey());
                         if (data == null) {
                             kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
@@ -132,17 +140,9 @@ public class ServerResponse implements Runnable {
                     if (isKeyInvalid(kvRequest.getKey())) {
                         kvResponse.setErrCode(Utils.INVALID_KEY_ERROR);
                     } else {
-                        if (!Utils.isLocalKey(kvRequest.getKey().toByteArray(), this.tables)) {
-                            redirectRequest(reqMsg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables));
-                            return;
-                        }
-
                         Data data = this.store.remove(kvRequest.getKey());
-                        if (data == null) {
-                            kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
-                        } else {
-                            kvResponse.setErrCode(Utils.SUCCESS);
-                        }
+                        if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
+                        else kvResponse.setErrCode(Utils.SUCCESS);
                     }
                 }
                 case Utils.SHUTDOWN_REQUEST -> System.exit(0);
@@ -170,17 +170,10 @@ public class ServerResponse implements Runnable {
             System.out.println("Memory Error: " + Utils.getFreeMemory());
             kvResponse.setErrCode(Utils.MEMORY_ERROR);
         } catch (Exception e) {
+            System.out.println("Store Error: " + Utils.getFreeMemory());
             kvResponse.setErrCode(Utils.STORE_ERROR);
         }
 
-        try {
-            resMsg.setPayload(kvResponse.build().toByteString());
-            resMsg.setCheckSum(Utils.createCheckSum(resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray()));
-            byte[] response = resMsg.build().toByteArray();
-            this.socket.send(new DatagramPacket(response, response.length, this.address, this.port));
-            this.cache.put(resMsg.getMessageID(), response);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if (msg != null) respond(msg.getMessageID(), kvResponse.build().toByteString());
     }
 }
