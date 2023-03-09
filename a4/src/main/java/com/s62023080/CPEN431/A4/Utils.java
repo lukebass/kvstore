@@ -1,7 +1,10 @@
 package com.s62023080.CPEN431.A4;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.zip.CRC32;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -21,6 +24,7 @@ public class Utils {
     public static final int HEALTH_REQUEST = 6;
     public static final int PID_REQUEST = 7;
     public static final int MEMBERSHIP_REQUEST = 8;
+    public static final int EPIDEMIC_REQUEST = 9;
     public static final int SUCCESS = 0;
     public static final int MISSING_KEY_ERROR = 1;
     public static final int MEMORY_ERROR = 2;
@@ -44,6 +48,22 @@ public class Utils {
 
     public static boolean isCheckSumInvalid(long checkSum, byte[] messageID, byte[] payload) {
         return checkSum != createCheckSum(messageID, payload);
+    }
+
+    public static byte[] generateMessageID(int port) throws UnknownHostException {
+        byte[] messageID = new byte[16];
+        ByteBuffer buffer = ByteBuffer.wrap(messageID);
+        // First 4 bytes are client IP
+        buffer.put(InetAddress.getLocalHost().getAddress());
+        // Next 2 bytes are client port
+        buffer.putShort((short) port);
+        // Next 2 bytes are random
+        byte[] random = new byte[2];
+        new Random().nextBytes(random);
+        buffer.put(random);
+        // Next 8 bytes are time
+        buffer.putLong(System.nanoTime());
+        return messageID;
     }
 
     /**

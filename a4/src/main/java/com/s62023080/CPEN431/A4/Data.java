@@ -7,7 +7,7 @@ public class Data {
 
     public ByteString value;
 
-    public Data (ByteString value, int version) {
+    public Data(ByteString value, int version) {
         this.value = value;
         this.version = version;
     }
