@@ -38,7 +38,7 @@ public class Server {
         for (int node : nodes) this.nodes.put(node, System.currentTimeMillis());
         this.addresses = new ConcurrentSkipListMap<>();
         this.tables = new ConcurrentSkipListMap<>();
-        generateTables();
+        this.generateTables();
         ScheduledExecutorService push = Executors.newScheduledThreadPool(1);
         push.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
 
@@ -176,7 +176,7 @@ public class Server {
                         if (this.nodes.containsKey(node) && node != this.port) {
                             this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
                         } else {
-                            this.nodes.put(node, nodes.get(node));
+                            this.join(node, nodes.get(node));
                         }
                     }
                     return;
@@ -204,7 +204,7 @@ public class Server {
     }
 
     public void push() {
-        isAlive();
+        this.isAlive();
         this.nodes.put(this.port, System.currentTimeMillis());
         ArrayList<Integer> addresses = new ArrayList<>(this.nodes.keySet());
         int rID = addresses.get(ThreadLocalRandom.current().nextInt(addresses.size()));
@@ -220,11 +220,16 @@ public class Server {
         }
     }
 
+    public void join(int node, long time) {
+        this.nodes.put(node, time);
+        this.generateTables();
+    }
+
     public void isAlive() {
         int size = this.nodes.size();
         long threshold = (long) Math.ceil(Utils.EPIDEMIC_TIMEOUT + Utils.EPIDEMIC_PERIOD * ((Math.log(size) / Math.log(2)) + Utils.EPIDEMIC_BUFFER));
         this.nodes.entrySet().removeIf(node -> System.currentTimeMillis() - node.getValue() > threshold);
-        if (this.nodes.size() < size) generateTables();
+        if (this.nodes.size() < size) this.generateTables();
     }
 
     public Store getStore() {

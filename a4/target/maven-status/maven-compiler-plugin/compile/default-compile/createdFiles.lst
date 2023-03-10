@@ -1,4 +1,3 @@
-com/s62023080/CPEN431/A4/ServerResponse.class
 ca/NetSysLab/ProtocolBuffers/Message$Msg.class
 ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponseOrBuilder.class
 ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequest$1.class
@@ -12,6 +11,8 @@ com/s62023080/CPEN431/A4/Data.class
 ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequest.class
 ca/NetSysLab/ProtocolBuffers/Message$Msg$Builder.class
 ca/NetSysLab/ProtocolBuffers/KeyValueResponse.class
+ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponse$NodesDefaultEntryHolder.class
+com/s62023080/CPEN431/A4/Request.class
 ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequest$Builder.class
 ca/NetSysLab/ProtocolBuffers/KeyValueRequest.class
 ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponse$Builder.class
@@ -19,4 +20,5 @@ com/s62023080/CPEN431/A4/Store.class
 ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequestOrBuilder.class
 ca/NetSysLab/ProtocolBuffers/Message.class
 ca/NetSysLab/ProtocolBuffers/Message$Msg$1.class
+ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequest$NodesDefaultEntryHolder.class
 com/s62023080/CPEN431/A4/Client.class

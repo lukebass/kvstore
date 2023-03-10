@@ -1,4 +1,5 @@
 /Users/lukebasso/Desktop/cpen431/cpen533/a4/src/main/java/com/s62023080/CPEN431/A4/Store.java
+/Users/lukebasso/Desktop/cpen431/cpen533/a4/src/main/java/com/s62023080/CPEN431/A4/Request.java
 /Users/lukebasso/Desktop/cpen431/cpen533/a4/src/main/java/com/s62023080/CPEN431/A4/Server.java
 /Users/lukebasso/Desktop/cpen431/cpen533/a4/src/main/java/com/s62023080/CPEN431/A4/Data.java
 /Users/lukebasso/Desktop/cpen431/cpen533/a4/src/main/java/ca/NetSysLab/ProtocolBuffers/KeyValueRequest.java
@@ -7,4 +8,3 @@
 /Users/lukebasso/Desktop/cpen431/cpen533/a4/src/main/java/ca/NetSysLab/ProtocolBuffers/Message.java
 /Users/lukebasso/Desktop/cpen431/cpen533/a4/src/main/java/ca/NetSysLab/ProtocolBuffers/KeyValueResponse.java
 /Users/lukebasso/Desktop/cpen431/cpen533/a4/src/main/java/com/s62023080/CPEN431/A4/Utils.java
-/Users/lukebasso/Desktop/cpen431/cpen533/a4/src/main/java/com/s62023080/CPEN431/A4/ServerResponse.java

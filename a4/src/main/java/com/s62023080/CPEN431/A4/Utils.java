@@ -17,7 +17,7 @@ public class Utils {
     public static final int CACHE_EXPIRATION = 1000;
     public static final int OVERLOAD_TIME = 1000;
     public static final int EPIDEMIC_PERIOD = 500;
-    public static final int EPIDEMIC_BUFFER = 1000;
+    public static final int EPIDEMIC_BUFFER = 100;
     public static final int EPIDEMIC_TIMEOUT = 10000;
     public static final int PUT_REQUEST = 1;
     public static final int GET_REQUEST = 2;
