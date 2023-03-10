@@ -13,6 +13,10 @@ public class Store {
         this.lock = new ReentrantReadWriteLock();
     }
 
+    public ConcurrentHashMap.KeySetView<ByteString, Data> getKeys() {
+        return this.store.keySet();
+    }
+
     public void put(ByteString key, ByteString value, int version) {
         Data data = new Data(value, version);
         this.lock.writeLock().lock();

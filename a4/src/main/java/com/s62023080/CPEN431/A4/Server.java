@@ -16,7 +16,7 @@ import java.util.concurrent.*;
 
 public class Server {
     private boolean running;
-    private int pid;
+    private final int pid;
     private final int port;
     private final int weight;
     private final DatagramSocket socket;
@@ -84,7 +84,7 @@ public class Server {
         }
     }
 
-    public void respond(ByteString messageID, ByteString payload, InetAddress address, int port, boolean cache) {
+    public void send(ByteString messageID, ByteString payload, InetAddress address, int port, boolean cache) {
         try {
             Message.Msg.Builder msg = Message.Msg.newBuilder();
             msg.setMessageID(messageID);
@@ -116,7 +116,7 @@ public class Server {
                 return;
             } else if (kvRequest.getCommand() == Utils.EPIDEMIC_REQUEST) {
                 Map<Integer, Long> nodes = kvRequest.getNodesMap();
-                for (int node: nodes.keySet()) {
+                for (int node : nodes.keySet()) {
                     if (node == this.port) continue;
                     if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
                     else this.join(node, nodes.get(node));
@@ -194,7 +194,7 @@ public class Server {
             kvResponse.setErrCode(Utils.STORE_ERROR);
         }
 
-        if (msg != null) respond(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+        if (msg != null) send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
     }
 
     public void generateTables() {
@@ -213,16 +213,32 @@ public class Server {
             KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
             kvRequest.setCommand(Utils.EPIDEMIC_REQUEST);
             kvRequest.putAllNodes(this.nodes);
-            respond(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), rID, false);
+            send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), rID, false);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
     }
 
     public void join(int node, long time) {
-        if (System.currentTimeMillis() - time < Utils.calculateThreshold(this.nodes.size())) {
-            this.nodes.put(node, time);
-            this.generateTables();
+        if (System.currentTimeMillis() - time > Utils.calculateThreshold(this.nodes.size())) return;
+        this.nodes.put(node, time);
+        this.generateTables();
+        ConcurrentSkipListMap<Integer, int[]> nodeTables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
+        for (ByteString key : this.store.getKeys()) {
+            if (Utils.isLocalKey(key.toByteArray(), nodeTables)) {
+                try {
+                    Data data = this.store.get(key);
+                    KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
+                    kvRequest.setCommand(Utils.PUT_REQUEST);
+                    kvRequest.setKey(key);
+                    kvRequest.setValue(data.value);
+                    kvRequest.setVersion(data.version);
+                    send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), node, false);
+                    this.store.remove(key);
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
