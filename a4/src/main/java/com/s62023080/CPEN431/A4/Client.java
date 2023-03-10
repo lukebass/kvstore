@@ -9,9 +9,7 @@ import java.net.*;
 
 public class Client {
     private final DatagramSocket socket;
-
     private final int timeout;
-
     private final int retries;
 
     public Client(String host, int port, int timeout, int retries) throws SocketException, UnknownHostException {

@@ -6,9 +6,7 @@ import java.nio.ByteBuffer;
 
 public class Request {
     public InetAddress address;
-
     public int port;
-
     public byte[] data;
 
     public Request(DatagramPacket packet) {

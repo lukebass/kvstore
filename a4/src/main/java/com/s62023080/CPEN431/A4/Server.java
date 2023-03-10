@@ -112,6 +112,14 @@ public class Server {
             } else if (isStoreRequest(kvRequest.getCommand()) && !Utils.isLocalKey(kvRequest.getKey().toByteArray(), this.tables)) {
                 redirect(msg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables), request.address, request.port);
                 return;
+            } else if (kvRequest.getCommand() == Utils.EPIDEMIC_REQUEST) {
+                Map<Integer, Long> nodes = kvRequest.getNodesMap();
+                for (int node: nodes.keySet()) {
+                    if (node == this.port) continue;
+                    if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
+                    else this.join(node, nodes.get(node));
+                }
+                return;
             } else if (cacheValue != null) {
                 this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, request.address, request.port));
                 return;
@@ -170,17 +178,6 @@ public class Server {
                     kvResponse.setErrCode(Utils.SUCCESS);
                     kvResponse.setMembershipCount(1);
                 }
-                case Utils.EPIDEMIC_REQUEST -> {
-                    Map<Integer, Long> nodes = kvRequest.getNodesMap();
-                    for (int node: nodes.keySet()) {
-                        if (this.nodes.containsKey(node) && node != this.port) {
-                            this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
-                        } else {
-                            this.join(node, nodes.get(node));
-                        }
-                    }
-                    return;
-                }
                 default -> kvResponse.setErrCode(Utils.UNRECOGNIZED_ERROR);
             }
         } catch (IOException e) {
@@ -200,7 +197,7 @@ public class Server {
 
     public void generateTables() {
         this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-        this.tables = Utils.generateTables(this.port, this.weight, new ArrayList<>(this.addresses.keySet()));
+        this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
     }
 
     public void push() {
@@ -221,15 +218,16 @@ public class Server {
     }
 
     public void join(int node, long time) {
-        this.nodes.put(node, time);
-        this.generateTables();
+        if (System.currentTimeMillis() - time > Utils.calculateThreshold(this.nodes.size())) {
+            this.nodes.put(node, time);
+            this.generateTables();
+        }
     }
 
     public void isAlive() {
         int size = this.nodes.size();
-        long threshold = (long) Math.ceil(Utils.EPIDEMIC_TIMEOUT + Utils.EPIDEMIC_PERIOD * ((Math.log(size) / Math.log(2)) + Utils.EPIDEMIC_BUFFER));
-        this.nodes.entrySet().removeIf(node -> System.currentTimeMillis() - node.getValue() > threshold);
-        if (this.nodes.size() < size) this.generateTables();
+        this.nodes.entrySet().removeIf(node -> System.currentTimeMillis() - node.getValue() > Utils.calculateThreshold(size));
+        if (size > this.nodes.size()) this.generateTables();
     }
 
     public Store getStore() {

@@ -6,7 +6,6 @@ import com.google.protobuf.ByteString;
 
 public class Store {
     private ConcurrentHashMap<ByteString, Data> store;
-
     private final ReentrantReadWriteLock lock;
 
     public Store() {

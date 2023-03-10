@@ -5,49 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3a799034-b100-4701-ad9e-797c029ae117" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/1000.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1001.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1002.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1003.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1004.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1005.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1006.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1007.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1008.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1009.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1010.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1011.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1012.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1013.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1014.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1015.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1016.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1017.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1018.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/1019.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/A7.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/server-jar-with-dependencies.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/servers.txt" beforeDir="false" afterPath="$PROJECT_DIR$/servers.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/App.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Data.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Data.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Request.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Request.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Server.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Store.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Store.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Utils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/CPEN431_2023_A4-1.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequest$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequest$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequest$Builder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequest$Builder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequestOrBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueRequest$KVRequestOrBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponse$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponse$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponse$Builder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponse$Builder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponseOrBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueResponse$KVResponseOrBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ca/NetSysLab/ProtocolBuffers/KeyValueResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/App.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/App.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Client.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Client.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Data.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Data.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Request.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Request.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Server.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/ServerResponse.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Store.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Store.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Utils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/s62023080/CPEN431/A4/Utils.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/com.s62023080.CPEN431.A4.AppTest.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A4.AppTest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.s62023080.CPEN431.A4.AppTest.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

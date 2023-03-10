@@ -4,7 +4,6 @@ import com.google.protobuf.ByteString;
 
 public class Data {
     public int version;
-
     public ByteString value;
 
     public Data(ByteString value, int version) {

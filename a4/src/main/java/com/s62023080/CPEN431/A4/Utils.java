@@ -16,9 +16,9 @@ public class Utils {
     public static final int MAX_CACHE_SIZE = 1000;
     public static final int CACHE_EXPIRATION = 1000;
     public static final int OVERLOAD_TIME = 1000;
-    public static final int EPIDEMIC_PERIOD = 500;
+    public static final int EPIDEMIC_PERIOD = 1000;
     public static final int EPIDEMIC_BUFFER = 100;
-    public static final int EPIDEMIC_TIMEOUT = 10000;
+    public static final int EPIDEMIC_TIMEOUT = 5000;
     public static final int PUT_REQUEST = 1;
     public static final int GET_REQUEST = 2;
     public static final int REMOVE_REQUEST = 3;
@@ -172,12 +172,12 @@ public class Utils {
     /**
      * Constructs finger tables for virtual nodes at physical node
      *
+     * @param nodes sorted list of node hashes
      * @param node the physical node address
      * @param weight the weight of virtual nodes
-     * @param nodes sorted list of node hashes
      * @return ConcurrentSkipListMap of node hashes and finger tables
      */
-    public static ConcurrentSkipListMap<Integer, int[]> generateTables(int node, int weight, ArrayList<Integer> nodes) {
+    public static ConcurrentSkipListMap<Integer, int[]> generateTables(ArrayList<Integer> nodes, int node, int weight) {
         ConcurrentSkipListMap<Integer, int[]> tables = new ConcurrentSkipListMap<>();
 
         // Iterate over virtual nodes
@@ -225,6 +225,10 @@ public class Utils {
         }
 
         return finger;
+    }
+
+    public static long calculateThreshold(int size) {
+        return (long) Math.ceil(Utils.EPIDEMIC_TIMEOUT + Utils.EPIDEMIC_PERIOD * ((Math.log(size) / Math.log(2)) + Utils.EPIDEMIC_BUFFER));
     }
 
     /**
