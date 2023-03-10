@@ -18,7 +18,6 @@ public class App
         }
 
         try {
-            System.out.println("---BOOTSTRAP START---");
             BufferedReader reader = new BufferedReader(new FileReader(args[1]));
             String line = reader.readLine();
             while (line != null) {
@@ -30,7 +29,7 @@ public class App
                         System.getProperty("user.dir") + "/" + args[0],
                         System.getProperty("user.dir") + "/" + args[1],
                         line.split(":")[1],
-                        "2",
+                        "1",
                         "5"
                 );
                 String filename = line.split(":")[1];
@@ -41,7 +40,6 @@ public class App
                 line = reader.readLine();
             }
             reader.close();
-            System.out.println("---BOOTSTRAP END---");
         } catch (IOException e) {
             e.printStackTrace();
         }

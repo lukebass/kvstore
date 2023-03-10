@@ -9,7 +9,7 @@ import java.util.zip.CRC32;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class Utils {
-    private static final int M_BITS = 11;
+    private static final int M_BITS = 12;
     public static final int MAX_REQUEST_SIZE = 16000;
     public static final int LOWER_MIN_MEMORY = 5;
     public static final int UPPER_MIN_MEMORY = 10;
@@ -18,7 +18,7 @@ public class Utils {
     public static final int OVERLOAD_TIME = 1000;
     public static final int EPIDEMIC_TIMEOUT = 5000;
     public static final int EPIDEMIC_PERIOD = 500;
-    public static final int EPIDEMIC_BUFFER = 100;
+    public static final int EPIDEMIC_BUFFER = 10;
     public static final int PUT_REQUEST = 1;
     public static final int GET_REQUEST = 2;
     public static final int REMOVE_REQUEST = 3;
@@ -133,7 +133,7 @@ public class Utils {
         // Get finger table for closest node to key
         int[] table = tables.get(nodeID);
         // Check if successor node is responsible
-        if (inBetween(keyID, nodeID + 1, table[1])) return table[1];
+        if (inBetween(keyID, nodeID + 1, table[1] + 1)) return table[1];
 
         // Iterate over finger table
         for (int i = 1; i < M_BITS + 1; i++) {
