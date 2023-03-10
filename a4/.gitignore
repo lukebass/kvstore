@@ -11,9 +11,6 @@ dist/
 # Log files
 *.log
 
-# Package files
-*.jar
-
 # Maven
 target/
 
