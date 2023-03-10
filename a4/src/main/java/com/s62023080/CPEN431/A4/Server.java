@@ -218,7 +218,7 @@ public class Server {
     }
 
     public void join(int node, long time) {
-        if (System.currentTimeMillis() - time > Utils.calculateThreshold(this.nodes.size())) {
+        if (System.currentTimeMillis() - time < Utils.calculateThreshold(this.nodes.size())) {
             this.nodes.put(node, time);
             this.generateTables();
         }
