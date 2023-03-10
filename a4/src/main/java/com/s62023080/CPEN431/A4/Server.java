@@ -16,6 +16,7 @@ import java.util.concurrent.*;
 
 public class Server {
     private boolean running;
+    private int pid;
     private final int port;
     private final int weight;
     private final DatagramSocket socket;
@@ -28,6 +29,7 @@ public class Server {
 
     public Server(ArrayList<Integer> nodes, int port, int threads, int weight) throws IOException {
         this.running = true;
+        this.pid = (int) ProcessHandle.current().pid();
         this.port = port;
         this.weight = weight;
         this.socket = new DatagramSocket(port);
@@ -82,7 +84,7 @@ public class Server {
         }
     }
 
-    public void respond(ByteString messageID, ByteString payload, InetAddress address, int port) {
+    public void respond(ByteString messageID, ByteString payload, InetAddress address, int port, boolean cache) {
         try {
             Message.Msg.Builder msg = Message.Msg.newBuilder();
             msg.setMessageID(messageID);
@@ -90,7 +92,7 @@ public class Server {
             msg.setCheckSum(Utils.createCheckSum(messageID.toByteArray(), payload.toByteArray()));
             byte[] response = msg.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, address, port));
-            this.cache.put(msg.getMessageID(), response);
+            if (cache) this.cache.put(msg.getMessageID(), response);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -172,11 +174,11 @@ public class Server {
                 case Utils.HEALTH_REQUEST -> kvResponse.setErrCode(Utils.SUCCESS);
                 case Utils.PID_REQUEST -> {
                     kvResponse.setErrCode(Utils.SUCCESS);
-                    kvResponse.setPid((int) ProcessHandle.current().pid());
+                    kvResponse.setPid(this.pid);
                 }
                 case Utils.MEMBERSHIP_REQUEST -> {
                     kvResponse.setErrCode(Utils.SUCCESS);
-                    kvResponse.setMembershipCount(1);
+                    kvResponse.setMembershipCount(this.nodes.size());
                 }
                 default -> kvResponse.setErrCode(Utils.UNRECOGNIZED_ERROR);
             }
@@ -192,7 +194,7 @@ public class Server {
             kvResponse.setErrCode(Utils.STORE_ERROR);
         }
 
-        if (msg != null) respond(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port);
+        if (msg != null) respond(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
     }
 
     public void generateTables() {
@@ -211,7 +213,7 @@ public class Server {
             KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
             kvRequest.setCommand(Utils.EPIDEMIC_REQUEST);
             kvRequest.putAllNodes(this.nodes);
-            respond(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), rID);
+            respond(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), rID, false);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
