@@ -29,7 +29,7 @@ public class App
                         System.getProperty("user.dir") + "/" + args[0],
                         System.getProperty("user.dir") + "/" + args[1],
                         line.split(":")[1],
-                        "1",
+                        "3",
                         "5"
                 );
                 String filename = line.split(":")[1];

@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.net.*;
 import java.util.concurrent.*;
@@ -23,6 +24,7 @@ public class Server {
     private final ExecutorService executor;
     private final Store store;
     private final Cache<ByteString, byte[]> cache;
+    private final ArrayList<Integer> ports;
     private final ConcurrentHashMap<Integer, Long> nodes;
     private ConcurrentSkipListMap<Integer, Integer> addresses;
     private ConcurrentSkipListMap<Integer, int[]> tables;
@@ -36,10 +38,11 @@ public class Server {
         this.executor = Executors.newFixedThreadPool(threads);
         this.store = new Store();
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
-        this.nodes = new ConcurrentHashMap<>();
-        for (int node : nodes) this.nodes.put(node, System.currentTimeMillis());
+        this.ports = nodes;
         this.addresses = new ConcurrentSkipListMap<>();
         this.tables = new ConcurrentSkipListMap<>();
+        this.nodes = new ConcurrentHashMap<>();
+        for (int node : nodes) this.nodes.put(node, System.currentTimeMillis());
         this.generateTables();
         ScheduledExecutorService push = Executors.newScheduledThreadPool(1);
         push.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
@@ -50,7 +53,6 @@ public class Server {
                 socket.receive(packet);
                 Request request = new Request(packet);
                 this.executor.submit(() -> handleRequest(request));
-                System.out.println(this.cache.size() + " / " + this.store.size() + " / " + Utils.getFreeMemory());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -190,7 +192,9 @@ public class Server {
             System.out.println("Memory Error: " + Utils.getFreeMemory());
             kvResponse.setErrCode(Utils.MEMORY_ERROR);
         } catch (Exception e) {
-            System.out.println("Store Error: " + Utils.getFreeMemory());
+            System.out.println("Store Error:");
+            System.out.println(e.getMessage());
+            e.printStackTrace();
             kvResponse.setErrCode(Utils.STORE_ERROR);
         }
 
@@ -203,28 +207,27 @@ public class Server {
     }
 
     public void push() {
-        this.isAlive();
         this.nodes.put(this.port, System.currentTimeMillis());
-        ArrayList<Integer> addresses = new ArrayList<>(this.nodes.keySet());
-        int rID = addresses.get(ThreadLocalRandom.current().nextInt(addresses.size()));
-        while (rID == this.port) rID = addresses.get(ThreadLocalRandom.current().nextInt(addresses.size()));
+        boolean regen = this.nodes.entrySet().removeIf(node -> System.currentTimeMillis() - node.getValue() > Utils.calculateThreshold(this.nodes.size()));
+        if (regen) this.generateTables();
+        int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
+        while (port == this.port) port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
 
         try {
             KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
             kvRequest.setCommand(Utils.EPIDEMIC_REQUEST);
             kvRequest.putAllNodes(this.nodes);
-            send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), rID, false);
+            send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
     }
 
     public void join(int node, long time) {
-        if (System.currentTimeMillis() - time > Utils.calculateThreshold(this.nodes.size())) return;
         this.nodes.put(node, time);
         this.generateTables();
         ConcurrentSkipListMap<Integer, int[]> nodeTables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
-        for (ByteString key : this.store.getKeys()) {
+        for (ByteString key : new HashSet<>(this.store.getKeys())) {
             if (Utils.isLocalKey(key.toByteArray(), nodeTables)) {
                 try {
                     Data data = this.store.get(key);
@@ -240,12 +243,6 @@ public class Server {
                 }
             }
         }
-    }
-
-    public void isAlive() {
-        int size = this.nodes.size();
-        this.nodes.entrySet().removeIf(node -> System.currentTimeMillis() - node.getValue() > Utils.calculateThreshold(size));
-        if (size > this.nodes.size()) this.generateTables();
     }
 
     public Store getStore() {
