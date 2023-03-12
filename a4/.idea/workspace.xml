@@ -5,9 +5,34 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3a799034-b100-4701-ad9e-797c029ae117" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/server-jar-with-dependencies.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Server.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eval7.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eval8.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/proto/KeyValueRequest.proto" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/proto/KeyValueResponse.proto" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/proto/Message.proto" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server-jar-with-dependencies.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/servers.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/KeyValueRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/KeyValueResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ca/NetSysLab/ProtocolBuffers/Message.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/App.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Client.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Data.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Request.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Server.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Store.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/s62023080/CPEN431/A4/Utils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/s62023080/CPEN431/A4/AppTest.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,7 +94,7 @@
   <component name="RunManager" selected="Application.App">
     <configuration name="App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.s62023080.CPEN431.A4.App" />
-      <module name="CPEN431_2023_A4" />
+      <module name="CPEN431_2023_G4" />
       <option name="PROGRAM_PARAMETERS" value="3080 4 1000 1000" />
       <extension name="coverage">
         <pattern>
@@ -82,7 +107,7 @@
       </method>
     </configuration>
     <configuration name="AppTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="CPEN431_2023_A4" />
+      <module name="CPEN431_2023_G4" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="com.s62023080.CPEN431.A4.*" />
@@ -92,6 +117,19 @@
       <option name="PACKAGE_NAME" value="com.s62023080.CPEN431.A4" />
       <option name="MAIN_CLASS_NAME" value="com.s62023080.CPEN431.A4.AppTest" />
       <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="CPEN431_2023_G4" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="CPEN431_2023_G4" />
+      <option name="filePath" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
