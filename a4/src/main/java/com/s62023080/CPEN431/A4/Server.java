@@ -43,7 +43,7 @@ public class Server {
         this.tables = new ConcurrentSkipListMap<>();
         this.nodes = new ConcurrentHashMap<>();
         for (int node : nodes) this.nodes.put(node, System.currentTimeMillis());
-        this.generateTables();
+        generateTables();
         ScheduledExecutorService push = Executors.newScheduledThreadPool(1);
         push.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
 
@@ -63,12 +63,27 @@ public class Server {
         return command == Utils.PUT_REQUEST || command == Utils.GET_REQUEST || command == Utils.REMOVE_REQUEST;
     }
 
+    public boolean isEpidemicRequest(int command) {
+        return command == Utils.EPIDEMIC_PUSH || command == Utils.EPIDEMIC_PULL;
+    }
+
     public boolean isKeyInvalid(ByteString key) {
         return key.size() == 0 || key.size() > 32;
     }
 
     public boolean isValueInvalid(ByteString value) {
         return value.size() == 0 || value.size() > 10000;
+    }
+
+    public void sendEpidemic(int command, int port) {
+        try {
+            KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
+            kvRequest.setCommand(command);
+            kvRequest.putAllNodes(this.nodes);
+            send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
     }
 
     public void redirect(Message.Msg msg, int nodeID, InetAddress address, int port) {
@@ -116,13 +131,14 @@ public class Server {
             } else if (isStoreRequest(kvRequest.getCommand()) && !Utils.isLocalKey(kvRequest.getKey().toByteArray(), this.tables)) {
                 redirect(msg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables), request.address, request.port);
                 return;
-            } else if (kvRequest.getCommand() == Utils.EPIDEMIC_REQUEST) {
+            } else if (isEpidemicRequest(kvRequest.getCommand())) {
                 Map<Integer, Long> nodes = kvRequest.getNodesMap();
                 for (int node : nodes.keySet()) {
                     if (node == this.port) continue;
                     if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
-                    else this.join(node, nodes.get(node));
+                    else join(node, nodes.get(node));
                 }
+                if (kvRequest.getCommand() == Utils.EPIDEMIC_PUSH) sendEpidemic(Utils.EPIDEMIC_PULL, request.port);
                 return;
             } else if (cacheValue != null) {
                 this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, request.address, request.port));
@@ -209,23 +225,15 @@ public class Server {
     public void push() {
         this.nodes.put(this.port, System.currentTimeMillis());
         boolean regen = this.nodes.entrySet().removeIf(node -> System.currentTimeMillis() - node.getValue() > Utils.calculateThreshold(this.nodes.size()));
-        if (regen) this.generateTables();
+        if (regen) generateTables();
         int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
         while (port == this.port) port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
-
-        try {
-            KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
-            kvRequest.setCommand(Utils.EPIDEMIC_REQUEST);
-            kvRequest.putAllNodes(this.nodes);
-            send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        sendEpidemic(Utils.EPIDEMIC_PUSH, port);
     }
 
     public void join(int node, long time) {
         this.nodes.put(node, time);
-        this.generateTables();
+        generateTables();
         ConcurrentSkipListMap<Integer, int[]> nodeTables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
         for (ByteString key : new HashSet<>(this.store.getKeys())) {
             if (Utils.isLocalKey(key.toByteArray(), nodeTables)) {

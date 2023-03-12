@@ -17,7 +17,7 @@ public class Utils {
     public static final int CACHE_EXPIRATION = 1000;
     public static final int OVERLOAD_TIME = 1000;
     public static final int EPIDEMIC_TIMEOUT = 5000;
-    public static final int EPIDEMIC_PERIOD = 300;
+    public static final int EPIDEMIC_PERIOD = 500;
     public static final int EPIDEMIC_BUFFER = 10;
     public static final int PUT_REQUEST = 1;
     public static final int GET_REQUEST = 2;
@@ -27,7 +27,8 @@ public class Utils {
     public static final int HEALTH_REQUEST = 6;
     public static final int PID_REQUEST = 7;
     public static final int MEMBERSHIP_REQUEST = 8;
-    public static final int EPIDEMIC_REQUEST = 9;
+    public static final int EPIDEMIC_PUSH = 9;
+    public static final int EPIDEMIC_PULL = 10;
     public static final int SUCCESS = 0;
     public static final int MISSING_KEY_ERROR = 1;
     public static final int MEMORY_ERROR = 2;
