@@ -21,6 +21,7 @@ public class Server {
     private final int port;
     private final int weight;
     private final ArrayList<Integer> ports;
+    private final Logger logger;
     private final DatagramSocket socket;
     private final ExecutorService executor;
     private final Store store;
@@ -36,6 +37,7 @@ public class Server {
         this.port = port;
         this.weight = weight;
         this.ports = nodes;
+        this.logger = new Logger(this.pid, this.port);
         this.socket = new DatagramSocket(this.port);
         this.executor = Executors.newFixedThreadPool(threads);
         this.store = new Store();
@@ -56,8 +58,7 @@ public class Server {
                 Request request = new Request(packet);
                 this.executor.submit(() -> this.handleRequest(request));
             } catch (Exception e) {
-                System.out.println(e.getMessage());
-                e.printStackTrace();
+                this.logger.log(e.getMessage());
             }
         }
     }
@@ -86,8 +87,7 @@ public class Server {
             kvRequest.putAllNodes(this.nodes);
             this.send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
         } catch (UnknownHostException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            this.logger.log(e.getMessage());
         }
     }
 
@@ -100,8 +100,7 @@ public class Server {
             kvRequest.setVersion(data.version);
             this.send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
         } catch (UnknownHostException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            this.logger.log(e.getMessage());
         }
     }
 
@@ -116,8 +115,7 @@ public class Server {
             byte[] response = clone.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, InetAddress.getLocalHost(), this.addresses.get(nodeID)));
         } catch (IOException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            this.logger.log(e.getMessage());
         }
     }
 
@@ -131,8 +129,7 @@ public class Server {
             this.socket.send(new DatagramPacket(response, response.length, address, port));
             if (cache) this.cache.put(msg.getMessageID(), response);
         } catch (IOException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            this.logger.log(e.getMessage());
         }
     }
 
@@ -155,9 +152,9 @@ public class Server {
                 this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, request.address, request.port));
                 return;
             } else if (this.cache.size() > Utils.MAX_CACHE_SIZE && Utils.isOutOfMemory(Utils.UPPER_MIN_MEMORY)) {
-                throw new IOException("Too many requests");
+                throw new IOException("Overload error");
             } else if (Utils.isOutOfMemory(Utils.LOWER_MIN_MEMORY)) {
-                throw new OutOfMemoryError("Out of memory");
+                throw new OutOfMemoryError("Memory error");
             }
 
             switch (kvRequest.getCommand()) {
@@ -225,16 +222,14 @@ public class Server {
                 default -> kvResponse.setErrCode(Utils.UNRECOGNIZED_ERROR);
             }
         } catch (IOException e) {
-            System.out.println("Overload Error: " + Utils.getFreeMemory());
+            this.logger.log(e.getMessage(), Utils.getFreeMemory());
             kvResponse.setErrCode(Utils.OVERLOAD_ERROR);
             kvResponse.setOverloadWaitTime(Utils.OVERLOAD_TIME);
         } catch (OutOfMemoryError e) {
-            System.out.println("Memory Error: " + Utils.getFreeMemory());
+            this.logger.log(e.getMessage(), Utils.getFreeMemory());
             kvResponse.setErrCode(Utils.MEMORY_ERROR);
         } catch (Exception e) {
-            System.out.println("Store Error:");
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            this.logger.log(e.getMessage(), Utils.getFreeMemory());
             kvResponse.setErrCode(Utils.STORE_ERROR);
         }
 
