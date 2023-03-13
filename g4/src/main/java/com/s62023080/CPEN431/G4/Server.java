@@ -11,7 +11,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.HashSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.net.*;
 import java.util.concurrent.*;
@@ -267,12 +266,15 @@ public class Server {
         this.generateTables();
         this.lock.writeLock().unlock();
         ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
-        for (ByteString key : new HashSet<>(this.store.getKeys())) {
+        ArrayList<ByteString> keys = new ArrayList<>();
+        for (ByteString key : this.store.getKeys()) {
             if (Utils.isLocalKey(key.toByteArray(), tables)) {
                 Data data = this.store.get(key);
                 this.sendKey(key, data, node);
+                keys.add(key);
             }
         }
+        this.store.bulkRemove(keys);
     }
 
     public Store getStore() {
