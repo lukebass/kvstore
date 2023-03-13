@@ -271,7 +271,6 @@ public class Server {
             if (Utils.isLocalKey(key.toByteArray(), tables)) {
                 Data data = this.store.get(key);
                 this.sendKey(key, data, node);
-                this.store.remove(key);
             }
         }
     }
