@@ -18,6 +18,7 @@ public class App
         }
 
         try {
+            File output = new File(System.getProperty("user.dir") + "/server.log");
             BufferedReader reader = new BufferedReader(new FileReader(args[1]));
             String line = reader.readLine();
             while (line != null) {
@@ -32,9 +33,6 @@ public class App
                         "3",
                         "5"
                 );
-                String filename = line.split(":")[1];
-                File output = new File(System.getProperty("user.dir") + "/" + filename + ".log");
-                System.out.println(output.getName());
                 pb.redirectOutput(output);
                 pb.start();
                 line = reader.readLine();
