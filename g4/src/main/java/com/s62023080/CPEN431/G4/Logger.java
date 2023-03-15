@@ -10,12 +10,14 @@ public class Logger {
     }
 
     public void log(String message) {
+        System.out.println("Log: " + System.currentTimeMillis());
         System.out.println("PID: " + pid);
         System.out.println("Port: " + port);
         System.out.println(message);
     }
 
     public void log(String message, int memory) {
+        System.out.println("Log: " + System.currentTimeMillis());
         System.out.println("PID: " + pid);
         System.out.println("Port: " + port);
         System.out.println("Memory: " + memory);
