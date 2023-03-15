@@ -8,12 +8,12 @@ import java.io.IOException;
 public class App
 {
     /**
-     * @param args args[0] server.jar; args[1] servers-remote.txt
+     * @param args args[0] server.jar; args[1] servers.txt
      */
     public static void main(String[] args)
     {
         if(args.length != 2) {
-            System.out.println("Must provide server.jar and servers-remote.txt");
+            System.out.println("Must provide server.jar and servers.txt");
             System.exit(1);
         }
 
@@ -35,11 +35,12 @@ public class App
                 );
                 pb.redirectOutput(output);
                 pb.start();
+                System.out.println("Starting Server: " + line);
                 line = reader.readLine();
             }
             reader.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 }

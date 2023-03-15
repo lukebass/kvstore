@@ -294,7 +294,7 @@ public class Server {
     }
 
     /**
-     * @param args args[0] servers-remote.txt; args[1] port; args[2] threads; args[3] weight
+     * @param args args[0] servers.txt; args[1] port; args[2] threads; args[3] weight
      */
     public static void main(String[] args) {
        ArrayList<Integer> nodes = new ArrayList<>();
