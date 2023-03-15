@@ -8,12 +8,12 @@ import java.io.IOException;
 public class App
 {
     /**
-     * @param args args[0] server.jar; args[1] servers.txt
+     * @param args args[0] server.jar; args[1] servers-remote.txt
      */
     public static void main(String[] args)
     {
         if(args.length != 2) {
-            System.out.println("Must provide server.jar and servers.txt");
+            System.out.println("Must provide server.jar and servers-remote.txt");
             System.exit(1);
         }
 
@@ -25,7 +25,7 @@ public class App
                 // java -Xmx64m -jar server-jar-with-dependencies.jar servers port threads weight
                 ProcessBuilder pb = new ProcessBuilder(
                         "java",
-                        "-Xmx64m",
+                        "-Xmx512m",
                         "-jar",
                         System.getProperty("user.dir") + "/" + args[0],
                         System.getProperty("user.dir") + "/" + args[1],
