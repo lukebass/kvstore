@@ -245,31 +245,28 @@ public class Server {
     }
 
     public void push() {
-        this.lock.writeLock().lock();
         this.nodes.put(this.port, System.currentTimeMillis());
         boolean regen = this.nodes.values().removeIf(value -> System.currentTimeMillis() - value > Utils.calculateThreshold(this.nodes.size()));
         if (regen) this.generateTables();
-        this.lock.writeLock().unlock();
         int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
         while (port == this.port) port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
         this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
     }
 
     public void join(int node, long time) {
-        this.lock.writeLock().lock();
         this.nodes.put(node, time);
         this.generateTables();
-        this.lock.writeLock().unlock();
         ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
         ArrayList<ByteString> keys = new ArrayList<>();
         for (ByteString key : this.store.getKeys()) {
             if (Utils.isLocalKey(key.toByteArray(), tables)) {
                 Data data = this.store.get(key);
+                if (data == null) continue;
                 this.sendKey(key, data, node);
                 keys.add(key);
             }
         }
-        this.store.bulkRemove(keys);
+        if (keys.size() != 0) this.store.bulkRemove(keys);
     }
 
     public Store getStore() {

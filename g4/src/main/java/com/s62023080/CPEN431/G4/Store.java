@@ -26,9 +26,9 @@ public class Store {
     }
 
     public Data get(ByteString key) {
-        this.lock.writeLock().lock();
+        this.lock.readLock().lock();
         Data data = this.store.get(key);
-        this.lock.writeLock().unlock();
+        this.lock.readLock().unlock();
         return data;
     }
 

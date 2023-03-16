@@ -18,14 +18,13 @@ public class App
         }
 
         try {
-            File output = new File(System.getProperty("user.dir") + "/server.log");
             BufferedReader reader = new BufferedReader(new FileReader(args[1]));
             String line = reader.readLine();
             while (line != null) {
                 // java -Xmx64m -jar server-jar-with-dependencies.jar servers port threads weight
                 ProcessBuilder pb = new ProcessBuilder(
                         "java",
-                        "-Xmx512m",
+                        "-Xmx64m",
                         "-jar",
                         System.getProperty("user.dir") + "/" + args[0],
                         System.getProperty("user.dir") + "/" + args[1],
@@ -33,9 +32,11 @@ public class App
                         "3",
                         "5"
                 );
+                String filename = line.split(":")[1];
+                File output = new File(System.getProperty("user.dir") + "/" + filename + ".log");
+                System.out.println(output.getName());
                 pb.redirectOutput(output);
                 pb.start();
-                System.out.println("Starting Server: " + line);
                 line = reader.readLine();
             }
             reader.close();
