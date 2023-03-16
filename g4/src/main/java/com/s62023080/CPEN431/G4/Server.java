@@ -63,11 +63,6 @@ public class Server {
         }
     }
 
-    public void generateTables() {
-        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-        this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
-    }
-
     public boolean isStoreRequest(int command) {
         return command == Utils.PUT_REQUEST || command == Utils.GET_REQUEST || command == Utils.REMOVE_REQUEST;
     }
@@ -236,6 +231,11 @@ public class Server {
         if (msg != null) this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
     }
 
+    public void generateTables() {
+        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
+        this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
+    }
+
     public void merge(Map<Integer, Long> nodes) {
         for (int node : nodes.keySet()) {
             if (node == this.port) continue;
@@ -247,8 +247,8 @@ public class Server {
     public void push() {
         this.lock.writeLock().lock();
         this.nodes.put(this.port, System.currentTimeMillis());
-        this.nodes.values().removeIf(value -> System.currentTimeMillis() - value > Utils.calculateThreshold(this.nodes.size()));
-        this.generateTables();
+        boolean regen = this.nodes.values().removeIf(value -> System.currentTimeMillis() - value > Utils.calculateThreshold(this.nodes.size()));
+        if (regen) this.generateTables();
         this.lock.writeLock().unlock();
         int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
         while (port == this.port) port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
