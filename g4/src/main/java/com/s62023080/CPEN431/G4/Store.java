@@ -19,30 +19,39 @@ public class Store {
     }
 
     public void put(ByteString key, ByteString value, int version) {
-        Data data = new Data(value, version);
         this.lock.writeLock().lock();
-        this.store.put(key, data);
-        this.lock.writeLock().unlock();
+        try {
+            this.store.put(key, new Data(value, version));
+        } finally {
+            this.lock.writeLock().unlock();
+        }
     }
 
     public Data get(ByteString key) {
         this.lock.readLock().lock();
-        Data data = this.store.get(key);
-        this.lock.readLock().unlock();
-        return data;
+        try {
+            return this.store.get(key);
+        } finally {
+            this.lock.readLock().unlock();
+        }
     }
 
     public Data remove(ByteString key) {
         this.lock.writeLock().lock();
-        Data data = this.store.remove(key);
-        this.lock.writeLock().unlock();
-        return data;
+        try {
+            return this.store.remove(key);
+        } finally {
+            this.lock.writeLock().unlock();
+        }
     }
 
     public void bulkRemove(ArrayList<ByteString> keys) {
         this.lock.writeLock().lock();
-        for (ByteString key : keys) this.store.remove(key);
-        this.lock.writeLock().unlock();
+        try {
+            for (ByteString key : keys) this.store.remove(key);
+        } finally {
+            this.lock.writeLock().unlock();
+        }
     }
 
     public void clear() {
