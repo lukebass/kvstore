@@ -27,7 +27,7 @@ public class Logger {
     }
 
     public void logTables(ConcurrentSkipListMap<Integer, int[]> tables) {
-        this.log("Table Formation");
+        this.log("Table Size: " + tables.size());
         for (int node : tables.keySet()) {
             System.out.println("Virtual Node: " + node);
             for (int finger : tables.get(node)) {

@@ -240,21 +240,23 @@ public class Server {
         }
     }
 
-    public void update(int port, long time, boolean regen) {
+    public void update(int port, long time) {
         this.lock.writeLock().lock();
         try {
             this.nodes.put(port, time);
-            if (regen) this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
-            this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-            this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
-            this.logger.logTables(this.tables);
+            boolean regen = this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
+            if (regen || this.port != port) {
+                this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
+                this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
+                this.logger.logTables(this.tables);
+            }
         } finally {
             this.lock.writeLock().unlock();
         }
     }
 
     public void push() {
-        this.update(this.port, System.currentTimeMillis(), true);
+        this.update(this.port, System.currentTimeMillis());
         int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
         while (port == this.port) port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
         this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
@@ -262,7 +264,7 @@ public class Server {
 
     public void join(int node, long time) {
         this.logger.log("Node Join: " + node);
-        this.update(node, time, false);
+        this.update(node, time);
         ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
         ArrayList<ByteString> keys = new ArrayList<>();
         for (ByteString key : this.store.getKeys()) {
