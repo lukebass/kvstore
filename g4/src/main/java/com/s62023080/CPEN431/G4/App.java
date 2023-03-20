@@ -33,7 +33,7 @@ public class App
                         "5"
                 );
                 String filename = line.split(":")[1];
-                File output = new File(System.getProperty("user.dir") + "/out/" + filename + ".log");
+                File output = new File(System.getProperty("user.dir") + "/" + filename + ".log");
                 System.out.println(output.getName());
                 pb.redirectOutput(output);
                 pb.start();
