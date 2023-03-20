@@ -229,8 +229,9 @@ public class Utils {
         return finger;
     }
 
-    public static long calculateThreshold(int size) {
-        return (long) Math.ceil(Utils.EPIDEMIC_TIMEOUT + Utils.EPIDEMIC_PERIOD * ((Math.log(size) / Math.log(2)) + Utils.EPIDEMIC_BUFFER));
+    public static boolean isDeadNode(long time, int size) {
+        long threshold = (long) Math.ceil(Utils.EPIDEMIC_TIMEOUT + Utils.EPIDEMIC_PERIOD * ((Math.log(size) / Math.log(2)) + Utils.EPIDEMIC_BUFFER));
+        return System.currentTimeMillis() - time > threshold;
     }
 
     /**

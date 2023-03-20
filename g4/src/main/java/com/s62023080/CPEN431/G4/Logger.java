@@ -1,5 +1,7 @@
 package com.s62023080.CPEN431.G4;
 
+import java.util.concurrent.ConcurrentSkipListMap;
+
 public class Logger {
     private final int pid;
     private final int port;
@@ -22,5 +24,15 @@ public class Logger {
         System.out.println("Port: " + port);
         System.out.println("Memory: " + memory);
         System.out.println(message);
+    }
+
+    public void logTables(ConcurrentSkipListMap<Integer, int[]> tables) {
+        this.log("Table Formation");
+        for (int node : tables.keySet()) {
+            System.out.println("Virtual Node: " + node);
+            for (int finger : tables.get(node)) {
+                System.out.println("Finger Node: " + finger);
+            }
+        }
     }
 }

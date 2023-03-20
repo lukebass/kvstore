@@ -47,6 +47,7 @@ public class Server {
         for (int node : nodes) this.nodes.put(node, System.currentTimeMillis());
         this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
         this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
+        this.logger.logTables(this.tables);
 
         ScheduledExecutorService push = Executors.newScheduledThreadPool(1);
         push.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
@@ -233,9 +234,9 @@ public class Server {
 
     public void merge(Map<Integer, Long> nodes) {
         for (int node : nodes.keySet()) {
-            if (node == this.port) continue;
+            if (node == this.port || Utils.isDeadNode(nodes.get(node), this.nodes.size())) continue;
             if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
-            else if (System.currentTimeMillis() - nodes.get(node) < Utils.calculateThreshold(this.nodes.size())) this.join(node, nodes.get(node));
+            else this.join(node, nodes.get(node));
         }
     }
 
@@ -243,9 +244,10 @@ public class Server {
         this.lock.writeLock().lock();
         try {
             this.nodes.put(port, time);
-            if (regen) this.nodes.values().removeIf(value -> System.currentTimeMillis() - value > Utils.calculateThreshold(this.nodes.size()));
+            if (regen) this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
             this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
             this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
+            this.logger.logTables(this.tables);
         } finally {
             this.lock.writeLock().unlock();
         }
@@ -259,6 +261,7 @@ public class Server {
     }
 
     public void join(int node, long time) {
+        this.logger.log("Node Join: " + node);
         this.update(node, time, false);
         ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
         ArrayList<ByteString> keys = new ArrayList<>();
@@ -266,6 +269,7 @@ public class Server {
             if (Utils.isLocalKey(key.toByteArray(), tables)) {
                 Data data = this.store.get(key);
                 if (data == null) continue;
+                this.logger.log("Send Key: " + key + " => " + node);
                 this.sendKey(key, data, node);
                 keys.add(key);
             }
