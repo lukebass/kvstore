@@ -232,51 +232,67 @@ public class Server {
         if (msg != null) this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
     }
 
-    public void merge(Map<Integer, Long> nodes) {
-        for (int node : nodes.keySet()) {
-            if (node == this.port || Utils.isDeadNode(nodes.get(node), this.nodes.size())) continue;
-            if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
-            else this.join(node, nodes.get(node));
-        }
+    public void regen() {
+        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
+        this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
+        this.logger.logTables(this.tables);
     }
 
-    public void update(int port, long time) {
+    public void push() {
         this.lock.writeLock().lock();
         try {
-            this.nodes.put(port, time);
+            this.nodes.put(this.port, System.currentTimeMillis());
             boolean regen = this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
-            if (regen || this.port != port) {
-                this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-                this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
-                this.logger.logTables(this.tables);
-            }
+            if (regen) this.regen();
+            int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
+            if (port == this.port) port = this.ports.get((port + 1) % this.ports.size());
+            this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
         } finally {
             this.lock.writeLock().unlock();
         }
     }
 
-    public void push() {
-        this.update(this.port, System.currentTimeMillis());
-        int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
-        while (port == this.port) port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
-        this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
+    public void merge(Map<Integer, Long> nodes) {
+        this.lock.writeLock().lock();
+        try {
+            ArrayList<Integer> joined = new ArrayList<>();
+
+            for (int node : nodes.keySet()) {
+                if (node == this.port || Utils.isDeadNode(nodes.get(node), this.nodes.size())) continue;
+                if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
+                else {
+                    this.nodes.put(node, nodes.get(node));
+                    joined.add(node);
+                }
+            }
+
+            this.join(joined);
+        } finally {
+            this.lock.writeLock().unlock();
+        }
     }
 
-    public void join(int node, long time) {
-        this.logger.log("Node Join: " + node);
-        this.update(node, time);
-        ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
+    public void join(ArrayList<Integer> nodes) {
+        if (nodes.size() == 0) return;
+
+        this.regen();
         ArrayList<ByteString> keys = new ArrayList<>();
-        for (ByteString key : this.store.getKeys()) {
-            if (Utils.isLocalKey(key.toByteArray(), tables)) {
-                Data data = this.store.get(key);
-                if (data == null) continue;
-                this.logger.log("Send Key: " + key + " => " + node);
-                this.sendKey(key, data, node);
-                keys.add(key);
+
+        for (int node : nodes) {
+            this.logger.log("Node Join: " + node);
+            ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
+            for (ByteString key : this.store.getKeys()) {
+                if (Utils.isLocalKey(key.toByteArray(), tables)) {
+                    Data data = this.store.get(key);
+                    if (data == null) continue;
+                    this.logger.log("Send Key: " + key + " => " + node);
+                    this.sendKey(key, data, node);
+                    keys.add(key);
+                }
             }
         }
-        if (keys.size() != 0) this.store.bulkRemove(keys);
+
+        this.store.bulkRemove(keys);
     }
 
     public Store getStore() {
