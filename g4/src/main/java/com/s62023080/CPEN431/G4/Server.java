@@ -45,9 +45,7 @@ public class Server {
         this.nodes = new ConcurrentHashMap<>();
         this.lock = new ReentrantReadWriteLock();
         for (int node : nodes) this.nodes.put(node, System.currentTimeMillis());
-        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-        this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
-        this.logger.logTables(this.tables);
+        this.regen();
 
         ScheduledExecutorService push = Executors.newScheduledThreadPool(1);
         push.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
@@ -64,6 +62,10 @@ public class Server {
         }
     }
 
+    /**
+     * REQUEST VALIDATION
+     */
+
     public boolean isStoreRequest(int command) {
         return command == Utils.PUT_REQUEST || command == Utils.GET_REQUEST || command == Utils.REMOVE_REQUEST;
     }
@@ -75,6 +77,10 @@ public class Server {
     public boolean isValueInvalid(ByteString value) {
         return value.size() == 0 || value.size() > 10000;
     }
+
+    /**
+     * REQUEST HANDLING
+     */
 
     public void sendEpidemic(int command, int port) {
         try {
@@ -231,6 +237,10 @@ public class Server {
 
         if (msg != null) this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
     }
+
+    /**
+     * EPIDEMIC PROTOCOL
+     */
 
     public void regen() {
         this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
