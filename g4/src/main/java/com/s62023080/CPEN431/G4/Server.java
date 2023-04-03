@@ -25,9 +25,10 @@ public class Server {
     private final DatagramSocket socket;
     private final ExecutorService executor;
     private final Store store;
-    private final Cache<ByteString, byte[]> cache;
-    private final ConcurrentHashMap<Integer, Long> nodes;
     private final ReentrantReadWriteLock lock;
+    private final Cache<ByteString, byte[]> cache;
+    private final ConcurrentHashMap<ByteString, ByteString> queue;
+    private final ConcurrentHashMap<Integer, Long> nodes;
     private ConcurrentSkipListMap<Integer, Integer> addresses;
     private ConcurrentSkipListMap<Integer, int[]> tables;
 
@@ -41,14 +42,16 @@ public class Server {
         this.socket = new DatagramSocket(this.port);
         this.executor = Executors.newFixedThreadPool(threads);
         this.store = new Store();
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
-        this.nodes = new ConcurrentHashMap<>();
         this.lock = new ReentrantReadWriteLock();
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
+        this.queue = new ConcurrentHashMap<>();
+        this.nodes = new ConcurrentHashMap<>();
         for (int node : nodes) this.nodes.put(node, System.currentTimeMillis());
         this.regen();
 
-        ScheduledExecutorService push = Executors.newScheduledThreadPool(1);
-        push.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+        scheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
+        scheduler.scheduleAtFixedRate(this::pop, 0, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
 
         while (this.running) {
             try {
@@ -100,7 +103,10 @@ public class Server {
             kvRequest.setKey(key);
             kvRequest.setValue(data.value);
             kvRequest.setVersion(data.version);
-            this.send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
+            ByteString messageId = ByteString.copyFrom(Utils.generateMessageID(this.port));
+            ByteString request = kvRequest.build().toByteString();
+            this.send(messageId, request, InetAddress.getLocalHost(), port, false);
+            this.queue.put(messageId, request);
         } catch (UnknownHostException e) {
             this.logger.log(e.getMessage());
         }
@@ -266,7 +272,6 @@ public class Server {
         this.lock.writeLock().lock();
         try {
             ArrayList<Integer> joined = new ArrayList<>();
-
             for (int node : nodes.keySet()) {
                 if (node == this.port || Utils.isDeadNode(nodes.get(node), this.nodes.size())) continue;
                 if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
@@ -275,7 +280,6 @@ public class Server {
                     joined.add(node);
                 }
             }
-
             this.join(joined);
         } finally {
             this.lock.writeLock().unlock();
@@ -286,8 +290,8 @@ public class Server {
         if (nodes.size() == 0) return;
 
         this.regen();
-        ArrayList<ByteString> keys = new ArrayList<>();
 
+        ArrayList<ByteString> keys = new ArrayList<>();
         for (int node : nodes) {
             this.logger.log("Node Join: " + node);
             ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
@@ -301,9 +305,16 @@ public class Server {
                 }
             }
         }
-
         this.store.bulkRemove(keys);
     }
+
+    public void pop() {
+        // Continue
+    }
+
+    /**
+     * Test Methods
+     */
 
     public Store getStore() {
         return this.store;
