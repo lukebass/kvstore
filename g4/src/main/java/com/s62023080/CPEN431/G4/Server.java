@@ -95,7 +95,7 @@ public class Server {
             KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
             kvRequest.setCommand(command);
             kvRequest.putAllNodes(this.nodes);
-            this.send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
+            this.send(Utils.generateMessageID(this.port), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
         } catch (UnknownHostException e) {
             this.logger.log(e.getMessage());
         }
@@ -118,7 +118,7 @@ public class Server {
             kvRequest.setKey(key);
             kvRequest.setValue(data.value);
             kvRequest.setVersion(data.version);
-            ByteString messageID = ByteString.copyFrom(Utils.generateMessageID(this.port));
+            ByteString messageID = Utils.generateMessageID(this.port);
             this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, true);
             this.queue.put(messageID, port);
         } catch (UnknownHostException e) {

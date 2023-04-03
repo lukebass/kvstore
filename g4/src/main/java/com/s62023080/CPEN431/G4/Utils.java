@@ -1,5 +1,6 @@
 package com.s62023080.CPEN431.G4;
 
+import com.google.protobuf.ByteString;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -57,7 +58,7 @@ public class Utils {
         return checkSum != createCheckSum(messageID, payload);
     }
 
-    public static byte[] generateMessageID(int port) throws UnknownHostException {
+    public static ByteString generateMessageID(int port) throws UnknownHostException {
         byte[] messageID = new byte[16];
         ByteBuffer buffer = ByteBuffer.wrap(messageID);
         // First 4 bytes are client IP
@@ -70,7 +71,7 @@ public class Utils {
         buffer.put(random);
         // Next 8 bytes are time
         buffer.putLong(System.nanoTime());
-        return messageID;
+        return ByteString.copyFrom(messageID);
     }
 
     /**
