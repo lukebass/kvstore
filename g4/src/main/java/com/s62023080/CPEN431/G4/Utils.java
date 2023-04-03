@@ -19,7 +19,7 @@ public class Utils {
     public static final int EPIDEMIC_TIMEOUT = 5000;
     public static final int EPIDEMIC_PERIOD = 300;
     public static final int EPIDEMIC_BUFFER = 10;
-    public static final int POP_PERIOD = 500;
+    public static final int POP_PERIOD = 300;
     public static final int PUT_REQUEST = 1;
     public static final int GET_REQUEST = 2;
     public static final int REMOVE_REQUEST = 3;
