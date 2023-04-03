@@ -322,7 +322,7 @@ public class Server {
         ArrayList<ByteString> keys = new ArrayList<>();
         this.regen();
 
-        this.tableLock.readLock().lock();
+        this.tableLock.writeLock().lock();
         try {
             for (int node : nodes) {
                 ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
@@ -337,7 +337,7 @@ public class Server {
                 }
             }
         } finally {
-            this.tableLock.readLock().unlock();
+            this.tableLock.writeLock().unlock();
         }
 
         this.store.bulkRemove(keys);
