@@ -53,9 +53,10 @@ public class Server {
         for (int node : nodes) this.nodes.put(node, System.currentTimeMillis());
         this.regen();
 
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
-        scheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
-        scheduler.scheduleAtFixedRate(this::pop, 0, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
+        ScheduledExecutorService epidemicScheduler = Executors.newScheduledThreadPool(1);
+        epidemicScheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
+        ScheduledExecutorService queueScheduler = Executors.newScheduledThreadPool(1);
+        queueScheduler.scheduleAtFixedRate(this::pop, 0, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
 
         while (this.running) {
             try {
@@ -317,6 +318,7 @@ public class Server {
 
     public void join(ArrayList<Integer> nodes) {
         if (nodes.size() == 0) return;
+
         this.regen();
         ArrayList<ByteString> keys = new ArrayList<>();
 
