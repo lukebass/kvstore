@@ -317,9 +317,8 @@ public class Server {
 
     public void join(ArrayList<Integer> nodes) {
         if (nodes.size() == 0) return;
-        ArrayList<ByteString> keys = new ArrayList<>();
-
         this.regen();
+        ArrayList<ByteString> keys = new ArrayList<>();
 
         this.tableLock.writeLock().lock();
         try {
@@ -349,8 +348,8 @@ public class Server {
         try {
             for (ByteString messageID : this.queue.keySet()) {
                 byte[] cacheValue = this.cache.getIfPresent(messageID);
-                if (cacheValue == null) continue;
-                this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, InetAddress.getLocalHost(), this.queue.get(messageID)));
+                if (cacheValue == null) this.queue.remove(messageID);
+                else this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, InetAddress.getLocalHost(), this.queue.get(messageID)));
             }
         } catch (IOException e) {
             this.logger.log(e.getMessage());
