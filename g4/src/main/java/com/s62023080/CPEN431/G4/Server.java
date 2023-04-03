@@ -319,11 +319,10 @@ public class Server {
 
     public void join(ArrayList<Integer> nodes) {
         if (nodes.size() == 0) return;
-
-        this.regen();
         ArrayList<ByteString> keys = new ArrayList<>();
+        this.regen();
 
-        this.tableLock.writeLock().lock();
+        this.tableLock.readLock().lock();
         try {
             for (int node : nodes) {
                 ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
@@ -338,7 +337,7 @@ public class Server {
                 }
             }
         } finally {
-            this.tableLock.writeLock().unlock();
+            this.tableLock.readLock().unlock();
         }
 
         this.store.bulkRemove(keys);
@@ -349,10 +348,11 @@ public class Server {
 
         this.queueLock.writeLock().lock();
         try {
+            this.queue.keySet().removeIf(messageID -> this.cache.getIfPresent(messageID) == null);
             for (ByteString messageID : this.queue.keySet()) {
                 byte[] cacheValue = this.cache.getIfPresent(messageID);
-                if (cacheValue == null) this.queue.remove(messageID);
-                else this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, InetAddress.getLocalHost(), this.queue.get(messageID)));
+                if (cacheValue == null) continue;
+                this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, InetAddress.getLocalHost(), this.queue.get(messageID)));
             }
         } catch (IOException e) {
             this.logger.log(e.getMessage());
