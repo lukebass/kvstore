@@ -118,8 +118,7 @@ public class Server {
             kvRequest.setValue(data.value);
             kvRequest.setVersion(data.version);
             ByteString messageID = ByteString.copyFrom(Utils.generateMessageID(this.port));
-            ByteString request = kvRequest.build().toByteString();
-            this.send(messageID, request, InetAddress.getLocalHost(), port, true);
+            this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, true);
             this.queue.put(messageID, port);
         } catch (UnknownHostException e) {
             this.logger.log(e.getMessage());
@@ -270,6 +269,27 @@ public class Server {
      * EPIDEMIC PROTOCOL
      */
 
+    public void merge(Map<Integer, Long> nodes) {
+        ArrayList<Integer> joined = new ArrayList<>();
+
+        this.lock.writeLock().lock();
+        try {
+            for (int node : nodes.keySet()) {
+                if (node == this.port || Utils.isDeadNode(nodes.get(node), this.nodes.size())) continue;
+                if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
+                else {
+                    this.logger.log("Node Join: " + node);
+                    this.nodes.put(node, nodes.get(node));
+                    joined.add(node);
+                }
+            }
+        } finally {
+            this.lock.writeLock().unlock();
+        }
+
+        this.join(joined);
+    }
+
     public void regen() {
         this.tableLock.writeLock().lock();
         try {
@@ -293,27 +313,6 @@ public class Server {
         } finally {
             this.lock.writeLock().unlock();
         }
-    }
-
-    public void merge(Map<Integer, Long> nodes) {
-        ArrayList<Integer> joined = new ArrayList<>();
-
-        this.lock.writeLock().lock();
-        try {
-            for (int node : nodes.keySet()) {
-                if (node == this.port || Utils.isDeadNode(nodes.get(node), this.nodes.size())) continue;
-                if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
-                else {
-                    this.logger.log("Node Join: " + node);
-                    this.nodes.put(node, nodes.get(node));
-                    joined.add(node);
-                }
-            }
-        } finally {
-            this.lock.writeLock().unlock();
-        }
-
-        this.join(joined);
     }
 
     public void join(ArrayList<Integer> nodes) {
