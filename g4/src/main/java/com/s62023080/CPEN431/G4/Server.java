@@ -280,9 +280,9 @@ public class Server {
                 if (node == this.port || Utils.isDeadNode(nodes.get(node), this.nodes.size())) continue;
                 if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
                 else {
-                    this.logger.log("Node Join: " + node);
                     this.nodes.put(node, nodes.get(node));
                     joined.add(node);
+                    this.logger.log("Node Join: " + node);
                 }
             }
         } finally {
@@ -330,9 +330,9 @@ public class Server {
                     if (Utils.isLocalKey(key.toByteArray(), tables)) {
                         Data data = this.store.get(key);
                         if (data == null) continue;
-                        this.logger.log("Send Key: " + key + " => " + node);
                         this.sendKey(key, data, node);
                         keys.add(key);
+                        this.logger.log("Send Key: " + key + " => " + node);
                     }
                 }
             }
@@ -353,6 +353,7 @@ public class Server {
                 byte[] cacheValue = this.cache.getIfPresent(messageID);
                 if (cacheValue == null) continue;
                 this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, InetAddress.getLocalHost(), this.queue.get(messageID)));
+                this.logger.log("Send key: " + this.queue.get(messageID));
             }
         } catch (IOException e) {
             this.logger.log(e.getMessage());
