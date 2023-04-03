@@ -177,6 +177,7 @@ public class Server {
                 } finally {
                     this.queueLock.writeLock().unlock();
                 }
+                return;
             } else if (cacheValue != null) {
                 this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, request.address, request.port));
                 return;
