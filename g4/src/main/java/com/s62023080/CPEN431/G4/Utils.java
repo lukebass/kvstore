@@ -1,5 +1,6 @@
 package com.s62023080.CPEN431.G4;
 
+import com.google.protobuf.ByteString;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -19,6 +20,7 @@ public class Utils {
     public static final int EPIDEMIC_TIMEOUT = 5000;
     public static final int EPIDEMIC_PERIOD = 300;
     public static final int EPIDEMIC_BUFFER = 10;
+    public static final int POP_PERIOD = 300;
     public static final int PUT_REQUEST = 1;
     public static final int GET_REQUEST = 2;
     public static final int REMOVE_REQUEST = 3;
@@ -30,6 +32,7 @@ public class Utils {
     public static final int EPIDEMIC_PUSH = 9;
     public static final int EPIDEMIC_PULL = 10;
     public static final int EPIDEMIC_PUT = 11;
+    public static final int KEY_CONFIRMED = 12;
     public static final int SUCCESS = 0;
     public static final int MISSING_KEY_ERROR = 1;
     public static final int MEMORY_ERROR = 2;
@@ -55,7 +58,7 @@ public class Utils {
         return checkSum != createCheckSum(messageID, payload);
     }
 
-    public static byte[] generateMessageID(int port) throws UnknownHostException {
+    public static ByteString generateMessageID(int port) throws UnknownHostException {
         byte[] messageID = new byte[16];
         ByteBuffer buffer = ByteBuffer.wrap(messageID);
         // First 4 bytes are client IP
@@ -68,7 +71,7 @@ public class Utils {
         buffer.put(random);
         // Next 8 bytes are time
         buffer.putLong(System.nanoTime());
-        return messageID;
+        return ByteString.copyFrom(messageID);
     }
 
     /**

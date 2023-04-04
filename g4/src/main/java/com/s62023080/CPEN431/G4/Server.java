@@ -25,9 +25,11 @@ public class Server {
     private final DatagramSocket socket;
     private final ExecutorService executor;
     private final Store store;
-    private final Cache<ByteString, byte[]> cache;
-    private final ConcurrentHashMap<Integer, Long> nodes;
     private final ReentrantReadWriteLock lock;
+    private final ReentrantReadWriteLock queueLock;
+    private final Cache<ByteString, byte[]> cache;
+    private final ConcurrentHashMap<ByteString, Integer> queue;
+    private final ConcurrentHashMap<Integer, Long> nodes;
     private ConcurrentSkipListMap<Integer, Integer> addresses;
     private ConcurrentSkipListMap<Integer, int[]> tables;
 
@@ -41,16 +43,18 @@ public class Server {
         this.socket = new DatagramSocket(this.port);
         this.executor = Executors.newFixedThreadPool(threads);
         this.store = new Store();
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
-        this.nodes = new ConcurrentHashMap<>();
         this.lock = new ReentrantReadWriteLock();
+        this.queueLock = new ReentrantReadWriteLock();
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
+        this.queue = new ConcurrentHashMap<>();
+        this.nodes = new ConcurrentHashMap<>();
         for (int node : nodes) this.nodes.put(node, System.currentTimeMillis());
-        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-        this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
-        this.logger.logTables(this.tables);
+        this.regen();
 
-        ScheduledExecutorService push = Executors.newScheduledThreadPool(1);
-        push.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
+        ScheduledExecutorService epidemicScheduler = Executors.newScheduledThreadPool(1);
+        epidemicScheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
+        ScheduledExecutorService queueScheduler = Executors.newScheduledThreadPool(1);
+        queueScheduler.scheduleAtFixedRate(this::pop, 0, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
 
         while (this.running) {
             try {
@@ -64,6 +68,10 @@ public class Server {
         }
     }
 
+    /**
+     * REQUEST VALIDATION
+     */
+
     public boolean isStoreRequest(int command) {
         return command == Utils.PUT_REQUEST || command == Utils.GET_REQUEST || command == Utils.REMOVE_REQUEST;
     }
@@ -76,27 +84,46 @@ public class Server {
         return value.size() == 0 || value.size() > 10000;
     }
 
+    /**
+     * REQUEST HANDLING
+     */
+
     public void sendEpidemic(int command, int port) {
         try {
             KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
             kvRequest.setCommand(command);
             kvRequest.putAllNodes(this.nodes);
-            this.send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
+            this.send(Utils.generateMessageID(this.port), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
+        } catch (UnknownHostException e) {
+            this.logger.log(e.getMessage());
+        }
+    }
+
+    public void sendConfirm(ByteString messageID, int port) {
+        try {
+            KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
+            kvRequest.setCommand(Utils.KEY_CONFIRMED);
+            this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
         } catch (UnknownHostException e) {
             this.logger.log(e.getMessage());
         }
     }
 
     public void sendKey(ByteString key, Data data, int port) {
+        this.queueLock.writeLock().lock();
         try {
             KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
             kvRequest.setCommand(Utils.EPIDEMIC_PUT);
             kvRequest.setKey(key);
             kvRequest.setValue(data.value);
             kvRequest.setVersion(data.version);
-            this.send(ByteString.copyFrom(Utils.generateMessageID(this.port)), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
+            ByteString messageID = Utils.generateMessageID(this.port);
+            this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, true);
+            this.queue.put(messageID, port);
         } catch (UnknownHostException e) {
             this.logger.log(e.getMessage());
+        } finally {
+            this.queueLock.writeLock().unlock();
         }
     }
 
@@ -144,6 +171,14 @@ public class Server {
             if (this.isStoreRequest(kvRequest.getCommand()) && !Utils.isLocalKey(kvRequest.getKey().toByteArray(), this.tables)) {
                 this.redirect(msg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables), request.address, request.port);
                 return;
+            } else if (kvRequest.getCommand() == Utils.KEY_CONFIRMED) {
+                this.queueLock.writeLock().lock();
+                try {
+                    this.queue.remove(msg.getMessageID());
+                } finally {
+                    this.queueLock.writeLock().unlock();
+                }
+                return;
             } else if (cacheValue != null) {
                 this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, request.address, request.port));
                 return;
@@ -166,6 +201,7 @@ public class Server {
                 }
                 case Utils.EPIDEMIC_PUT -> {
                     this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
+                    this.sendConfirm(msg.getMessageID(), request.port);
                     return;
                 }
                 case Utils.GET_REQUEST -> {
@@ -232,52 +268,99 @@ public class Server {
         if (msg != null) this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
     }
 
-    public void merge(Map<Integer, Long> nodes) {
-        for (int node : nodes.keySet()) {
-            if (node == this.port || Utils.isDeadNode(nodes.get(node), this.nodes.size())) continue;
-            if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
-            else this.join(node, nodes.get(node));
-        }
-    }
+    /**
+     * EPIDEMIC PROTOCOL
+     */
 
-    public void update(int port, long time) {
+    public void merge(Map<Integer, Long> nodes) {
+        ArrayList<Integer> joined = new ArrayList<>();
+
         this.lock.writeLock().lock();
         try {
-            this.nodes.put(port, time);
-            boolean regen = this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
-            if (regen || this.port != port) {
-                this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-                this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
-                this.logger.logTables(this.tables);
+            for (int node : nodes.keySet()) {
+                if (node == this.port || Utils.isDeadNode(nodes.get(node), this.nodes.size())) continue;
+                if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
+                else {
+                    this.nodes.put(node, nodes.get(node));
+                    joined.add(node);
+                    this.logger.log("Node Join: " + node);
+                }
             }
+        } finally {
+            this.lock.writeLock().unlock();
+        }
+
+        this.join(joined);
+    }
+
+    public void regen() {
+        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
+        this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
+        this.logger.logTables(this.tables);
+    }
+
+    public void push() {
+        this.lock.writeLock().lock();
+        try {
+            this.nodes.put(this.port, System.currentTimeMillis());
+            boolean regen = this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
+            if (regen) this.regen();
+            int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
+            if (port == this.port) port = this.ports.get((port + 1) % this.ports.size());
+            this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
         } finally {
             this.lock.writeLock().unlock();
         }
     }
 
-    public void push() {
-        this.update(this.port, System.currentTimeMillis());
-        int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
-        while (port == this.port) port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
-        this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
+    public void join(ArrayList<Integer> nodes) {
+        if (nodes.size() == 0) return;
+        ArrayList<ByteString> keys = new ArrayList<>();
+
+        this.lock.writeLock().lock();
+        try {
+            this.regen();
+            for (int node : nodes) {
+                ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
+                for (ByteString key : this.store.getKeys()) {
+                    if (Utils.isLocalKey(key.toByteArray(), tables)) {
+                        Data data = this.store.get(key);
+                        if (data == null) continue;
+                        this.sendKey(key, data, node);
+                        keys.add(key);
+                        this.logger.log("Send Key: " + key + " => " + node);
+                    }
+                }
+            }
+        } finally {
+            this.lock.writeLock().unlock();
+        }
+
+        this.store.bulkRemove(keys);
     }
 
-    public void join(int node, long time) {
-        this.logger.log("Node Join: " + node);
-        this.update(node, time);
-        ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
-        ArrayList<ByteString> keys = new ArrayList<>();
-        for (ByteString key : this.store.getKeys()) {
-            if (Utils.isLocalKey(key.toByteArray(), tables)) {
-                Data data = this.store.get(key);
-                if (data == null) continue;
-                this.logger.log("Send Key: " + key + " => " + node);
-                this.sendKey(key, data, node);
-                keys.add(key);
+    public void pop() {
+        if (this.queue.size() == 0) return;
+
+        this.queueLock.writeLock().lock();
+        try {
+            this.queue.keySet().removeIf(messageID -> this.cache.getIfPresent(messageID) == null);
+            for (ByteString messageID : this.queue.keySet()) {
+                byte[] cacheValue = this.cache.getIfPresent(messageID);
+                if (cacheValue == null) continue;
+                this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, InetAddress.getLocalHost(), this.queue.get(messageID)));
+                this.logger.log("Send key: " + this.queue.get(messageID));
             }
+        } catch (IOException e) {
+            this.logger.log(e.getMessage());
+        } finally {
+            this.queueLock.writeLock().unlock();
         }
-        if (keys.size() != 0) this.store.bulkRemove(keys);
     }
+
+    /**
+     * Test Methods
+     */
 
     public Store getStore() {
         return this.store;

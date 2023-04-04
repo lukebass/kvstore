@@ -8,12 +8,12 @@ import java.io.IOException;
 public class App
 {
     /**
-     * @param args args[0] server.jar; args[1] servers.txt
+     * @param args args[0] server.jar; args[1] servers.txt; args[2] threads; args[3] weight
      */
     public static void main(String[] args)
     {
-        if(args.length != 2) {
-            System.out.println("Must provide server.jar and servers.txt");
+        if(args.length != 4) {
+            System.out.println("Must provide server.jar, servers.txt, threads, weight");
             System.exit(1);
         }
 
@@ -21,7 +21,7 @@ public class App
             BufferedReader reader = new BufferedReader(new FileReader(args[1]));
             String line = reader.readLine();
             while (line != null) {
-                // java -Xmx64m -jar server-jar-with-dependencies.jar servers port threads weight
+                // java -Xmx64m -jar server.jar servers.txt port threads weight
                 ProcessBuilder pb = new ProcessBuilder(
                         "java",
                         "-Xmx64m",
@@ -29,8 +29,8 @@ public class App
                         System.getProperty("user.dir") + "/" + args[0],
                         System.getProperty("user.dir") + "/" + args[1],
                         line.split(":")[1],
-                        "1",
-                        "5"
+                        args[2],
+                        args[3]
                 );
                 String filename = line.split(":")[1];
                 File output = new File(System.getProperty("user.dir") + "/" + filename + ".log");
