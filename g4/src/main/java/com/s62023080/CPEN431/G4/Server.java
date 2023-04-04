@@ -127,6 +127,25 @@ public class Server {
         }
     }
 
+    public void pop() {
+        if (this.queue.size() == 0) return;
+
+        this.queueLock.writeLock().lock();
+        try {
+            this.queue.keySet().removeIf(messageID -> this.cache.getIfPresent(messageID) == null);
+            for (ByteString messageID : this.queue.keySet()) {
+                byte[] cacheValue = this.cache.getIfPresent(messageID);
+                if (cacheValue == null) continue;
+                this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, InetAddress.getLocalHost(), this.queue.get(messageID)));
+                this.logger.log("Send key: " + this.queue.get(messageID));
+            }
+        } catch (IOException e) {
+            this.logger.log(e.getMessage());
+        } finally {
+            this.queueLock.writeLock().unlock();
+        }
+    }
+
     public void redirect(Message.Msg msg, int nodeID, InetAddress address, int port) {
         try {
             Message.Msg.Builder clone = Message.Msg.newBuilder();
@@ -272,6 +291,26 @@ public class Server {
      * EPIDEMIC PROTOCOL
      */
 
+    public void regen() {
+        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
+        this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
+        this.logger.logTables(this.tables);
+    }
+
+    public void push() {
+        this.lock.writeLock().lock();
+        try {
+            this.nodes.put(this.port, System.currentTimeMillis());
+            boolean regen = this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
+            if (regen) this.regen();
+            int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
+            if (port == this.port) port = this.ports.get((port + 1) % this.ports.size());
+            this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
+        } finally {
+            this.lock.writeLock().unlock();
+        }
+    }
+
     public void merge(Map<Integer, Long> nodes) {
         ArrayList<Integer> joined = new ArrayList<>();
 
@@ -291,26 +330,6 @@ public class Server {
         }
 
         this.join(joined);
-    }
-
-    public void regen() {
-        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-        this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
-        this.logger.logTables(this.tables);
-    }
-
-    public void push() {
-        this.lock.writeLock().lock();
-        try {
-            this.nodes.put(this.port, System.currentTimeMillis());
-            boolean regen = this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
-            if (regen) this.regen();
-            int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
-            if (port == this.port) port = this.ports.get((port + 1) % this.ports.size());
-            this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
-        } finally {
-            this.lock.writeLock().unlock();
-        }
     }
 
     public void join(ArrayList<Integer> nodes) {
@@ -337,25 +356,6 @@ public class Server {
         }
 
         this.store.bulkRemove(keys);
-    }
-
-    public void pop() {
-        if (this.queue.size() == 0) return;
-
-        this.queueLock.writeLock().lock();
-        try {
-            this.queue.keySet().removeIf(messageID -> this.cache.getIfPresent(messageID) == null);
-            for (ByteString messageID : this.queue.keySet()) {
-                byte[] cacheValue = this.cache.getIfPresent(messageID);
-                if (cacheValue == null) continue;
-                this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, InetAddress.getLocalHost(), this.queue.get(messageID)));
-                this.logger.log("Send key: " + this.queue.get(messageID));
-            }
-        } catch (IOException e) {
-            this.logger.log(e.getMessage());
-        } finally {
-            this.queueLock.writeLock().unlock();
-        }
     }
 
     /**

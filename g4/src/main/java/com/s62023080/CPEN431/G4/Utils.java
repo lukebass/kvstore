@@ -15,12 +15,13 @@ public class Utils {
     public static final int LOWER_MIN_MEMORY = 5;
     public static final int UPPER_MIN_MEMORY = 10;
     public static final int MAX_CACHE_SIZE = 1000;
-    public static final int CACHE_EXPIRATION = 1000;
+    public static final int CACHE_EXPIRATION = 1200;
     public static final int OVERLOAD_TIME = 1500;
     public static final int EPIDEMIC_TIMEOUT = 5000;
     public static final int EPIDEMIC_PERIOD = 300;
     public static final int EPIDEMIC_BUFFER = 10;
     public static final int POP_PERIOD = 300;
+    public static final int REPLICATION_FACTOR = 4;
     public static final int PUT_REQUEST = 1;
     public static final int GET_REQUEST = 2;
     public static final int REMOVE_REQUEST = 3;
