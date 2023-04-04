@@ -26,7 +26,6 @@ public class Server {
     private final ExecutorService executor;
     private final Store store;
     private final ReentrantReadWriteLock lock;
-    private final ReentrantReadWriteLock tableLock;
     private final ReentrantReadWriteLock queueLock;
     private final Cache<ByteString, byte[]> cache;
     private final ConcurrentHashMap<ByteString, Integer> queue;
@@ -45,7 +44,6 @@ public class Server {
         this.executor = Executors.newFixedThreadPool(threads);
         this.store = new Store();
         this.lock = new ReentrantReadWriteLock();
-        this.tableLock = new ReentrantReadWriteLock();
         this.queueLock = new ReentrantReadWriteLock();
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
         this.queue = new ConcurrentHashMap<>();
@@ -112,6 +110,7 @@ public class Server {
     }
 
     public void sendKey(ByteString key, Data data, int port) {
+        this.queueLock.writeLock().lock();
         try {
             KeyValueRequest.KVRequest.Builder kvRequest = KeyValueRequest.KVRequest.newBuilder();
             kvRequest.setCommand(Utils.EPIDEMIC_PUT);
@@ -123,6 +122,8 @@ public class Server {
             this.queue.put(messageID, port);
         } catch (UnknownHostException e) {
             this.logger.log(e.getMessage());
+        } finally {
+            this.queueLock.writeLock().unlock();
         }
     }
 
@@ -293,14 +294,9 @@ public class Server {
     }
 
     public void regen() {
-        this.tableLock.writeLock().lock();
-        try {
-            this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-            this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
-            this.logger.logTables(this.tables);
-        } finally {
-            this.tableLock.writeLock().unlock();
-        }
+        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
+        this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
+        this.logger.logTables(this.tables);
     }
 
     public void push() {
@@ -320,10 +316,10 @@ public class Server {
     public void join(ArrayList<Integer> nodes) {
         if (nodes.size() == 0) return;
         ArrayList<ByteString> keys = new ArrayList<>();
-        this.regen();
 
-        this.tableLock.writeLock().lock();
+        this.lock.writeLock().lock();
         try {
+            this.regen();
             for (int node : nodes) {
                 ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
                 for (ByteString key : this.store.getKeys()) {
@@ -337,7 +333,7 @@ public class Server {
                 }
             }
         } finally {
-            this.tableLock.writeLock().unlock();
+            this.lock.writeLock().unlock();
         }
 
         this.store.bulkRemove(keys);
