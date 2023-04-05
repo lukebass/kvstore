@@ -276,8 +276,13 @@ public class Server {
      */
 
     public void regen() {
-        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-        this.logger.logAddresses(this.addresses);
+        this.tableLock.writeLock().lock();
+        try {
+            this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
+            this.logger.logAddresses(this.addresses);
+        } finally {
+            this.tableLock.writeLock().unlock();
+        }
     }
 
     public void push() {
