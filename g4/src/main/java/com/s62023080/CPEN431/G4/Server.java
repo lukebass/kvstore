@@ -327,6 +327,7 @@ public class Server {
         this.lock.writeLock().lock();
         try {
             this.regen();
+            // Continue
             for (int node : nodes) {
                 for (ByteString key : this.store.getKeys()) {
                     Data data = this.store.get(key);
