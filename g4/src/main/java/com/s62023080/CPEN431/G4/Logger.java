@@ -26,13 +26,11 @@ public class Logger {
         System.out.println(message);
     }
 
-    public void logTables(ConcurrentSkipListMap<Integer, int[]> tables) {
-        this.log("Table Size: " + tables.size());
-        for (int node : tables.keySet()) {
-            System.out.println("Virtual Node: " + node);
-            for (int finger : tables.get(node)) {
-                System.out.println("Finger Node: " + finger);
-            }
+    public void logAddresses(ConcurrentSkipListMap<Integer, Integer> addresses) {
+        this.log("Table Size: " + addresses.size());
+        for (int nodeID : addresses.keySet()) {
+            System.out.println("Node ID: " + nodeID);
+            System.out.println("Node Port: " + addresses.get(nodeID));
         }
     }
 }

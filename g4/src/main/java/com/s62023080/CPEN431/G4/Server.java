@@ -26,12 +26,12 @@ public class Server {
     private final ExecutorService executor;
     private final Store store;
     private final ReentrantReadWriteLock lock;
+    private final ReentrantReadWriteLock tableLock;
     private final ReentrantReadWriteLock queueLock;
     private final Cache<ByteString, byte[]> cache;
     private final ConcurrentHashMap<ByteString, Integer> queue;
     private final ConcurrentHashMap<Integer, Long> nodes;
     private ConcurrentSkipListMap<Integer, Integer> addresses;
-    private ConcurrentSkipListMap<Integer, int[]> tables;
 
     public Server(ArrayList<Integer> nodes, int port, int threads, int weight) throws IOException {
         this.running = true;
@@ -44,6 +44,7 @@ public class Server {
         this.executor = Executors.newFixedThreadPool(threads);
         this.store = new Store();
         this.lock = new ReentrantReadWriteLock();
+        this.tableLock = new ReentrantReadWriteLock();
         this.queueLock = new ReentrantReadWriteLock();
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
         this.queue = new ConcurrentHashMap<>();
@@ -51,10 +52,9 @@ public class Server {
         for (int node : nodes) this.nodes.put(node, System.currentTimeMillis());
         this.regen();
 
-        ScheduledExecutorService epidemicScheduler = Executors.newScheduledThreadPool(1);
-        epidemicScheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
-        ScheduledExecutorService queueScheduler = Executors.newScheduledThreadPool(1);
-        queueScheduler.scheduleAtFixedRate(this::pop, 0, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+        scheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
+        scheduler.scheduleAtFixedRate(this::pop, 0, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
 
         while (this.running) {
             try {
@@ -66,22 +66,6 @@ public class Server {
                 this.logger.log(e.getMessage());
             }
         }
-    }
-
-    /**
-     * REQUEST VALIDATION
-     */
-
-    public boolean isStoreRequest(int command) {
-        return command == Utils.PUT_REQUEST || command == Utils.GET_REQUEST || command == Utils.REMOVE_REQUEST;
-    }
-
-    public boolean isKeyInvalid(ByteString key) {
-        return key.size() == 0 || key.size() > 32;
-    }
-
-    public boolean isValueInvalid(ByteString value) {
-        return value.size() == 0 || value.size() > 10000;
     }
 
     /**
@@ -187,8 +171,8 @@ public class Server {
             KeyValueRequest.KVRequest kvRequest = KeyValueRequest.KVRequest.parseFrom(msg.getPayload());
 
             byte[] cacheValue = this.cache.getIfPresent(msg.getMessageID());
-            if (this.isStoreRequest(kvRequest.getCommand()) && !Utils.isLocalKey(kvRequest.getKey().toByteArray(), this.tables)) {
-                this.redirect(msg, Utils.searchTables(kvRequest.getKey().toByteArray(), this.tables), request.address, request.port);
+            if (Utils.isStoreRequest(kvRequest.getCommand())) {
+                // Continue
                 return;
             } else if (kvRequest.getCommand() == Utils.KEY_CONFIRMED) {
                 this.queueLock.writeLock().lock();
@@ -209,9 +193,9 @@ public class Server {
 
             switch (kvRequest.getCommand()) {
                 case Utils.PUT_REQUEST -> {
-                    if (this.isKeyInvalid(kvRequest.getKey())) {
+                    if (Utils.isKeyInvalid(kvRequest.getKey())) {
                         kvResponse.setErrCode(Utils.INVALID_KEY_ERROR);
-                    } else if (this.isValueInvalid(kvRequest.getValue())) {
+                    } else if (Utils.isValueInvalid(kvRequest.getValue())) {
                         kvResponse.setErrCode(Utils.INVALID_VALUE_ERROR);
                     } else {
                         this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
@@ -224,7 +208,7 @@ public class Server {
                     return;
                 }
                 case Utils.GET_REQUEST -> {
-                    if (this.isKeyInvalid(kvRequest.getKey())) {
+                    if (Utils.isKeyInvalid(kvRequest.getKey())) {
                         kvResponse.setErrCode(Utils.INVALID_KEY_ERROR);
                     } else {
                         Data data = this.store.get(kvRequest.getKey());
@@ -238,7 +222,7 @@ public class Server {
                     }
                 }
                 case Utils.REMOVE_REQUEST -> {
-                    if (this.isKeyInvalid(kvRequest.getKey())) {
+                    if (Utils.isKeyInvalid(kvRequest.getKey())) {
                         kvResponse.setErrCode(Utils.INVALID_KEY_ERROR);
                     } else {
                         Data data = this.store.remove(kvRequest.getKey());
@@ -293,8 +277,7 @@ public class Server {
 
     public void regen() {
         this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-        this.tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), this.port, this.weight);
-        this.logger.logTables(this.tables);
+        this.logger.logAddresses(this.addresses);
     }
 
     public void push() {
@@ -340,15 +323,12 @@ public class Server {
         try {
             this.regen();
             for (int node : nodes) {
-                ConcurrentSkipListMap<Integer, int[]> tables = Utils.generateTables(new ArrayList<>(this.addresses.keySet()), node, this.weight);
                 for (ByteString key : this.store.getKeys()) {
-                    if (Utils.isLocalKey(key.toByteArray(), tables)) {
-                        Data data = this.store.get(key);
-                        if (data == null) continue;
-                        this.sendKey(key, data, node);
-                        keys.add(key);
-                        this.logger.log("Send Key: " + key + " => " + node);
-                    }
+                    Data data = this.store.get(key);
+                    if (data == null) continue;
+                    this.sendKey(key, data, node);
+                    keys.add(key);
+                    this.logger.log("Send Key: " + key + " => " + node);
                 }
             }
         } finally {
@@ -374,7 +354,6 @@ public class Server {
         this.store.clear();
         this.cache.invalidateAll();
         this.addresses.clear();
-        this.tables.clear();
     }
 
     public void shutdown() {
