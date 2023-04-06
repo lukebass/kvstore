@@ -49,11 +49,12 @@ public class Server {
         this.queue = new ConcurrentHashMap<>();
         this.nodes = new ConcurrentHashMap<>();
         for (int n : nodes) this.nodes.put(n, System.currentTimeMillis());
-        this.regen();
+        this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
+        this.logger.logAddresses(this.addresses);
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
         scheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
-        scheduler.scheduleAtFixedRate(this::pop, 0, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
+        scheduler.scheduleAtFixedRate(this::pop, 250, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
 
         while (this.running) {
             try {
@@ -129,19 +130,21 @@ public class Server {
         }
     }
 
-    public void redirect(Msg msg, KVRequest kvRequest, int node, List<Integer> replicas, InetAddress address, int port) {
+    public void redirect(Msg msg, KVRequest kvRequest, int node, ArrayList<Integer> replicas, InetAddress address, int port) {
         if (node == -1) return;
 
         try {
             KVRequest.Builder reqClone = KVRequest.newBuilder();
+            reqClone.setCommand(kvRequest.getCommand());
             reqClone.addAllReplicas(replicas);
             if (kvRequest.hasKey()) reqClone.setKey(kvRequest.getKey());
             if (kvRequest.hasValue()) reqClone.setValue(kvRequest.getValue());
             if (kvRequest.hasVersion()) reqClone.setVersion(kvRequest.getVersion());
+            ByteString payload = reqClone.build().toByteString();
             Msg.Builder msgClone = Msg.newBuilder();
             msgClone.setMessageID(msg.getMessageID());
-            msgClone.setPayload(reqClone.build().toByteString());
-            msgClone.setCheckSum(msg.getCheckSum());
+            msgClone.setPayload(payload);
+            msgClone.setCheckSum(Utils.createCheckSum(msg.getMessageID().toByteArray(), payload.toByteArray()));
             msgClone.setAddress(ByteString.copyFrom(address.getAddress()));
             msgClone.setPort(port);
             byte[] response = msgClone.build().toByteArray();
@@ -206,7 +209,7 @@ public class Server {
                 return;
             }
 
-            if (this.check(msg, request)) return;
+            // if (this.check(msg, request)) return;
 
             // Node request
             if (Utils.isNodeRequest(kvRequest.getCommand())) {
@@ -243,7 +246,7 @@ public class Server {
 
             // Get request
             if (kvRequest.getCommand() == Utils.GET_REQUEST) {
-                List<Integer> replicas = new ArrayList<>();
+                ArrayList<Integer> replicas = new ArrayList<>();
                 for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
                 int node = replicas.get(replicas.size() - 1);
 
@@ -264,7 +267,7 @@ public class Server {
 
             // Change request
             if (Utils.isChangeRequest(kvRequest.getCommand())) {
-                List<Integer> replicas = kvRequest.getReplicasList();
+                ArrayList<Integer> replicas = new ArrayList<>(kvRequest.getReplicasList());
                 if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
 
                 if (replicas.contains(this.node)) {

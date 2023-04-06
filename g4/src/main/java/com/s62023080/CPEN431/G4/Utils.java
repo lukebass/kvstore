@@ -17,12 +17,12 @@ public class Utils {
     public static final int LOWER_MIN_MEMORY = 5;
     public static final int UPPER_MIN_MEMORY = 10;
     public static final int MAX_CACHE_SIZE = 1000;
-    public static final int CACHE_EXPIRATION = 1200;
+    public static final int CACHE_EXPIRATION = 1500;
     public static final int OVERLOAD_TIME = 1500;
     public static final int EPIDEMIC_TIMEOUT = 5000;
-    public static final int EPIDEMIC_PERIOD = 300;
+    public static final int EPIDEMIC_PERIOD = 500;
     public static final int EPIDEMIC_BUFFER = 10;
-    public static final int POP_PERIOD = 300;
+    public static final int POP_PERIOD = 500;
     public static final int REPLICATION_FACTOR = 4;
     public static final int PUT_REQUEST = 1;
     public static final int GET_REQUEST = 2;
@@ -84,7 +84,7 @@ public class Utils {
             return kvResponse;
         }
 
-        if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
+        if (kvRequest.getCommand() == Utils.PUT_REQUEST || kvRequest.getCommand() == Utils.REPLICA_PUSH) {
             if (size > Utils.MAX_CACHE_SIZE && Utils.isOutOfMemory(Utils.UPPER_MIN_MEMORY)) {
                 kvResponse.setErrCode(Utils.OVERLOAD_ERROR);
                 kvResponse.setOverloadWaitTime(Utils.OVERLOAD_TIME);

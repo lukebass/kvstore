@@ -27,7 +27,7 @@ public class Logger {
     }
 
     public void logAddresses(ConcurrentSkipListMap<Integer, Integer> addresses) {
-        this.log("Table Size: " + addresses.size());
+        System.out.println("Table Size: " + addresses.size());
         for (int nodeID : addresses.keySet()) {
             System.out.println("Node ID: " + nodeID);
             System.out.println("Node Port: " + addresses.get(nodeID));
