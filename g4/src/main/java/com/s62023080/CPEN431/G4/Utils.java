@@ -53,6 +53,10 @@ public class Utils {
         return command == Utils.EPIDEMIC_PUSH || command == Utils.EPIDEMIC_PULL || command == Utils.EPIDEMIC_PUT;
     }
 
+    public static boolean isChangeRequest(int command) {
+        return command == Utils.PUT_REQUEST || command == Utils.REMOVE_REQUEST;
+    }
+
     public static boolean isKeyInvalid(ByteString key) {
         return key.size() == 0 || key.size() > 32;
     }

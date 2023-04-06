@@ -220,17 +220,13 @@ public class Server {
             // Get request
             if (kvRequest.getCommand() == Utils.GET_REQUEST) {
                 List<Integer> replicas = new ArrayList<>();
-                for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) {
-                    replicas.add(Utils.searchAddresses(kvRequest.getKey(), this.addresses, replicas));
-                }
-
+                for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) replicas.add(Utils.searchAddresses(kvRequest.getKey(), this.addresses, replicas));
                 int node = replicas.get(replicas.size() - 1);
 
-                if (node == this.node || kvRequest.getReplicasList().size() == Utils.REPLICATION_FACTOR) {
+                if (node == this.node || (kvRequest.getReplicasList().contains(this.node) && kvRequest.getReplicasList().size() >= Utils.REPLICATION_FACTOR)) {
                     Data data = this.store.get(kvRequest.getKey());
                     if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
                     else {
-                        kvResponse.setErrCode(Utils.SUCCESS);
                         kvResponse.setValue(data.value);
                         kvResponse.setVersion(data.version);
                     }
@@ -239,20 +235,37 @@ public class Server {
                 }
 
                 this.redirect(msg, kvRequest, node, replicas, request.address, request.port);
+                return;
             }
 
-            // Continue
-            switch (kvRequest.getCommand()) {
-                case Utils.PUT_REQUEST -> {
-                    this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
-                    kvResponse.setErrCode(Utils.SUCCESS);
+            // Change request
+            if (Utils.isChangeRequest(kvRequest.getCommand())) {
+                List<Integer> replicas = kvRequest.getReplicasList();
+                if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(Utils.searchAddresses(kvRequest.getKey(), this.addresses, replicas));
+
+                if (kvRequest.getReplicasList().contains(this.node)) {
+                    if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
+                    } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
+                        Data data = this.store.remove(kvRequest.getKey());
+                        if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
+                    }
+
+                    if (replicas.size() >= Utils.REPLICATION_FACTOR) {
+                        this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                        return;
+                    }
                 }
-                case Utils.REMOVE_REQUEST -> {
-                    Data data = this.store.remove(kvRequest.getKey());
-                    if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
-                    else kvResponse.setErrCode(Utils.SUCCESS);
+
+                int node = replicas.get(replicas.size() - 1);
+                if (node == this.node) {
+                    node = Utils.searchAddresses(kvRequest.getKey(), this.addresses, replicas);
+                    replicas.add(node);
                 }
+
+                this.redirect(msg, kvRequest, node, replicas, request.address, request.port);
             }
+
         } catch (OutOfMemoryError e) {
             this.logger.log(e.getMessage(), Utils.getFreeMemory());
             if (msg != null && kvResponse != null)  {
