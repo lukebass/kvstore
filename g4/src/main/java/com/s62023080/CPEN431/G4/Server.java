@@ -86,13 +86,13 @@ public class Server {
         try {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
             kvRequest.setCommand(Utils.REPLICA_CONFIRMED);
-            this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
+            this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, true);
         } catch (UnknownHostException e) {
             this.logger.log(e.getMessage());
         }
     }
 
-    public void sendKey(ByteString key, Data data, int port) {
+    public void sendReplica(ByteString key, Data data, int port) {
         this.queueLock.writeLock().lock();
         try {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
@@ -146,6 +146,7 @@ public class Server {
             msgClone.setPort(port);
             byte[] response = msgClone.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, InetAddress.getLocalHost(), node));
+            this.cache.put(msg.getMessageID(), response);
         } catch (IOException e) {
             this.logger.log(e.getMessage());
         }
@@ -165,6 +166,18 @@ public class Server {
         }
     }
 
+    public boolean check(Msg msg, Request request) {
+        try {
+            byte[] cached = this.cache.getIfPresent(msg.getMessageID());
+            if (cached == null) return false;
+            this.socket.send(new DatagramPacket(cached, cached.length, request.address, request.port));
+            return true;
+        } catch (IOException e) {
+            this.logger.log(e.getMessage());
+        }
+        return false;
+    }
+
     public void handleRequest(Request request) {
         Msg msg = null;
         KVResponse.Builder kvResponse = null;
@@ -179,9 +192,21 @@ public class Server {
             KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
             kvResponse = Utils.parseRequest(kvRequest, this.cache.size());
             if (kvResponse.getErrCode() != 0) {
-                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
                 return;
             }
+
+            if (kvRequest.getCommand() == Utils.REPLICA_CONFIRMED) {
+                this.queueLock.writeLock().lock();
+                try {
+                    this.queue.remove(msg.getMessageID());
+                } finally {
+                    this.queueLock.writeLock().unlock();
+                }
+                return;
+            }
+
+            if (this.check(msg, request)) return;
 
             // Node request
             if (Utils.isNodeRequest(kvRequest.getCommand())) {
@@ -211,21 +236,9 @@ public class Server {
             }
 
             // Replica request
-            if (Utils.isReplicaRequest(kvRequest.getCommand())) {
-                switch (kvRequest.getCommand()) {
-                    case Utils.REPLICA_PUSH -> {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
-                        this.sendConfirm(msg.getMessageID(), request.port);
-                    }
-                    case Utils.REPLICA_CONFIRMED -> {
-                        this.queueLock.writeLock().lock();
-                        try {
-                            this.queue.remove(msg.getMessageID());
-                        } finally {
-                            this.queueLock.writeLock().unlock();
-                        }
-                    }
-                }
+            if (kvRequest.getCommand() == Utils.REPLICA_PUSH) {
+                this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
+                this.sendConfirm(msg.getMessageID(), request.port);
             }
 
             // Get request
@@ -234,18 +247,19 @@ public class Server {
                 for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
                 int node = replicas.get(replicas.size() - 1);
 
-                if (node == this.node || (kvRequest.getReplicasList().contains(this.node) && kvRequest.getReplicasList().size() >= Utils.REPLICATION_FACTOR)) {
-                    Data data = this.store.get(kvRequest.getKey());
-                    if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
-                    else {
-                        kvResponse.setValue(data.value);
-                        kvResponse.setVersion(data.version);
-                    }
-                    this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                if (node != this.node) {
+                    this.redirect(msg, kvRequest, node, replicas, request.address, request.port);
                     return;
                 }
 
-                this.redirect(msg, kvRequest, node, replicas, request.address, request.port);
+                Data data = this.store.get(kvRequest.getKey());
+                if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
+                else {
+                    kvResponse.setValue(data.value);
+                    kvResponse.setVersion(data.version);
+                }
+
+                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
             }
 
             // Change request
@@ -253,7 +267,7 @@ public class Server {
                 List<Integer> replicas = kvRequest.getReplicasList();
                 if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
 
-                if (kvRequest.getReplicasList().contains(this.node)) {
+                if (replicas.contains(this.node)) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
                         this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
@@ -316,7 +330,7 @@ public class Server {
                 if (!oldReplicas.contains(node)) {
                     Data data = this.store.get(key);
                     if (data == null) continue;
-                    this.sendKey(key, data, node);
+                    this.sendReplica(key, data, node);
                     this.logger.log("Send Key: " + key + " => " + node);
                 }
             }

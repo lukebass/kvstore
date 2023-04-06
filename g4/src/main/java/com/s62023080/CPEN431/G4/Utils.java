@@ -57,10 +57,6 @@ public class Utils {
         return command == Utils.PUT_REQUEST || command == Utils.REMOVE_REQUEST;
     }
 
-    public static boolean isReplicaRequest(int command) {
-        return command == Utils.REPLICA_PUSH || command == Utils.REPLICA_CONFIRMED;
-    }
-
     public static boolean isKeyInvalid(ByteString key) {
         return key.size() == 0 || key.size() > 32;
     }
