@@ -1,8 +1,9 @@
 package com.s62023080.CPEN431.G4;
 
+import ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest;
+import ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse;
 import com.google.protobuf.ByteString;
-
-import java.io.IOException;
+import ca.NetSysLab.ProtocolBuffers.Message.Msg;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -44,6 +45,55 @@ public class Utils {
     public static final int INVALID_KEY_ERROR = 6;
     public static final int INVALID_VALUE_ERROR = 7;
 
+    public static boolean isNodeRequest(int command) {
+        return command == Utils.SHUTDOWN_REQUEST || command == Utils.CLEAR_REQUEST || command == Utils.HEALTH_REQUEST || command == Utils.PID_REQUEST || command == Utils.MEMBERSHIP_REQUEST;
+    }
+
+    public static boolean isEpidemicRequest(int command) {
+        return command == Utils.EPIDEMIC_PUSH || command == Utils.EPIDEMIC_PULL || command == Utils.EPIDEMIC_PUT;
+    }
+
+    public static boolean isKeyInvalid(ByteString key) {
+        return key.size() == 0 || key.size() > 32;
+    }
+
+    public static boolean isValueInvalid(ByteString value) {
+        return value.size() == 0 || value.size() > 10000;
+    }
+
+    public static KVResponse.Builder parseRequest(KVRequest kvRequest, long size) {
+        KVResponse.Builder kvResponse = KVResponse.newBuilder();
+        kvResponse.setErrCode(Utils.SUCCESS);
+
+        if (kvRequest.getCommand() > 12) {
+            kvResponse.setErrCode(Utils.UNRECOGNIZED_ERROR);
+            return kvResponse;
+        }
+
+        if (kvRequest.hasKey() && isKeyInvalid(kvRequest.getKey())) {
+            kvResponse.setErrCode(Utils.INVALID_KEY_ERROR);
+            return kvResponse;
+        }
+
+        if (kvRequest.hasValue() && isValueInvalid(kvRequest.getValue())) {
+            kvResponse.setErrCode(Utils.INVALID_VALUE_ERROR);
+            return kvResponse;
+        }
+
+        if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
+            if (size > Utils.MAX_CACHE_SIZE && Utils.isOutOfMemory(Utils.UPPER_MIN_MEMORY)) {
+                kvResponse.setErrCode(Utils.OVERLOAD_ERROR);
+                kvResponse.setOverloadWaitTime(Utils.OVERLOAD_TIME);
+                return kvResponse;
+            } else if (Utils.isOutOfMemory(Utils.LOWER_MIN_MEMORY)) {
+                kvResponse.setErrCode(Utils.MEMORY_ERROR);
+                return kvResponse;
+            }
+        }
+
+        return kvResponse;
+    }
+
     public static long createCheckSum(byte[] messageID, byte[] payload) {
         byte[] checkSum = new byte[messageID.length + payload.length];
         ByteBuffer buffer = ByteBuffer.wrap(checkSum);
@@ -56,8 +106,8 @@ public class Utils {
         return crc.getValue();
     }
 
-    public static boolean isCheckSumInvalid(long checkSum, byte[] messageID, byte[] payload) {
-        return checkSum != createCheckSum(messageID, payload);
+    public static boolean isCheckSumInvalid(Msg msg) {
+        return msg.getCheckSum() != createCheckSum(msg.getMessageID().toByteArray(), msg.getPayload().toByteArray());
     }
 
     public static ByteString generateMessageID(int port) throws UnknownHostException {
@@ -76,19 +126,7 @@ public class Utils {
         return ByteString.copyFrom(messageID);
     }
 
-    public static boolean isStoreRequest(int command) {
-        return command == Utils.PUT_REQUEST || command == Utils.GET_REQUEST || command == Utils.REMOVE_REQUEST;
-    }
-
-    public static boolean isKeyInvalid(ByteString key) {
-        return key.size() == 0 || key.size() > 32;
-    }
-
-    public static boolean isValueInvalid(ByteString value) {
-        return value.size() == 0 || value.size() > 10000;
-    }
-
-    public static int searchAddresses(byte[] key, ConcurrentSkipListMap<Integer, Integer> addresses, ArrayList<Integer> replicas) throws IOException {
+    public static int searchAddresses(ByteString key, ConcurrentSkipListMap<Integer, Integer> addresses, List<Integer> replicas) {
         int keyID = hashKey(key);
 
         for (int nodeID : addresses.tailMap(keyID).keySet()) {
@@ -99,7 +137,7 @@ public class Utils {
             if (!replicas.contains(nodeID)) return nodeID;
         }
 
-        throw new IOException("Not found");
+        return -1;
     }
 
     public static ConcurrentSkipListMap<Integer, Integer> generateAddresses(ArrayList<Integer> nodes, int weight) {
@@ -122,9 +160,9 @@ public class Utils {
         return System.currentTimeMillis() - time > threshold;
     }
 
-    public static int hashKey(byte[] key) {
+    public static int hashKey(ByteString key) {
         CRC32 crc = new CRC32();
-        crc.update(key);
+        crc.update(key.toByteArray());
         return (int) (crc.getValue() % Math.pow(2, M_BITS));
     }
 

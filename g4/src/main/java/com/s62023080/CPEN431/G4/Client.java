@@ -78,7 +78,7 @@ public class Client {
                 }
 
                 // Ensure checksum is valid
-                if (Utils.isCheckSumInvalid(resMsg.getCheckSum(), resMsg.getMessageID().toByteArray(), resMsg.getPayload().toByteArray())) {
+                if (Utils.isCheckSumInvalid(resMsg)) {
                     throw new IOException("Checksum invalid, message potentially corrupted");
                 }
 
