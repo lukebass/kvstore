@@ -9,12 +9,10 @@ import com.google.protobuf.ByteString;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.net.*;
 import java.util.concurrent.*;
+import java.util.*;
 
 public class Server {
     private boolean running;
@@ -132,6 +130,8 @@ public class Server {
     }
 
     public void redirect(Msg msg, KVRequest kvRequest, int node, List<Integer> replicas, InetAddress address, int port) {
+        if (node == -1) return;
+
         try {
             KVRequest.Builder reqClone = KVRequest.newBuilder();
             reqClone.addAllReplicas(replicas);
@@ -197,7 +197,6 @@ public class Server {
                 }
 
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
-                return;
             }
 
             // Epidemic request
@@ -209,8 +208,6 @@ public class Server {
                     }
                     case Utils.EPIDEMIC_PULL -> this.merge(kvRequest.getNodesMap());
                 }
-
-                return;
             }
 
             // Replica request
@@ -229,14 +226,12 @@ public class Server {
                         }
                     }
                 }
-
-                return;
             }
 
             // Get request
             if (kvRequest.getCommand() == Utils.GET_REQUEST) {
                 List<Integer> replicas = new ArrayList<>();
-                for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) replicas.add(Utils.searchAddresses(kvRequest.getKey(), this.addresses, replicas));
+                for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
                 int node = replicas.get(replicas.size() - 1);
 
                 if (node == this.node || (kvRequest.getReplicasList().contains(this.node) && kvRequest.getReplicasList().size() >= Utils.REPLICATION_FACTOR)) {
@@ -251,13 +246,12 @@ public class Server {
                 }
 
                 this.redirect(msg, kvRequest, node, replicas, request.address, request.port);
-                return;
             }
 
             // Change request
             if (Utils.isChangeRequest(kvRequest.getCommand())) {
                 List<Integer> replicas = kvRequest.getReplicasList();
-                if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(Utils.searchAddresses(kvRequest.getKey(), this.addresses, replicas));
+                if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
 
                 if (kvRequest.getReplicasList().contains(this.node)) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
@@ -275,7 +269,7 @@ public class Server {
 
                 int node = replicas.get(replicas.size() - 1);
                 if (node == this.node) {
-                    node = Utils.searchAddresses(kvRequest.getKey(), this.addresses, replicas);
+                    node = Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas);
                     replicas.add(node);
                 }
 
@@ -301,27 +295,51 @@ public class Server {
      */
 
     public void regen() {
+        SortedMap<Integer, ArrayList<Integer>> oldMap;
+        SortedMap<Integer, ArrayList<Integer>> newMap;
+
         this.tableLock.writeLock().lock();
         try {
+            oldMap = Utils.generateReplicas(this.addresses);
             this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
+            newMap = Utils.generateReplicas(this.addresses);
             this.logger.logAddresses(this.addresses);
         } finally {
             this.tableLock.writeLock().unlock();
         }
+
+        for (ByteString key : this.store.getKeys()) {
+            ArrayList<Integer> oldReplicas = oldMap.get(oldMap.tailMap(Utils.hashKey(key)).firstKey());
+            ArrayList<Integer> newReplicas = newMap.get(newMap.tailMap(Utils.hashKey(key)).firstKey());
+
+            for (int node : newReplicas) {
+                if (!oldReplicas.contains(node)) {
+                    Data data = this.store.get(key);
+                    if (data == null) continue;
+                    this.sendKey(key, data, node);
+                    this.logger.log("Send Key: " + key + " => " + node);
+                }
+            }
+
+            if (!newReplicas.contains(this.node)) this.store.remove(key);
+        }
     }
 
     public void push() {
+        boolean regen;
+
         this.lock.writeLock().lock();
         try {
             this.nodes.put(this.node, System.currentTimeMillis());
-            boolean regen = this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
-            if (regen) this.regen();
+            regen = this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
             int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
             if (port == this.node) port = this.ports.get((port + 1) % this.ports.size());
             this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
         } finally {
             this.lock.writeLock().unlock();
         }
+
+        if (regen) this.regen();
     }
 
     public void merge(Map<Integer, Long> nodes) {
@@ -347,26 +365,15 @@ public class Server {
 
     public void join(ArrayList<Integer> nodes) {
         if (nodes.size() == 0) return;
-        ArrayList<ByteString> keys = new ArrayList<>();
 
         this.lock.writeLock().lock();
         try {
-            this.regen();
-            // Continue
-            for (int node : nodes) {
-                for (ByteString key : this.store.getKeys()) {
-                    Data data = this.store.get(key);
-                    if (data == null) continue;
-                    this.sendKey(key, data, node);
-                    keys.add(key);
-                    this.logger.log("Send Key: " + key + " => " + node);
-                }
-            }
+            for (int node : nodes) this.sendEpidemic(Utils.EPIDEMIC_PUSH, node);
         } finally {
             this.lock.writeLock().unlock();
         }
 
-        this.store.bulkRemove(keys);
+        this.regen();
     }
 
     /**

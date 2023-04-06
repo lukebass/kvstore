@@ -7,9 +7,9 @@ import ca.NetSysLab.ProtocolBuffers.Message.Msg;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.util.*;
 import java.util.zip.CRC32;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.*;
 
 public class Utils {
     private static final int M_BITS = 12;
@@ -134,15 +134,15 @@ public class Utils {
         return ByteString.copyFrom(messageID);
     }
 
-    public static int searchAddresses(ByteString key, ConcurrentSkipListMap<Integer, Integer> addresses, List<Integer> replicas) {
-        int keyID = hashKey(key);
-
-        for (int nodeID : addresses.tailMap(keyID).keySet()) {
-            if (!replicas.contains(nodeID)) return nodeID;
+    public static int searchAddresses(int id, ConcurrentSkipListMap<Integer, Integer> addresses, List<Integer> replicas) {
+        for (int nodeID : addresses.tailMap(id).keySet()) {
+            int node = addresses.get(nodeID);
+            if (!replicas.contains(node)) return node;
         }
 
-        for (int nodeID : addresses.headMap(keyID).keySet()) {
-            if (!replicas.contains(nodeID)) return nodeID;
+        for (int nodeID : addresses.headMap(id).keySet()) {
+            int node = addresses.get(nodeID);
+            if (!replicas.contains(node)) return node;
         }
 
         return -1;
@@ -161,6 +161,21 @@ public class Utils {
         }
 
         return addresses;
+    }
+
+    public static SortedMap<Integer, ArrayList<Integer>> generateReplicas(ConcurrentSkipListMap<Integer, Integer> addresses) {
+        SortedMap<Integer, ArrayList<Integer>> map = new TreeMap<>();
+
+        for (int nodeID : addresses.keySet()) {
+            ArrayList<Integer> replicas = new ArrayList<>();
+            for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) {
+                int node = Utils.searchAddresses(nodeID, addresses, replicas);
+                if (node != -1) replicas.add(Utils.searchAddresses(nodeID, addresses, replicas));
+            }
+            map.put(nodeID, replicas);
+        }
+
+        return map;
     }
 
     public static boolean isDeadNode(long time, int size) {

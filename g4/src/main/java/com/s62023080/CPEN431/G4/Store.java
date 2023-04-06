@@ -1,6 +1,5 @@
 package com.s62023080.CPEN431.G4;
 
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.google.protobuf.ByteString;
@@ -40,16 +39,6 @@ public class Store {
         this.lock.writeLock().lock();
         try {
             return this.store.remove(key);
-        } finally {
-            this.lock.writeLock().unlock();
-        }
-    }
-
-    public void bulkRemove(ArrayList<ByteString> keys) {
-        if (keys.size() == 0) return;
-        this.lock.writeLock().lock();
-        try {
-            for (ByteString key : keys) this.store.remove(key);
         } finally {
             this.lock.writeLock().unlock();
         }
