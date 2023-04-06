@@ -87,7 +87,7 @@ public class Server {
     public void sendConfirm(ByteString messageID, int port) {
         try {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
-            kvRequest.setCommand(Utils.KEY_CONFIRMED);
+            kvRequest.setCommand(Utils.REPLICA_CONFIRMED);
             this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
         } catch (UnknownHostException e) {
             this.logger.log(e.getMessage());
@@ -98,7 +98,7 @@ public class Server {
         this.queueLock.writeLock().lock();
         try {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
-            kvRequest.setCommand(Utils.EPIDEMIC_PUT);
+            kvRequest.setCommand(Utils.REPLICA_PUSH);
             kvRequest.setKey(key);
             kvRequest.setValue(data.value);
             kvRequest.setVersion(data.version);
@@ -203,15 +203,31 @@ public class Server {
             // Epidemic request
             if (Utils.isEpidemicRequest(kvRequest.getCommand())) {
                 switch (kvRequest.getCommand()) {
-                    case Utils.EPIDEMIC_PUT -> {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
-                        this.sendConfirm(msg.getMessageID(), request.port);
-                    }
                     case Utils.EPIDEMIC_PUSH -> {
                         this.merge(kvRequest.getNodesMap());
                         this.sendEpidemic(Utils.EPIDEMIC_PULL, request.port);
                     }
                     case Utils.EPIDEMIC_PULL -> this.merge(kvRequest.getNodesMap());
+                }
+
+                return;
+            }
+
+            // Replica request
+            if (Utils.isReplicaRequest(kvRequest.getCommand())) {
+                switch (kvRequest.getCommand()) {
+                    case Utils.REPLICA_PUSH -> {
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
+                        this.sendConfirm(msg.getMessageID(), request.port);
+                    }
+                    case Utils.REPLICA_CONFIRMED -> {
+                        this.queueLock.writeLock().lock();
+                        try {
+                            this.queue.remove(msg.getMessageID());
+                        } finally {
+                            this.queueLock.writeLock().unlock();
+                        }
+                    }
                 }
 
                 return;
@@ -265,7 +281,6 @@ public class Server {
 
                 this.redirect(msg, kvRequest, node, replicas, request.address, request.port);
             }
-
         } catch (OutOfMemoryError e) {
             this.logger.log(e.getMessage(), Utils.getFreeMemory());
             if (msg != null && kvResponse != null)  {

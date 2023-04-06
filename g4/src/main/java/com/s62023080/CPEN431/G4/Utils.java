@@ -34,8 +34,8 @@ public class Utils {
     public static final int MEMBERSHIP_REQUEST = 8;
     public static final int EPIDEMIC_PUSH = 9;
     public static final int EPIDEMIC_PULL = 10;
-    public static final int EPIDEMIC_PUT = 11;
-    public static final int KEY_CONFIRMED = 12;
+    public static final int REPLICA_PUSH = 11;
+    public static final int REPLICA_CONFIRMED = 12;
     public static final int SUCCESS = 0;
     public static final int MISSING_KEY_ERROR = 1;
     public static final int MEMORY_ERROR = 2;
@@ -50,11 +50,15 @@ public class Utils {
     }
 
     public static boolean isEpidemicRequest(int command) {
-        return command == Utils.EPIDEMIC_PUSH || command == Utils.EPIDEMIC_PULL || command == Utils.EPIDEMIC_PUT;
+        return command == Utils.EPIDEMIC_PUSH || command == Utils.EPIDEMIC_PULL;
     }
 
     public static boolean isChangeRequest(int command) {
         return command == Utils.PUT_REQUEST || command == Utils.REMOVE_REQUEST;
+    }
+
+    public static boolean isReplicaRequest(int command) {
+        return command == Utils.REPLICA_PUSH || command == Utils.REPLICA_CONFIRMED;
     }
 
     public static boolean isKeyInvalid(ByteString key) {
