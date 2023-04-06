@@ -343,7 +343,7 @@ public class Server {
     }
 
     public void merge(Map<Integer, Long> nodes) {
-        ArrayList<Integer> joined = new ArrayList<>();
+        boolean regen = false;
 
         this.lock.writeLock().lock();
         try {
@@ -351,8 +351,8 @@ public class Server {
                 if (node == this.node || Utils.isDeadNode(nodes.get(node), this.nodes.size())) continue;
                 if (this.nodes.containsKey(node)) this.nodes.put(node, Math.max(this.nodes.get(node), nodes.get(node)));
                 else {
+                    regen = true;
                     this.nodes.put(node, nodes.get(node));
-                    joined.add(node);
                     this.logger.log("Node Join: " + node);
                 }
             }
@@ -360,20 +360,7 @@ public class Server {
             this.lock.writeLock().unlock();
         }
 
-        this.join(joined);
-    }
-
-    public void join(ArrayList<Integer> nodes) {
-        if (nodes.size() == 0) return;
-
-        this.lock.writeLock().lock();
-        try {
-            for (int node : nodes) this.sendEpidemic(Utils.EPIDEMIC_PUSH, node);
-        } finally {
-            this.lock.writeLock().unlock();
-        }
-
-        this.regen();
+        if (regen) this.regen();
     }
 
     /**
