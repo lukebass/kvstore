@@ -50,7 +50,7 @@ public class Server {
         this.nodes = new ConcurrentHashMap<>();
         for (int n : nodes) this.nodes.put(n, System.currentTimeMillis());
         this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
-        this.logger.logAddresses(this.addresses);
+        this.logger.log(this.addresses);
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
         scheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
@@ -121,7 +121,7 @@ public class Server {
                 byte[] cacheValue = this.cache.getIfPresent(messageID);
                 if (cacheValue == null) continue;
                 this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, InetAddress.getLocalHost(), this.queue.get(messageID)));
-                this.logger.log("Send key: " + this.queue.get(messageID));
+                this.logger.log("Send Key: " + this.queue.get(messageID));
             }
         } catch (IOException e) {
             this.logger.log(e.getMessage());
@@ -209,7 +209,7 @@ public class Server {
                 return;
             }
 
-            // if (this.check(msg, request)) return;
+            if (this.check(msg, request)) return;
 
             // Node request
             if (Utils.isNodeRequest(kvRequest.getCommand())) {
@@ -250,7 +250,10 @@ public class Server {
                 for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
                 int node = replicas.get(replicas.size() - 1);
 
+                this.logger.log("Get Request: " + kvRequest.getCommand(), replicas);
+
                 if (node != this.node) {
+                    this.logger.log("Redirect Request: " + node, replicas);
                     this.redirect(msg, kvRequest, node, replicas, request.address, request.port);
                     return;
                 }
@@ -262,6 +265,7 @@ public class Server {
                     kvResponse.setVersion(data.version);
                 }
 
+                this.logger.log("Get Response: " + kvRequest.getCommand(), replicas);
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
             }
 
@@ -269,6 +273,9 @@ public class Server {
             if (Utils.isChangeRequest(kvRequest.getCommand())) {
                 ArrayList<Integer> replicas = new ArrayList<>(kvRequest.getReplicasList());
                 if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
+                int node = replicas.get(replicas.size() - 1);
+
+                this.logger.log("Change Request: " + kvRequest.getCommand(), replicas);
 
                 if (replicas.contains(this.node)) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
@@ -278,18 +285,19 @@ public class Server {
                         if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
                     }
 
-                    if (replicas.size() >= Utils.REPLICATION_FACTOR) {
-                        this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
-                        return;
+                    if (node == this.node) {
+                        node = Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas);
+                        if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(node);
+
+                        if (replicas.size() == Utils.REPLICATION_FACTOR) {
+                            this.logger.log("Change Response: " + kvRequest.getCommand(), replicas);
+                            this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                            return;
+                        }
                     }
                 }
 
-                int node = replicas.get(replicas.size() - 1);
-                if (node == this.node) {
-                    node = Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas);
-                    replicas.add(node);
-                }
-
+                this.logger.log("Redirect Request: " + node, replicas);
                 this.redirect(msg, kvRequest, node, replicas, request.address, request.port);
             }
         } catch (OutOfMemoryError e) {
@@ -320,7 +328,7 @@ public class Server {
             oldMap = Utils.generateReplicas(this.addresses);
             this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
             newMap = Utils.generateReplicas(this.addresses);
-            this.logger.logAddresses(this.addresses);
+            this.logger.log(this.addresses);
         } finally {
             this.tableLock.writeLock().unlock();
         }
