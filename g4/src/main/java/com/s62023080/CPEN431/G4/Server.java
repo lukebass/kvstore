@@ -171,9 +171,10 @@ public class Server {
 
     public boolean check(Msg msg, Request request) {
         try {
-            byte[] cached = this.cache.getIfPresent(msg.getMessageID());
-            if (cached == null) return false;
-            this.socket.send(new DatagramPacket(cached, cached.length, request.address, request.port));
+            byte[] cacheValue = this.cache.getIfPresent(msg.getMessageID());
+            if (cacheValue == null) return false;
+            this.logger.log("Cache Response");
+            this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, request.address, request.port));
             return true;
         } catch (IOException e) {
             this.logger.log(e.getMessage());
@@ -193,11 +194,6 @@ public class Server {
 
             // Parse request
             KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
-            kvResponse = Utils.parseRequest(kvRequest, this.cache.size());
-            if (kvResponse.getErrCode() != 0) {
-                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
-                return;
-            }
 
             if (kvRequest.getCommand() == Utils.REPLICA_CONFIRMED) {
                 this.queueLock.writeLock().lock();
@@ -210,6 +206,13 @@ public class Server {
             }
 
             if (this.check(msg, request)) return;
+
+            kvResponse = Utils.parseRequest(kvRequest, this.cache.size());
+            if (kvResponse.getErrCode() != 0) {
+                this.logger.log("Invalid Request: " + kvRequest.getCommand());
+                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                return;
+            }
 
             // Node request
             if (Utils.isNodeRequest(kvRequest.getCommand())) {
@@ -285,15 +288,13 @@ public class Server {
                         if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
                     }
 
-                    if (node == this.node) {
+                    if (node == this.node && replicas.size() == Utils.REPLICATION_FACTOR) {
+                        this.logger.log("Change Response: " + kvRequest.getCommand(), replicas);
+                        this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                        return;
+                    } else if (node == this.node) {
                         node = Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas);
-                        if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(node);
-
-                        if (replicas.size() == Utils.REPLICATION_FACTOR) {
-                            this.logger.log("Change Response: " + kvRequest.getCommand(), replicas);
-                            this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
-                            return;
-                        }
+                        replicas.add(node);
                     }
                 }
 
