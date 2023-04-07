@@ -174,13 +174,7 @@ public class Server {
             byte[] cached = this.cache.getIfPresent(messageID);
             if (cached == null) return false;
             this.logger.log("Cache Response");
-            Msg msg = Msg.parseFrom(cached);
-            this.socket.send(new DatagramPacket(
-                    cached,
-                    cached.length,
-                    msg.hasAddress() ? InetAddress.getByAddress(msg.getAddress().toByteArray()) : request.address,
-                    msg.hasPort() ? msg.getPort() : request.port
-            ));
+            this.socket.send(new DatagramPacket(cached, cached.length, request.address, request.port));
             return true;
         } catch (IOException e) {
             this.logger.log(e.getMessage());
