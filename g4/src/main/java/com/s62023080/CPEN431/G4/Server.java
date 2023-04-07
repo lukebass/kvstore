@@ -118,9 +118,9 @@ public class Server {
         try {
             this.queue.keySet().removeIf(messageID -> this.cache.getIfPresent(messageID) == null);
             for (ByteString messageID : this.queue.keySet()) {
-                byte[] cacheValue = this.cache.getIfPresent(messageID);
-                if (cacheValue == null) continue;
-                this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, InetAddress.getLocalHost(), this.queue.get(messageID)));
+                byte[] cached = this.cache.getIfPresent(messageID);
+                if (cached == null) continue;
+                this.socket.send(new DatagramPacket(cached, cached.length, InetAddress.getLocalHost(), this.queue.get(messageID)));
                 this.logger.log("Send Key: " + this.queue.get(messageID));
             }
         } catch (IOException e) {
@@ -169,12 +169,18 @@ public class Server {
         }
     }
 
-    public boolean check(Msg msg, Request request) {
+    public boolean check(ByteString messageID, Request request) {
         try {
-            byte[] cacheValue = this.cache.getIfPresent(msg.getMessageID());
-            if (cacheValue == null) return false;
+            byte[] cached = this.cache.getIfPresent(messageID);
+            if (cached == null) return false;
             this.logger.log("Cache Response");
-            this.socket.send(new DatagramPacket(cacheValue, cacheValue.length, request.address, request.port));
+            Msg msg = Msg.parseFrom(cached);
+            this.socket.send(new DatagramPacket(
+                    cached,
+                    cached.length,
+                    msg.hasAddress() ? InetAddress.getByAddress(msg.getAddress().toByteArray()) : request.address,
+                    msg.hasPort() ? msg.getPort() : request.port
+            ));
             return true;
         } catch (IOException e) {
             this.logger.log(e.getMessage());
@@ -205,7 +211,7 @@ public class Server {
                 return;
             }
 
-            if (this.check(msg, request)) return;
+            if (this.check(msg.getMessageID(), request)) return;
 
             kvResponse = Utils.parseRequest(kvRequest, this.cache.size());
             if (kvResponse.getErrCode() != 0) {
