@@ -19,9 +19,10 @@ public class Utils {
     public static final int MAX_CACHE_SIZE = 1000;
     public static final int CACHE_EXPIRATION = 1000;
     public static final int OVERLOAD_TIME = 1500;
-    public static final int EPIDEMIC_TIMEOUT = 5000;
+    public static final int EPIDEMIC_TIMEOUT = 10000;
     public static final int EPIDEMIC_PERIOD = 500;
     public static final int EPIDEMIC_BUFFER = 10;
+    public static final int QUEUE_EXPIRATION = 1500;
     public static final int POP_PERIOD = 500;
     public static final int REPLICATION_FACTOR = 4;
     public static final int PUT_REQUEST = 1;
@@ -177,6 +178,10 @@ public class Utils {
     public static boolean isDeadNode(long time, int size) {
         long threshold = (long) Math.ceil(Utils.EPIDEMIC_TIMEOUT + Utils.EPIDEMIC_PERIOD * ((Math.log(size) / Math.log(2)) + Utils.EPIDEMIC_BUFFER));
         return System.currentTimeMillis() - time > threshold;
+    }
+
+    public static boolean isDeadQueue(long time) {
+        return System.currentTimeMillis() - time > Utils.QUEUE_EXPIRATION;
     }
 
     public static int hashKey(ByteString key) {

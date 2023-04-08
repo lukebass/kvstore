@@ -24,7 +24,7 @@ public class App
                 // java -Xmx64m -jar server.jar servers.txt port threads weight
                 ProcessBuilder pb = new ProcessBuilder(
                         "java",
-                        "-Xmx64m",
+                        "-Xmx512m",
                         "-jar",
                         System.getProperty("user.dir") + "/" + args[0],
                         System.getProperty("user.dir") + "/" + args[1],

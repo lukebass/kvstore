@@ -6,10 +6,12 @@ public class CacheData {
     public byte[] data;
     public InetAddress address;
     public int port;
+    public long time;
 
     public CacheData(byte[] data, InetAddress address, int port) {
         this.data = data;
         this.address = address;
         this.port = port;
+        this.time = System.currentTimeMillis();
     }
 }

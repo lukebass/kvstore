@@ -39,10 +39,10 @@ public class Logger {
     }
 
     public void log(ConcurrentSkipListMap<Integer, Integer> addresses) {
-        System.out.println("Table Size: " + addresses.size());
+        System.out.println("Addresses Size: " + addresses.size());
         for (int nodeID : addresses.keySet()) {
-            System.out.println("Node ID: " + nodeID);
-            System.out.println("Node Port: " + addresses.get(nodeID));
+            System.out.println("ID: " + nodeID);
+            System.out.println("Port: " + addresses.get(nodeID));
         }
         System.out.println("\n");
     }

@@ -28,7 +28,7 @@ public class Server {
     private final ReentrantReadWriteLock tableLock;
     private final ReentrantReadWriteLock queueLock;
     private final Cache<ByteString, CacheData> cache;
-    private final ConcurrentLinkedQueue<ByteString> queue;
+    private final ConcurrentHashMap<ByteString, CacheData> queue;
     private final ConcurrentHashMap<Integer, Long> nodes;
     private ConcurrentSkipListMap<Integer, Integer> addresses;
 
@@ -46,7 +46,7 @@ public class Server {
         this.tableLock = new ReentrantReadWriteLock();
         this.queueLock = new ReentrantReadWriteLock();
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
-        this.queue = new ConcurrentLinkedQueue<>();
+        this.queue = new ConcurrentHashMap<>();
         this.nodes = new ConcurrentHashMap<>();
         for (int n : nodes) this.nodes.put(n, System.currentTimeMillis());
         this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
@@ -63,7 +63,7 @@ public class Server {
                 Request request = new Request(packet);
                 this.executor.submit(() -> this.handleRequest(request));
             } catch (Exception e) {
-                this.logger.log(e.getMessage());
+                this.logger.log("Error : " + e.getMessage());
             }
         }
     }
@@ -79,7 +79,7 @@ public class Server {
             kvRequest.putAllNodes(this.nodes);
             this.send(Utils.generateMessageID(this.node), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
         } catch (UnknownHostException e) {
-            this.logger.log(e.getMessage());
+            this.logger.log("Epidemic " + e.getMessage());
         }
     }
 
@@ -89,7 +89,7 @@ public class Server {
             kvRequest.setCommand(Utils.REPLICA_CONFIRMED);
             this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, true);
         } catch (UnknownHostException e) {
-            this.logger.log(e.getMessage());
+            this.logger.log("Confirm " + e.getMessage());
         }
     }
 
@@ -102,10 +102,10 @@ public class Server {
             kvRequest.setValue(data.value);
             kvRequest.setVersion(data.version);
             ByteString messageID = Utils.generateMessageID(this.node);
-            this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, true);
-            this.queue.add(messageID);
+            CacheData cached = this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
+            if (cached != null) this.queue.put(messageID, cached);
         } catch (UnknownHostException e) {
-            this.logger.log(e.getMessage());
+            this.logger.log("Replica " + e.getMessage());
         } finally {
             this.queueLock.writeLock().unlock();
         }
@@ -132,11 +132,11 @@ public class Server {
             this.socket.send(new DatagramPacket(response, response.length, InetAddress.getLocalHost(), node));
             if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, InetAddress.getLocalHost(), node));
         } catch (IOException e) {
-            this.logger.log(e.getMessage());
+            this.logger.log("Redirect " + e.getMessage());
         }
     }
 
-    public void send(ByteString messageID, ByteString payload, InetAddress address, int port, boolean cache) {
+    public CacheData send(ByteString messageID, ByteString payload, InetAddress address, int port, boolean cache) {
         try {
             Msg.Builder msg = Msg.newBuilder();
             msg.setMessageID(messageID);
@@ -144,10 +144,14 @@ public class Server {
             msg.setCheckSum(Utils.createCheckSum(messageID.toByteArray(), payload.toByteArray()));
             byte[] response = msg.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, address, port));
-            if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, address, port));
+            CacheData cached = new CacheData(response, address, port);
+            if (cache) this.cache.put(msg.getMessageID(), cached);
+            return cached;
         } catch (IOException e) {
-            this.logger.log(e.getMessage());
+            this.logger.log("Send " + e.getMessage());
         }
+
+        return null;
     }
 
     public void pop() {
@@ -155,7 +159,14 @@ public class Server {
 
         this.queueLock.writeLock().lock();
         try {
-            this.queue.removeIf(messageID -> !this.check(messageID));
+            this.queue.values().removeIf(cached -> Utils.isDeadQueue(cached.time));
+            for (ByteString messageID : this.queue.keySet()) {
+                CacheData cached = this.queue.get(messageID);
+                if (cached == null) continue;
+                this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
+            }
+        } catch (IOException e) {
+            this.logger.log("Pop " + e.getMessage());
         } finally {
             this.queueLock.writeLock().unlock();
         }
@@ -165,13 +176,10 @@ public class Server {
         try {
             CacheData cached = this.cache.getIfPresent(messageID);
             if (cached == null) return false;
-            Msg msg = Msg.parseFrom(cached.data);
-            KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
-            this.logger.log("Cache Response: " + kvRequest.getCommand(), new ArrayList<>(kvRequest.getReplicasList()));
             this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
             return true;
         } catch (IOException e) {
-            this.logger.log(e.getMessage());
+            this.logger.log("Check " + e.getMessage());
         }
         return false;
     }
@@ -203,8 +211,7 @@ public class Server {
 
             kvResponse = Utils.parseRequest(kvRequest, this.cache.size());
             if (kvResponse.getErrCode() != 0) {
-                this.logger.log("Invalid Request: " + kvRequest.getCommand());
-                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
                 return;
             }
 
@@ -247,10 +254,7 @@ public class Server {
                 for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
                 int node = replicas.get(replicas.size() - 1);
 
-                this.logger.log("Get Request: " + kvRequest.getCommand(), replicas);
-
                 if (node != this.node) {
-                    this.logger.log("Get Redirect: " + node, replicas);
                     this.redirect(msg, kvRequest, node, replicas, request.address, request.port, false);
                     return;
                 }
@@ -262,7 +266,6 @@ public class Server {
                     kvResponse.setVersion(data.version);
                 }
 
-                this.logger.log("Get Response: " + kvRequest.getCommand(), replicas);
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
             }
 
@@ -271,8 +274,6 @@ public class Server {
                 ArrayList<Integer> replicas = new ArrayList<>(kvRequest.getReplicasList());
                 if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
                 int node = replicas.get(replicas.size() - 1);
-
-                this.logger.log("Change Request: " + kvRequest.getCommand(), replicas);
 
                 if (replicas.contains(this.node)) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
@@ -284,7 +285,6 @@ public class Server {
 
                     if (node == this.node) {
                         if (replicas.size() == Utils.REPLICATION_FACTOR) {
-                            this.logger.log("Change Response: " + kvRequest.getCommand(), replicas);
                             this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
                             return;
                         }
@@ -294,20 +294,13 @@ public class Server {
                     }
                 }
 
-                this.logger.log("Change Redirect: " + node, replicas);
                 this.redirect(msg, kvRequest, node, replicas, request.address, request.port, replicas.contains(this.node));
             }
-        } catch (OutOfMemoryError e) {
-            this.logger.log(e.getMessage(), Utils.getFreeMemory());
-            if (msg != null && kvResponse != null)  {
-                kvResponse.setErrCode(Utils.MEMORY_ERROR);
-                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
-            }
         } catch (Exception e) {
-            this.logger.log(e.getMessage(), Utils.getFreeMemory());
+            this.logger.log("Request: " + e.getMessage(), Utils.getFreeMemory());
             if (msg != null && kvResponse != null)  {
                 kvResponse.setErrCode(Utils.STORE_ERROR);
-                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
             }
         }
     }
