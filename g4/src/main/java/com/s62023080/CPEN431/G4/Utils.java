@@ -17,7 +17,7 @@ public class Utils {
     public static final int LOWER_MIN_MEMORY = 5;
     public static final int UPPER_MIN_MEMORY = 10;
     public static final int MAX_CACHE_SIZE = 1000;
-    public static final int CACHE_EXPIRATION = 1500;
+    public static final int CACHE_EXPIRATION = 1000;
     public static final int OVERLOAD_TIME = 1500;
     public static final int EPIDEMIC_TIMEOUT = 5000;
     public static final int EPIDEMIC_PERIOD = 500;

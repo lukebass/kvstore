@@ -13,28 +13,28 @@ public class Logger {
     }
 
     public void log(String message) {
+        System.out.println(message);
         System.out.println("Log: " + System.currentTimeMillis());
         System.out.println("PID: " + pid);
         System.out.println("Port: " + port);
-        System.out.println(message);
         System.out.println("\n");
     }
 
     public void log(String message, int memory) {
+        System.out.println(message);
         System.out.println("Log: " + System.currentTimeMillis());
         System.out.println("PID: " + pid);
         System.out.println("Port: " + port);
         System.out.println("Memory: " + memory);
-        System.out.println(message);
         System.out.println("\n");
     }
 
     public void log(String message, ArrayList<Integer> replicas) {
+        System.out.println(message);
+        System.out.println("Replicas: " + replicas.toString());
         System.out.println("Log: " + System.currentTimeMillis());
         System.out.println("PID: " + pid);
         System.out.println("Port: " + port);
-        System.out.println(message);
-        System.out.println("Replicas: " + replicas.toString());
         System.out.println("\n");
     }
 

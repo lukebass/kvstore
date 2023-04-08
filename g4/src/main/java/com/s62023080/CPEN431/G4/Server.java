@@ -111,7 +111,7 @@ public class Server {
         }
     }
 
-    public void redirect(Msg msg, KVRequest kvRequest, int node, ArrayList<Integer> replicas, InetAddress address, int port) {
+    public void redirect(Msg msg, KVRequest kvRequest, int node, ArrayList<Integer> replicas, InetAddress address, int port, boolean cache) {
         if (node == -1) return;
 
         try {
@@ -130,7 +130,7 @@ public class Server {
             msgClone.setPort(port);
             byte[] response = msgClone.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, InetAddress.getLocalHost(), node));
-            this.cache.put(msg.getMessageID(), new CacheData(response, InetAddress.getLocalHost(), node));
+            if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, InetAddress.getLocalHost(), node));
         } catch (IOException e) {
             this.logger.log(e.getMessage());
         }
@@ -165,7 +165,9 @@ public class Server {
         try {
             CacheData cached = this.cache.getIfPresent(messageID);
             if (cached == null) return false;
-            this.logger.log("Cache Response");
+            Msg msg = Msg.parseFrom(cached.data);
+            KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
+            this.logger.log("Cache Response: " + kvRequest.getCommand(), new ArrayList<>(kvRequest.getReplicasList()));
             this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
             return true;
         } catch (IOException e) {
@@ -248,8 +250,8 @@ public class Server {
                 this.logger.log("Get Request: " + kvRequest.getCommand(), replicas);
 
                 if (node != this.node) {
-                    this.logger.log("Redirect Request: " + node, replicas);
-                    this.redirect(msg, kvRequest, node, replicas, request.address, request.port);
+                    this.logger.log("Get Redirect: " + node, replicas);
+                    this.redirect(msg, kvRequest, node, replicas, request.address, request.port, false);
                     return;
                 }
 
@@ -280,18 +282,20 @@ public class Server {
                         if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
                     }
 
-                    if (node == this.node && replicas.size() == Utils.REPLICATION_FACTOR) {
-                        this.logger.log("Change Response: " + kvRequest.getCommand(), replicas);
-                        this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
-                        return;
-                    } else if (node == this.node) {
+                    if (node == this.node) {
+                        if (replicas.size() == Utils.REPLICATION_FACTOR) {
+                            this.logger.log("Change Response: " + kvRequest.getCommand(), replicas);
+                            this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                            return;
+                        }
+
                         node = Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas);
                         replicas.add(node);
                     }
                 }
 
-                this.logger.log("Redirect Request: " + node, replicas);
-                this.redirect(msg, kvRequest, node, replicas, request.address, request.port);
+                this.logger.log("Change Redirect: " + node, replicas);
+                this.redirect(msg, kvRequest, node, replicas, request.address, request.port, replicas.contains(this.node));
             }
         } catch (OutOfMemoryError e) {
             this.logger.log(e.getMessage(), Utils.getFreeMemory());
@@ -357,7 +361,10 @@ public class Server {
             this.lock.writeLock().unlock();
         }
 
-        if (regen) this.regen();
+        if (regen) {
+            this.logger.log("Node Leave");
+            this.regen();
+        }
     }
 
     public void merge(Map<Integer, Long> nodes) {
