@@ -275,7 +275,6 @@ public class Server {
                 }
 
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
-                return;
             }
 
             // Change request
@@ -359,7 +358,6 @@ public class Server {
     public void broadcast() {
         this.logger.log("Node Alive");
         this.nodes.put(this.node, System.currentTimeMillis());
-        this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
         for (int port : this.ports) {
             if (port == this.node) continue;
             this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
