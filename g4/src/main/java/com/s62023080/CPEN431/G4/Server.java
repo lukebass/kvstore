@@ -122,7 +122,7 @@ public class Server {
     }
 
     public void redirect(Msg msg, KVRequest kvRequest, int node, ArrayList<Integer> replicas, InetAddress address, int port, boolean cache) {
-        if (node == -1) return;
+        if (port == this.node || node == -1) return;
         try {
             KVRequest.Builder reqClone = KVRequest.newBuilder();
             reqClone.setCommand(kvRequest.getCommand());
@@ -146,6 +146,7 @@ public class Server {
     }
 
     public CacheData send(ByteString messageID, ByteString payload, InetAddress address, int port, boolean cache) {
+        if (port == this.node) return null;
         try {
             Msg.Builder msg = Msg.newBuilder();
             msg.setMessageID(messageID);
@@ -338,7 +339,7 @@ public class Server {
             this.tableLock.writeLock().unlock();
         }
 
-        for (ByteString key : this.store.getKeys()) {
+        for (ByteString key : new ArrayList<>(this.store.getKeys())) {
             ArrayList<Integer> oldReplicas = oldMap.get(oldMap.tailMap(Utils.hashKey(key)).firstKey());
             ArrayList<Integer> newReplicas = newMap.get(newMap.tailMap(Utils.hashKey(key)).firstKey());
 
@@ -380,7 +381,7 @@ public class Server {
             int random = ThreadLocalRandom.current().nextInt(nodes.size());
             int port = nodes.get(random);
             if (port == this.node) port = nodes.get((random + 1) % nodes.size());
-            if (port != this.node) this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
+            this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
         } finally {
             this.lock.writeLock().unlock();
         }
