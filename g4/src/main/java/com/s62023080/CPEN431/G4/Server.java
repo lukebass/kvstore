@@ -93,6 +93,16 @@ public class Server {
         }
     }
 
+    public void receiveConfirm(ByteString messageID) {
+        this.queueLock.writeLock().lock();
+        try {
+            this.queue.remove(messageID);
+            this.cache.put(messageID, new CacheData(null, null, 0));
+        } finally {
+            this.queueLock.writeLock().unlock();
+        }
+    }
+
     public void sendReplica(ByteString key, Data data, int port) {
         this.queueLock.writeLock().lock();
         try {
@@ -113,7 +123,6 @@ public class Server {
 
     public void redirect(Msg msg, KVRequest kvRequest, int node, ArrayList<Integer> replicas, InetAddress address, int port, boolean cache) {
         if (node == -1) return;
-
         try {
             KVRequest.Builder reqClone = KVRequest.newBuilder();
             reqClone.setCommand(kvRequest.getCommand());
@@ -150,13 +159,11 @@ public class Server {
         } catch (IOException e) {
             this.logger.log("Send " + e.getMessage());
         }
-
         return null;
     }
 
     public void pop() {
         if (this.queue.size() == 0) return;
-
         this.queueLock.writeLock().lock();
         try {
             this.queue.values().removeIf(cached -> Utils.isDeadQueue(cached.time));
@@ -172,11 +179,11 @@ public class Server {
         }
     }
 
-    public boolean check(ByteString messageID) {
+    public boolean check(ByteString messageID, boolean send) {
         try {
             CacheData cached = this.cache.getIfPresent(messageID);
             if (cached == null) return false;
-            this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
+            if (send) this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
             return true;
         } catch (IOException e) {
             this.logger.log("Check " + e.getMessage());
@@ -190,27 +197,22 @@ public class Server {
 
         try {
             msg = Msg.parseFrom(request.data);
-            if (Utils.isCheckSumInvalid(msg)) return;
+            if (Utils.isCheckSumInvalid(msg)) {
+                this.logger.log("CheckSum: " + msg.getMessageID());
+                return;
+            }
             if (msg.hasAddress()) request.address = InetAddress.getByAddress(msg.getAddress().toByteArray());
             if (msg.hasPort()) request.port = msg.getPort();
 
-            // Parse request
             KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
 
-            if (kvRequest.getCommand() == Utils.REPLICA_CONFIRMED) {
-                this.queueLock.writeLock().lock();
-                try {
-                    this.queue.remove(msg.getMessageID());
-                } finally {
-                    this.queueLock.writeLock().unlock();
-                }
-                return;
-            }
+            // Cache check
+            if (this.check(msg.getMessageID(), !Utils.isReplicaRequest(kvRequest.getCommand()))) return;
 
-            if (this.check(msg.getMessageID())) return;
-
-            kvResponse = Utils.parseRequest(kvRequest, this.cache.size());
+            // Parse request
+            kvResponse = Utils.parseRequest(kvRequest);
             if (kvResponse.getErrCode() != 0) {
+                this.logger.log("Parse: " + kvResponse.getErrCode());
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
                 return;
             }
@@ -243,9 +245,15 @@ public class Server {
             }
 
             // Replica request
-            if (kvRequest.getCommand() == Utils.REPLICA_PUSH) {
-                this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
-                this.sendConfirm(msg.getMessageID(), request.port);
+            if (Utils.isReplicaRequest(kvRequest.getCommand())) {
+                switch (kvRequest.getCommand()) {
+                    case Utils.REPLICA_PUSH -> {
+                        if (Utils.memoryCheck(this.cache.size()) != null) return;
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
+                        this.sendConfirm(msg.getMessageID(), request.port);
+                    }
+                    case Utils.REPLICA_CONFIRMED -> this.receiveConfirm(msg.getMessageID());
+                }
             }
 
             // Get request
@@ -267,6 +275,7 @@ public class Server {
                 }
 
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                return;
             }
 
             // Change request
@@ -276,6 +285,13 @@ public class Server {
                 int node = replicas.get(replicas.size() - 1);
 
                 if (replicas.contains(this.node)) {
+                    ByteString payload = Utils.memoryCheck(this.cache.size());
+                    if (payload != null) {
+                        this.send(msg.getMessageID(), payload, request.address, request.port, false);
+                        this.logger.log("Memory: " + kvResponse.getErrCode(), Utils.getFreeMemory());
+                        return;
+                    }
+
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
                         this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
@@ -340,16 +356,33 @@ public class Server {
         }
     }
 
+    public void broadcast() {
+        this.logger.log("Node Alive");
+        this.nodes.put(this.node, System.currentTimeMillis());
+        this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
+        for (int port : this.ports) {
+            if (port == this.node) continue;
+            this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
+        }
+    }
+
     public void push() {
         boolean regen;
 
         this.lock.writeLock().lock();
         try {
+            if (System.currentTimeMillis() - this.nodes.get(this.node) > Utils.EPIDEMIC_TIMEOUT) {
+                this.broadcast();
+                return;
+            }
+
             this.nodes.put(this.node, System.currentTimeMillis());
             regen = this.nodes.values().removeIf(value -> Utils.isDeadNode(value, this.nodes.size()));
-            int port = this.ports.get(ThreadLocalRandom.current().nextInt(this.ports.size()));
-            if (port == this.node) port = this.ports.get((port + 1) % this.ports.size());
-            this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
+            ArrayList<Integer> nodes = new ArrayList<>(this.nodes.keySet());
+            int random = ThreadLocalRandom.current().nextInt(nodes.size());
+            int port = nodes.get(random);
+            if (port == this.node) port = nodes.get((random + 1) % nodes.size());
+            if (port != this.node) this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
         } finally {
             this.lock.writeLock().unlock();
         }

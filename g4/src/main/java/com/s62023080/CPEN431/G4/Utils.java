@@ -54,6 +54,10 @@ public class Utils {
         return command == Utils.EPIDEMIC_PUSH || command == Utils.EPIDEMIC_PULL;
     }
 
+    public static boolean isReplicaRequest(int command) {
+        return command == Utils.REPLICA_PUSH || command == Utils.REPLICA_CONFIRMED;
+    }
+
     public static boolean isChangeRequest(int command) {
         return command == Utils.PUT_REQUEST || command == Utils.REMOVE_REQUEST;
     }
@@ -66,7 +70,7 @@ public class Utils {
         return value.size() == 0 || value.size() > 10000;
     }
 
-    public static KVResponse.Builder parseRequest(KVRequest kvRequest, long size) {
+    public static KVResponse.Builder parseRequest(KVRequest kvRequest) {
         KVResponse.Builder kvResponse = KVResponse.newBuilder();
         kvResponse.setErrCode(Utils.SUCCESS);
 
@@ -85,18 +89,22 @@ public class Utils {
             return kvResponse;
         }
 
-        if (kvRequest.getCommand() == Utils.PUT_REQUEST || kvRequest.getCommand() == Utils.REPLICA_PUSH) {
-            if (size > Utils.MAX_CACHE_SIZE && Utils.isOutOfMemory(Utils.UPPER_MIN_MEMORY)) {
-                kvResponse.setErrCode(Utils.OVERLOAD_ERROR);
-                kvResponse.setOverloadWaitTime(Utils.OVERLOAD_TIME);
-                return kvResponse;
-            } else if (Utils.isOutOfMemory(Utils.LOWER_MIN_MEMORY)) {
-                kvResponse.setErrCode(Utils.MEMORY_ERROR);
-                return kvResponse;
-            }
+        return kvResponse;
+    }
+
+    public static ByteString memoryCheck(long size) {
+        KVResponse.Builder kvResponse = KVResponse.newBuilder();
+
+        if (Utils.isOutOfMemory(Utils.UPPER_MIN_MEMORY) && size > Utils.MAX_CACHE_SIZE) {
+            kvResponse.setErrCode(Utils.OVERLOAD_ERROR);
+            kvResponse.setOverloadWaitTime(Utils.OVERLOAD_TIME);
+            return kvResponse.build().toByteString();
+        } else if (Utils.isOutOfMemory(Utils.LOWER_MIN_MEMORY)) {
+            kvResponse.setErrCode(Utils.MEMORY_ERROR);
+            return kvResponse.build().toByteString();
         }
 
-        return kvResponse;
+        return null;
     }
 
     public static long createCheckSum(byte[] messageID, byte[] payload) {
@@ -167,7 +175,7 @@ public class Utils {
             ArrayList<Integer> replicas = new ArrayList<>();
             for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) {
                 int node = Utils.searchAddresses(nodeID, addresses, replicas);
-                if (node != -1) replicas.add(Utils.searchAddresses(nodeID, addresses, replicas));
+                if (node != -1) replicas.add(node);
             }
             map.put(nodeID, replicas);
         }
