@@ -247,9 +247,9 @@ public class Server {
 
             // Replica request
             if (Utils.isReplicaRequest(kvRequest.getCommand())) {
+                if (Utils.memoryCheck(this.cache.size()) != null) return;
                 switch (kvRequest.getCommand()) {
                     case Utils.REPLICA_PUSH -> {
-                        if (Utils.memoryCheck(this.cache.size()) != null) return;
                         this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
                         this.sendConfirm(msg.getMessageID(), request.port);
                     }
@@ -263,19 +263,21 @@ public class Server {
                 for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
                 int node = replicas.get(replicas.size() - 1);
 
-                if (node != this.node) {
-                    this.redirect(msg, kvRequest, node, replicas, request.address, request.port, false);
+                if (node == this.node) {
+                    Data data = this.store.get(kvRequest.getKey());
+                    if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
+                    else {
+                        kvResponse.setValue(data.value);
+                        kvResponse.setVersion(data.version);
+                    }
+
+                    this.logger.log("Get Response: " + kvRequest.getKey(), replicas);
+                    this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
                     return;
                 }
 
-                Data data = this.store.get(kvRequest.getKey());
-                if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
-                else {
-                    kvResponse.setValue(data.value);
-                    kvResponse.setVersion(data.version);
-                }
-
-                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                this.logger.log("Get Redirect: " + node, replicas);
+                this.redirect(msg, kvRequest, node, replicas, request.address, request.port, false);
             }
 
             // Change request
@@ -301,6 +303,7 @@ public class Server {
 
                     if (node == this.node) {
                         if (replicas.size() == Utils.REPLICATION_FACTOR) {
+                            this.logger.log("Change Response: " + kvRequest.getCommand(), replicas);
                             this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
                             return;
                         }
@@ -310,6 +313,7 @@ public class Server {
                     }
                 }
 
+                this.logger.log("Change Redirect: " + kvRequest.getCommand(), replicas);
                 this.redirect(msg, kvRequest, node, replicas, request.address, request.port, replicas.contains(this.node));
             }
         } catch (Exception e) {
