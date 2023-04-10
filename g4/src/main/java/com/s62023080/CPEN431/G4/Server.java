@@ -180,12 +180,12 @@ public class Server {
         return null;
     }
 
-    public boolean check(ByteString messageID) {
+    public boolean check(ByteString messageID, boolean send) {
         this.cacheLock.readLock().lock();
         try {
             CacheData cached = this.cache.getIfPresent(messageID);
             if (cached == null) return false;
-            this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
+            if (send) this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
             this.logger.log("Check: " + cached.address + ":" + cached.port + " " + messageID);
             return true;
         } catch (IOException e) {
@@ -209,7 +209,7 @@ public class Server {
             this.logger.log("Request: " + kvRequest.getCommand() + " " + msg.getMessageID(), Utils.getFreeMemory(), this.cache.size());
 
             // Cache check
-            if (this.check(msg.getMessageID())) return;
+            if (this.check(msg.getMessageID(), !Utils.isReplicaRequest(kvRequest.getCommand()))) return;
 
             // Parse request
             kvResponse = Utils.parseRequest(kvRequest, this.cache.size());
@@ -264,6 +264,7 @@ public class Server {
                         this.queueLock.writeLock().lock();
                         try {
                             this.queue.remove(msg.getMessageID());
+                            this.cache.put(msg.getMessageID(), new CacheData(null, null, 0, System.currentTimeMillis()));
                         } finally {
                             this.queueLock.writeLock().unlock();
                         }
