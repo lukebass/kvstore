@@ -70,7 +70,7 @@ public class Utils {
         return value.size() == 0 || value.size() > 10000;
     }
 
-    public static KVResponse.Builder parseRequest(KVRequest kvRequest) {
+    public static KVResponse.Builder parseRequest(KVRequest kvRequest, long size) {
         KVResponse.Builder kvResponse = KVResponse.newBuilder();
         kvResponse.setErrCode(Utils.SUCCESS);
 
@@ -89,22 +89,18 @@ public class Utils {
             return kvResponse;
         }
 
-        return kvResponse;
-    }
-
-    public static ByteString memoryCheck(long size) {
-        KVResponse.Builder kvResponse = KVResponse.newBuilder();
-
-        if (Utils.isOutOfMemory(Utils.UPPER_MIN_MEMORY) && size > Utils.MAX_CACHE_SIZE) {
-            kvResponse.setErrCode(Utils.OVERLOAD_ERROR);
-            kvResponse.setOverloadWaitTime(Utils.OVERLOAD_TIME);
-            return kvResponse.build().toByteString();
-        } else if (Utils.isOutOfMemory(Utils.LOWER_MIN_MEMORY)) {
-            kvResponse.setErrCode(Utils.MEMORY_ERROR);
-            return kvResponse.build().toByteString();
+        if (Utils.isChangeRequest(kvRequest.getCommand()) || Utils.isReplicaRequest(kvRequest.getCommand())) {
+            if (Utils.isOutOfMemory(Utils.UPPER_MIN_MEMORY) && size > Utils.MAX_CACHE_SIZE) {
+                kvResponse.setErrCode(Utils.OVERLOAD_ERROR);
+                kvResponse.setOverloadWaitTime(Utils.OVERLOAD_TIME);
+                return kvResponse;
+            } else if (Utils.isOutOfMemory(Utils.LOWER_MIN_MEMORY)) {
+                kvResponse.setErrCode(Utils.MEMORY_ERROR);
+                return kvResponse;
+            }
         }
 
-        return null;
+        return kvResponse;
     }
 
     public static long createCheckSum(byte[] messageID, byte[] payload) {

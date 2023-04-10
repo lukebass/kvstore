@@ -24,8 +24,8 @@ public class Server {
     private final DatagramSocket socket;
     private final ExecutorService executor;
     private final Store store;
-    private final ReentrantReadWriteLock lock;
     private final ReentrantReadWriteLock cacheLock;
+    private final ReentrantReadWriteLock nodesLock;
     private final ReentrantReadWriteLock addressesLock;
     private final ReentrantReadWriteLock queueLock;
     private final Cache<ByteString, CacheData> cache;
@@ -39,12 +39,12 @@ public class Server {
         this.node = node;
         this.weight = weight;
         this.ports = nodes;
-        this.logger = new Logger(this.pid, this.node);
+        this.logger = new Logger(this.pid);
         this.socket = new DatagramSocket(this.node);
         this.executor = Executors.newFixedThreadPool(threads);
         this.store = new Store();
-        this.lock = new ReentrantReadWriteLock();
         this.cacheLock = new ReentrantReadWriteLock();
+        this.nodesLock = new ReentrantReadWriteLock();
         this.addressesLock = new ReentrantReadWriteLock();
         this.queueLock = new ReentrantReadWriteLock();
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
@@ -99,7 +99,7 @@ public class Server {
         this.queueLock.writeLock().lock();
         try {
             this.queue.remove(messageID);
-            this.cache.put(messageID, new CacheData(null, null, -1));
+            this.cache.put(messageID, new CacheData(null, null, 0));
         } finally {
             this.queueLock.writeLock().unlock();
         }
@@ -118,6 +118,23 @@ public class Server {
             if (cached != null) this.queue.put(messageID, cached);
         } catch (UnknownHostException e) {
             this.logger.log("Replica " + e.getMessage());
+        } finally {
+            this.queueLock.writeLock().unlock();
+        }
+    }
+
+    public void pop() {
+        if (this.queue.size() == 0) return;
+        this.queueLock.writeLock().lock();
+        try {
+            this.queue.values().removeIf(cached -> Utils.isDeadQueue(cached.time));
+            for (ByteString messageID : this.queue.keySet()) {
+                CacheData cached = this.queue.get(messageID);
+                if (cached == null) continue;
+                this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
+            }
+        } catch (IOException e) {
+            this.logger.log("Pop " + e.getMessage());
         } finally {
             this.queueLock.writeLock().unlock();
         }
@@ -173,25 +190,8 @@ public class Server {
         return null;
     }
 
-    public void pop() {
-        if (this.queue.size() == 0) return;
-        this.queueLock.writeLock().lock();
-        try {
-            this.queue.values().removeIf(cached -> Utils.isDeadQueue(cached.time));
-            for (ByteString messageID : this.queue.keySet()) {
-                CacheData cached = this.queue.get(messageID);
-                if (cached == null) continue;
-                this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
-            }
-        } catch (IOException e) {
-            this.logger.log("Pop " + e.getMessage());
-        } finally {
-            this.queueLock.writeLock().unlock();
-        }
-    }
-
     public boolean check(ByteString messageID, boolean send) {
-        this.cacheLock.writeLock().lock();
+        this.cacheLock.readLock().lock();
         try {
             CacheData cached = this.cache.getIfPresent(messageID);
             if (cached == null) return false;
@@ -201,7 +201,7 @@ public class Server {
         } catch (IOException e) {
             this.logger.log("Cache " + e.getMessage());
         } finally {
-            this.cacheLock.writeLock().unlock();
+            this.cacheLock.readLock().unlock();
         }
         return false;
     }
@@ -212,21 +212,20 @@ public class Server {
 
         try {
             msg = Msg.parseFrom(request.data);
-            if (Utils.isCheckSumInvalid(msg)) return;
             if (msg.hasAddress()) request.address = InetAddress.getByAddress(msg.getAddress().toByteArray());
             if (msg.hasPort()) request.port = msg.getPort();
 
             KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
-            this.logger.log("Request: " + kvRequest.getCommand() + " " + msg.getMessageID(), Utils.getFreeMemory());
+            this.logger.log("Request: " + kvRequest.getCommand() + " " + msg.getMessageID(), Utils.getFreeMemory(), this.cache.size());
 
             // Cache check
             if (this.check(msg.getMessageID(), !Utils.isReplicaRequest(kvRequest.getCommand()))) return;
 
             // Parse request
-            kvResponse = Utils.parseRequest(kvRequest);
+            kvResponse = Utils.parseRequest(kvRequest, this.cache.size());
             if (kvResponse.getErrCode() != 0) {
                 this.logger.log("Parse: " + kvResponse.getErrCode());
-                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
+                if (!Utils.isReplicaRequest(kvRequest.getCommand())) this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
                 return;
             }
 
@@ -240,7 +239,14 @@ public class Server {
                     }
                     case Utils.HEALTH_REQUEST -> kvResponse.setErrCode(Utils.SUCCESS);
                     case Utils.PID_REQUEST -> kvResponse.setPid(this.pid);
-                    case Utils.MEMBERSHIP_REQUEST -> kvResponse.setMembershipCount(this.nodes.size());
+                    case Utils.MEMBERSHIP_REQUEST -> {
+                        this.nodesLock.readLock().lock();
+                        try {
+                            kvResponse.setMembershipCount(this.nodes.size());
+                        } finally {
+                            this.nodesLock.readLock().unlock();
+                        }
+                    }
                 }
 
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
@@ -259,7 +265,6 @@ public class Server {
 
             // Replica request
             if (Utils.isReplicaRequest(kvRequest.getCommand())) {
-                if (Utils.memoryCheck(this.cache.size()) != null) return;
                 switch (kvRequest.getCommand()) {
                     case Utils.REPLICA_PUSH -> {
                         this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
@@ -272,9 +277,14 @@ public class Server {
             // Get request
             if (kvRequest.getCommand() == Utils.GET_REQUEST) {
                 ArrayList<Integer> replicas = new ArrayList<>();
-                for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
-                int node = replicas.get(replicas.size() - 1);
+                this.addressesLock.readLock().lock();
+                try {
+                    for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
+                } finally {
+                    this.addressesLock.readLock().unlock();
+                }
 
+                int node = replicas.get(replicas.size() - 1);
                 if (node == this.node) {
                     Data data = this.store.get(kvRequest.getKey());
                     if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
@@ -293,17 +303,15 @@ public class Server {
             // Change request
             if (Utils.isChangeRequest(kvRequest.getCommand())) {
                 ArrayList<Integer> replicas = new ArrayList<>(kvRequest.getReplicasList());
-                if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
+                this.addressesLock.readLock().lock();
+                try {
+                    if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
+                } finally {
+                    this.addressesLock.readLock().unlock();
+                }
+
                 int node = replicas.get(replicas.size() - 1);
-
                 if (replicas.contains(this.node)) {
-                    ByteString payload = Utils.memoryCheck(this.cache.size());
-                    if (payload != null) {
-                        this.send(msg.getMessageID(), payload, request.address, request.port, false);
-                        this.logger.log("Memory: " + kvResponse.getErrCode(), Utils.getFreeMemory());
-                        return;
-                    }
-
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
                         this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
@@ -317,15 +325,20 @@ public class Server {
                             return;
                         }
 
-                        node = Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas);
-                        replicas.add(node);
+                        this.addressesLock.readLock().lock();
+                        try {
+                            node = Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas);
+                            replicas.add(node);
+                        } finally {
+                            this.addressesLock.readLock().unlock();
+                        }
                     }
                 }
 
                 this.redirect(msg, kvRequest, node, replicas, request.address, request.port, replicas.contains(this.node));
             }
         } catch (Exception e) {
-            this.logger.log("Request: " + e.getMessage(), Utils.getFreeMemory());
+            this.logger.log("Request: " + e.getMessage(), Utils.getFreeMemory(), this.cache.size());
             if (msg != null && kvResponse != null)  {
                 kvResponse.setErrCode(Utils.STORE_ERROR);
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
@@ -367,22 +380,18 @@ public class Server {
         }
     }
 
-    public void broadcast() {
-        this.logger.log("Node Alive");
-        this.nodes.put(this.node, System.currentTimeMillis());
-        for (int port : this.ports) {
-            if (port == this.node) continue;
-            this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
-        }
-    }
-
     public void push() {
         boolean regen;
 
-        this.lock.writeLock().lock();
+        this.nodesLock.writeLock().lock();
         try {
             if (System.currentTimeMillis() - this.nodes.get(this.node) > Utils.EPIDEMIC_TIMEOUT) {
-                this.broadcast();
+                this.logger.log("Node Alive");
+                this.nodes.put(this.node, System.currentTimeMillis());
+                for (int port : this.ports) {
+                    if (port == this.node) continue;
+                    this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
+                }
                 return;
             }
 
@@ -394,7 +403,7 @@ public class Server {
             if (port == this.node) port = nodes.get((random + 1) % nodes.size());
             this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
         } finally {
-            this.lock.writeLock().unlock();
+            this.nodesLock.writeLock().unlock();
         }
 
         if (regen) {
@@ -406,7 +415,7 @@ public class Server {
     public void merge(Map<Integer, Long> nodes) {
         boolean regen = false;
 
-        this.lock.writeLock().lock();
+        this.nodesLock.writeLock().lock();
         try {
             for (int node : nodes.keySet()) {
                 if (node == this.node || Utils.isDeadNode(nodes.get(node), this.nodes.size())) continue;
@@ -418,7 +427,7 @@ public class Server {
                 }
             }
         } finally {
-            this.lock.writeLock().unlock();
+            this.nodesLock.writeLock().unlock();
         }
 
         if (regen) this.regen();
