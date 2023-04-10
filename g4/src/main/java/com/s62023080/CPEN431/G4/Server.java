@@ -25,12 +25,13 @@ public class Server {
     private final ExecutorService executor;
     private final Store store;
     private final ReentrantReadWriteLock lock;
-    private final ReentrantReadWriteLock tableLock;
+    private final ReentrantReadWriteLock cacheLock;
+    private final ReentrantReadWriteLock addressesLock;
     private final ReentrantReadWriteLock queueLock;
     private final Cache<ByteString, CacheData> cache;
-    private final ConcurrentHashMap<ByteString, CacheData> queue;
     private final ConcurrentHashMap<Integer, Long> nodes;
     private ConcurrentSkipListMap<Integer, Integer> addresses;
+    private final ConcurrentHashMap<ByteString, CacheData> queue;
 
     public Server(ArrayList<Integer> nodes, int node, int threads, int weight) throws IOException {
         this.running = true;
@@ -43,7 +44,8 @@ public class Server {
         this.executor = Executors.newFixedThreadPool(threads);
         this.store = new Store();
         this.lock = new ReentrantReadWriteLock();
-        this.tableLock = new ReentrantReadWriteLock();
+        this.cacheLock = new ReentrantReadWriteLock();
+        this.addressesLock = new ReentrantReadWriteLock();
         this.queueLock = new ReentrantReadWriteLock();
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
         this.queue = new ConcurrentHashMap<>();
@@ -97,7 +99,7 @@ public class Server {
         this.queueLock.writeLock().lock();
         try {
             this.queue.remove(messageID);
-            this.cache.put(messageID, new CacheData(null, null, 0));
+            this.cache.put(messageID, new CacheData(null, null, -1));
         } finally {
             this.queueLock.writeLock().unlock();
         }
@@ -123,6 +125,7 @@ public class Server {
 
     public void redirect(Msg msg, KVRequest kvRequest, int node, ArrayList<Integer> replicas, InetAddress address, int port, boolean cache) {
         if (port == this.node || node == -1) return;
+        this.cacheLock.writeLock().lock();
         try {
             KVRequest.Builder reqClone = KVRequest.newBuilder();
             reqClone.setCommand(kvRequest.getCommand());
@@ -140,13 +143,17 @@ public class Server {
             byte[] response = msgClone.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, InetAddress.getLocalHost(), node));
             if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, InetAddress.getLocalHost(), node));
+            this.logger.log("Redirect: " + InetAddress.getLocalHost() + ":" + node + " " + msg.getMessageID());
         } catch (IOException e) {
             this.logger.log("Redirect " + e.getMessage());
+        } finally {
+            this.cacheLock.writeLock().unlock();
         }
     }
 
     public CacheData send(ByteString messageID, ByteString payload, InetAddress address, int port, boolean cache) {
         if (port == this.node) return null;
+        this.cacheLock.writeLock().lock();
         try {
             Msg.Builder msg = Msg.newBuilder();
             msg.setMessageID(messageID);
@@ -156,9 +163,12 @@ public class Server {
             this.socket.send(new DatagramPacket(response, response.length, address, port));
             CacheData cached = new CacheData(response, address, port);
             if (cache) this.cache.put(msg.getMessageID(), cached);
+            this.logger.log("Send: " + address + ":" + port + " " + messageID);
             return cached;
         } catch (IOException e) {
             this.logger.log("Send " + e.getMessage());
+        } finally {
+            this.cacheLock.writeLock().unlock();
         }
         return null;
     }
@@ -181,13 +191,17 @@ public class Server {
     }
 
     public boolean check(ByteString messageID, boolean send) {
+        this.cacheLock.writeLock().lock();
         try {
             CacheData cached = this.cache.getIfPresent(messageID);
             if (cached == null) return false;
             if (send) this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
+            this.logger.log("Cache: " + cached.address + ":" + cached.port + " " + messageID);
             return true;
         } catch (IOException e) {
-            this.logger.log("Check " + e.getMessage());
+            this.logger.log("Cache " + e.getMessage());
+        } finally {
+            this.cacheLock.writeLock().unlock();
         }
         return false;
     }
@@ -198,14 +212,12 @@ public class Server {
 
         try {
             msg = Msg.parseFrom(request.data);
-            if (Utils.isCheckSumInvalid(msg)) {
-                this.logger.log("CheckSum: " + msg.getMessageID());
-                return;
-            }
+            if (Utils.isCheckSumInvalid(msg)) return;
             if (msg.hasAddress()) request.address = InetAddress.getByAddress(msg.getAddress().toByteArray());
             if (msg.hasPort()) request.port = msg.getPort();
 
             KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
+            this.logger.log("Request: " + kvRequest.getCommand() + " " + msg.getMessageID(), Utils.getFreeMemory());
 
             // Cache check
             if (this.check(msg.getMessageID(), !Utils.isReplicaRequest(kvRequest.getCommand()))) return;
@@ -271,12 +283,10 @@ public class Server {
                         kvResponse.setVersion(data.version);
                     }
 
-                    this.logger.log("Get Response: " + kvRequest.getKey(), replicas);
                     this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
                     return;
                 }
 
-                this.logger.log("Get Redirect: " + node, replicas);
                 this.redirect(msg, kvRequest, node, replicas, request.address, request.port, false);
             }
 
@@ -303,7 +313,6 @@ public class Server {
 
                     if (node == this.node) {
                         if (replicas.size() == Utils.REPLICATION_FACTOR) {
-                            this.logger.log("Change Response: " + kvRequest.getCommand(), replicas);
                             this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
                             return;
                         }
@@ -313,7 +322,6 @@ public class Server {
                     }
                 }
 
-                this.logger.log("Change Redirect: " + kvRequest.getCommand(), replicas);
                 this.redirect(msg, kvRequest, node, replicas, request.address, request.port, replicas.contains(this.node));
             }
         } catch (Exception e) {
@@ -333,14 +341,14 @@ public class Server {
         SortedMap<Integer, ArrayList<Integer>> oldMap;
         SortedMap<Integer, ArrayList<Integer>> newMap;
 
-        this.tableLock.writeLock().lock();
+        this.addressesLock.writeLock().lock();
         try {
             oldMap = Utils.generateReplicas(this.addresses);
             this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
             newMap = Utils.generateReplicas(this.addresses);
             this.logger.log(this.addresses);
         } finally {
-            this.tableLock.writeLock().unlock();
+            this.addressesLock.writeLock().unlock();
         }
 
         for (ByteString key : new ArrayList<>(this.store.getKeys())) {
@@ -351,7 +359,6 @@ public class Server {
                 if (!oldReplicas.contains(node)) {
                     Data data = this.store.get(key);
                     if (data == null) continue;
-                    this.logger.log("Send Replica: " + node);
                     this.sendReplica(key, data, node);
                 }
             }
