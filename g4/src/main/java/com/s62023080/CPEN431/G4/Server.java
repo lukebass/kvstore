@@ -351,13 +351,20 @@ public class Server {
      */
 
     public void regen() {
+        ArrayList<Integer> nodes;
+        this.nodesLock.readLock().lock();
+        try {
+            nodes = new ArrayList<>(this.nodes.keySet());
+        } finally {
+            this.nodesLock.readLock().unlock();
+        }
+
         SortedMap<Integer, ArrayList<Integer>> oldMap;
         SortedMap<Integer, ArrayList<Integer>> newMap;
-
         this.addressesLock.writeLock().lock();
         try {
             oldMap = Utils.generateReplicas(this.addresses);
-            this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
+            this.addresses = Utils.generateAddresses(nodes, this.weight);
             newMap = Utils.generateReplicas(this.addresses);
             this.logger.log(this.addresses);
         } finally {
