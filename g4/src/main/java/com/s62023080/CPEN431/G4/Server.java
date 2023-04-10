@@ -95,16 +95,6 @@ public class Server {
         }
     }
 
-    public void receiveConfirm(ByteString messageID) {
-        this.queueLock.writeLock().lock();
-        try {
-            this.queue.remove(messageID);
-            this.cache.put(messageID, new CacheData(null, null, 0));
-        } finally {
-            this.queueLock.writeLock().unlock();
-        }
-    }
-
     public void sendReplica(ByteString key, Data data, int port) {
         this.queueLock.writeLock().lock();
         try {
@@ -128,9 +118,9 @@ public class Server {
         this.queueLock.writeLock().lock();
         try {
             this.queue.values().removeIf(cached -> Utils.isDeadQueue(cached.time));
+            this.logger.log("Pop: " + this.queue.size());
             for (ByteString messageID : this.queue.keySet()) {
                 CacheData cached = this.queue.get(messageID);
-                if (cached == null) continue;
                 this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
             }
         } catch (IOException e) {
@@ -141,7 +131,7 @@ public class Server {
     }
 
     public void redirect(Msg msg, KVRequest kvRequest, int node, ArrayList<Integer> replicas, InetAddress address, int port, boolean cache) {
-        if (port == this.node || node == -1) return;
+        if (node == this.node || node == -1) return;
         this.cacheLock.writeLock().lock();
         try {
             KVRequest.Builder reqClone = KVRequest.newBuilder();
@@ -159,17 +149,17 @@ public class Server {
             msgClone.setPort(port);
             byte[] response = msgClone.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, InetAddress.getLocalHost(), node));
-            if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, InetAddress.getLocalHost(), node));
+            if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, InetAddress.getLocalHost(), node, System.currentTimeMillis()));
             this.logger.log("Redirect: " + InetAddress.getLocalHost() + ":" + node + " " + msg.getMessageID());
         } catch (IOException e) {
-            this.logger.log("Redirect " + e.getMessage());
+            this.logger.log("Redirect Error " + e.getMessage());
         } finally {
             this.cacheLock.writeLock().unlock();
         }
     }
 
     public CacheData send(ByteString messageID, ByteString payload, InetAddress address, int port, boolean cache) {
-        if (port == this.node) return null;
+        if (port == this.node || port == -1) return null;
         this.cacheLock.writeLock().lock();
         try {
             Msg.Builder msg = Msg.newBuilder();
@@ -178,28 +168,28 @@ public class Server {
             msg.setCheckSum(Utils.createCheckSum(messageID.toByteArray(), payload.toByteArray()));
             byte[] response = msg.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, address, port));
-            CacheData cached = new CacheData(response, address, port);
+            CacheData cached = new CacheData(response, address, port, System.currentTimeMillis());
             if (cache) this.cache.put(msg.getMessageID(), cached);
             this.logger.log("Send: " + address + ":" + port + " " + messageID);
             return cached;
         } catch (IOException e) {
-            this.logger.log("Send " + e.getMessage());
+            this.logger.log("Send Error " + e.getMessage());
         } finally {
             this.cacheLock.writeLock().unlock();
         }
         return null;
     }
 
-    public boolean check(ByteString messageID, boolean send) {
+    public boolean check(ByteString messageID) {
         this.cacheLock.readLock().lock();
         try {
             CacheData cached = this.cache.getIfPresent(messageID);
             if (cached == null) return false;
-            if (send) this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
-            this.logger.log("Cache: " + cached.address + ":" + cached.port + " " + messageID);
+            this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
+            this.logger.log("Check: " + cached.address + ":" + cached.port + " " + messageID);
             return true;
         } catch (IOException e) {
-            this.logger.log("Cache " + e.getMessage());
+            this.logger.log("Check Error " + e.getMessage());
         } finally {
             this.cacheLock.readLock().unlock();
         }
@@ -219,12 +209,12 @@ public class Server {
             this.logger.log("Request: " + kvRequest.getCommand() + " " + msg.getMessageID(), Utils.getFreeMemory(), this.cache.size());
 
             // Cache check
-            if (this.check(msg.getMessageID(), !Utils.isReplicaRequest(kvRequest.getCommand()))) return;
+            if (this.check(msg.getMessageID())) return;
 
             // Parse request
             kvResponse = Utils.parseRequest(kvRequest, this.cache.size());
             if (kvResponse.getErrCode() != 0) {
-                this.logger.log("Parse: " + kvResponse.getErrCode());
+                this.logger.log("Parse: " + kvResponse.getErrCode(), Utils.getFreeMemory(), this.cache.size());
                 if (!Utils.isReplicaRequest(kvRequest.getCommand())) this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
                 return;
             }
@@ -249,7 +239,7 @@ public class Server {
                     }
                 }
 
-                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
             }
 
             // Epidemic request
@@ -270,7 +260,14 @@ public class Server {
                         this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
                         this.sendConfirm(msg.getMessageID(), request.port);
                     }
-                    case Utils.REPLICA_CONFIRMED -> this.receiveConfirm(msg.getMessageID());
+                    case Utils.REPLICA_CONFIRMED -> {
+                        this.queueLock.writeLock().lock();
+                        try {
+                            this.queue.remove(msg.getMessageID());
+                        } finally {
+                            this.queueLock.writeLock().unlock();
+                        }
+                    }
                 }
             }
 
