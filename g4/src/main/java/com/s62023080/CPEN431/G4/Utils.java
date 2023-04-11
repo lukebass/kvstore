@@ -161,6 +161,7 @@ public class Utils {
             }
         }
 
+        addresses.put((int) Math.pow(2, M_BITS), addresses.get(addresses.firstKey()));
         return addresses;
     }
 

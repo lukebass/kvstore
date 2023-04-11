@@ -117,8 +117,8 @@ public class Server {
         if (this.queue.size() == 0) return;
         this.queueLock.writeLock().lock();
         try {
-            this.queue.values().removeIf(cached -> Utils.isDeadQueue(cached.time));
             this.logger.log("Pop: " + this.queue.size());
+            this.queue.values().removeIf(cached -> Utils.isDeadQueue(cached.time));
             for (ByteString messageID : this.queue.keySet()) {
                 CacheData cached = this.queue.get(messageID);
                 this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
@@ -179,7 +179,7 @@ public class Server {
     }
 
     public boolean check(ByteString messageID, boolean send) {
-        this.cacheLock.readLock().lock();
+        this.cacheLock.writeLock().lock();
         try {
             CacheData cached = this.cache.getIfPresent(messageID);
             if (cached == null) return false;
@@ -188,7 +188,7 @@ public class Server {
         } catch (IOException e) {
             this.logger.log("Check Error: " + e.getMessage());
         } finally {
-            this.cacheLock.readLock().unlock();
+            this.cacheLock.writeLock().unlock();
         }
         return false;
     }
@@ -225,14 +225,7 @@ public class Server {
                     }
                     case Utils.HEALTH_REQUEST -> kvResponse.setErrCode(Utils.SUCCESS);
                     case Utils.PID_REQUEST -> kvResponse.setPid(this.pid);
-                    case Utils.MEMBERSHIP_REQUEST -> {
-                        this.nodesLock.readLock().lock();
-                        try {
-                            kvResponse.setMembershipCount(this.nodes.size());
-                        } finally {
-                            this.nodesLock.readLock().unlock();
-                        }
-                    }
+                    case Utils.MEMBERSHIP_REQUEST -> kvResponse.setMembershipCount(this.nodes.size());
                 }
 
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
@@ -257,10 +250,10 @@ public class Server {
                         this.sendConfirm(msg.getMessageID(), request.port);
                     }
                     case Utils.REPLICA_CONFIRMED -> {
+                        if (!this.queue.containsKey(msg.getMessageID())) return;
                         this.queueLock.writeLock().lock();
                         try {
                             this.queue.remove(msg.getMessageID());
-                            this.cache.put(msg.getMessageID(), new CacheData(null, null, 0, System.currentTimeMillis()));
                         } finally {
                             this.queueLock.writeLock().unlock();
                         }
@@ -271,11 +264,11 @@ public class Server {
             // Get request
             if (kvRequest.getCommand() == Utils.GET_REQUEST) {
                 ArrayList<Integer> replicas = new ArrayList<>();
-                this.addressesLock.readLock().lock();
+                this.addressesLock.writeLock().lock();
                 try {
                     for (int i = 0; i < Utils.REPLICATION_FACTOR; i++) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
                 } finally {
-                    this.addressesLock.readLock().unlock();
+                    this.addressesLock.writeLock().unlock();
                 }
 
                 int node = replicas.get(replicas.size() - 1);
@@ -297,11 +290,11 @@ public class Server {
             // Change request
             if (Utils.isChangeRequest(kvRequest.getCommand())) {
                 ArrayList<Integer> replicas = new ArrayList<>(kvRequest.getReplicasList());
-                this.addressesLock.readLock().lock();
+                this.addressesLock.writeLock().lock();
                 try {
                     if (replicas.size() < Utils.REPLICATION_FACTOR) replicas.add(Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas));
                 } finally {
-                    this.addressesLock.readLock().unlock();
+                    this.addressesLock.writeLock().unlock();
                 }
 
                 int node = replicas.get(replicas.size() - 1);
@@ -319,12 +312,12 @@ public class Server {
                             return;
                         }
 
-                        this.addressesLock.readLock().lock();
+                        this.addressesLock.writeLock().lock();
                         try {
                             node = Utils.searchAddresses(Utils.hashKey(kvRequest.getKey()), this.addresses, replicas);
                             replicas.add(node);
                         } finally {
-                            this.addressesLock.readLock().unlock();
+                            this.addressesLock.writeLock().unlock();
                         }
                     }
                 }
@@ -345,27 +338,21 @@ public class Server {
      */
 
     public void regen() {
-        ArrayList<Integer> nodes;
-        this.nodesLock.readLock().lock();
-        try {
-            nodes = new ArrayList<>(this.nodes.keySet());
-        } finally {
-            this.nodesLock.readLock().unlock();
-        }
-
         SortedMap<Integer, ArrayList<Integer>> oldMap;
         SortedMap<Integer, ArrayList<Integer>> newMap;
+
         this.addressesLock.writeLock().lock();
         try {
             oldMap = Utils.generateReplicas(this.addresses);
-            this.addresses = Utils.generateAddresses(nodes, this.weight);
+            this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
             newMap = Utils.generateReplicas(this.addresses);
             this.logger.log(this.addresses);
         } finally {
             this.addressesLock.writeLock().unlock();
         }
 
-        for (ByteString key : new ArrayList<>(this.store.getKeys())) {
+        ArrayList<ByteString> keys = new ArrayList<>();
+        for (ByteString key : this.store.getKeys()) {
             ArrayList<Integer> oldReplicas = oldMap.get(oldMap.tailMap(Utils.hashKey(key)).firstKey());
             ArrayList<Integer> newReplicas = newMap.get(newMap.tailMap(Utils.hashKey(key)).firstKey());
 
@@ -377,8 +364,10 @@ public class Server {
                 }
             }
 
-            if (!newReplicas.contains(this.node)) this.store.remove(key);
+            if (!newReplicas.contains(this.node)) keys.add(key);
         }
+
+        if (keys.size() != 0) this.store.bulkRemove(keys);
     }
 
     public void push() {
@@ -403,6 +392,7 @@ public class Server {
             int port = nodes.get(random);
             if (port == this.node) port = nodes.get((random + 1) % nodes.size());
             this.sendEpidemic(Utils.EPIDEMIC_PUSH, port);
+            this.logger.log("Push: " + port);
         } finally {
             this.nodesLock.writeLock().unlock();
         }
