@@ -353,6 +353,7 @@ public class Server {
 
         ArrayList<ByteString> keys = new ArrayList<>();
         for (ByteString key : this.store.getKeys()) {
+            if (oldMap.tailMap(Utils.hashKey(key)).size() == 0 || newMap.tailMap(Utils.hashKey(key)).size() == 0) continue;
             ArrayList<Integer> oldReplicas = oldMap.get(oldMap.tailMap(Utils.hashKey(key)).firstKey());
             ArrayList<Integer> newReplicas = newMap.get(newMap.tailMap(Utils.hashKey(key)).firstKey());
 
