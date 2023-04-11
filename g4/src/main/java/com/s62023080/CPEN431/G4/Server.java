@@ -150,7 +150,6 @@ public class Server {
             byte[] response = msgClone.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, InetAddress.getLocalHost(), node));
             if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, InetAddress.getLocalHost(), node, System.currentTimeMillis()));
-            this.logger.log("Redirect: " + InetAddress.getLocalHost() + ":" + node + " " + msg.getMessageID(), replicas);
         } catch (IOException e) {
             this.logger.log("Redirect Error: " + e.getMessage());
         } finally {
@@ -170,7 +169,6 @@ public class Server {
             this.socket.send(new DatagramPacket(response, response.length, address, port));
             CacheData cached = new CacheData(response, address, port, System.currentTimeMillis());
             if (cache) this.cache.put(msg.getMessageID(), cached);
-            this.logger.log("Send: " + address + ":" + port + " " + messageID);
             return cached;
         } catch (IOException e) {
             this.logger.log("Send Error: " + e.getMessage());
@@ -186,7 +184,6 @@ public class Server {
             CacheData cached = this.cache.getIfPresent(messageID);
             if (cached == null) return false;
             if (send) this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
-            this.logger.log("Check: " + cached.address + ":" + cached.port + " " + messageID);
             return true;
         } catch (IOException e) {
             this.logger.log("Check Error: " + e.getMessage());
@@ -206,7 +203,6 @@ public class Server {
             if (msg.hasPort()) request.port = msg.getPort();
 
             KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
-            this.logger.log("Request: " + kvRequest.getCommand() + " " + msg.getMessageID(), Utils.getFreeMemory(), this.cache.size());
 
             // Cache check
             if (this.check(msg.getMessageID(), !Utils.isReplicaRequest(kvRequest.getCommand()))) return;
