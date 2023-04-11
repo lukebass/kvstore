@@ -8,12 +8,12 @@ import java.io.IOException;
 public class App
 {
     /**
-     * @param args args[0] server.jar; args[1] servers.txt; args[2] threads; args[3] weight
+     * @param args args[0] server.jar; args[1] servers.txt; args[2] memory; args[3] threads; args[4] weight
      */
     public static void main(String[] args)
     {
-        if(args.length != 4) {
-            System.out.println("Must provide server.jar, servers.txt, threads, weight");
+        if(args.length != 5) {
+            System.out.println("Must provide server.jar, servers.txt, memory, threads, weight");
             System.exit(1);
         }
 
@@ -24,13 +24,13 @@ public class App
                 // java -Xmx64m -jar server.jar servers.txt port threads weight
                 ProcessBuilder pb = new ProcessBuilder(
                         "java",
-                        "-Xmx512m",
+                        "-Xmx" + args[2] + "m",
                         "-jar",
                         System.getProperty("user.dir") + "/" + args[0],
                         System.getProperty("user.dir") + "/" + args[1],
                         line.split(":")[1],
-                        args[2],
-                        args[3]
+                        args[3],
+                        args[4]
                 );
                 String filename = line.split(":")[1];
                 File output = new File(System.getProperty("user.dir") + "/" + filename + ".log");

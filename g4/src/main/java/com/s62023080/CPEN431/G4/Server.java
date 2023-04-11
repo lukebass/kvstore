@@ -65,7 +65,7 @@ public class Server {
                 Request request = new Request(packet);
                 this.executor.submit(() -> this.handleRequest(request));
             } catch (Exception e) {
-                this.logger.log("Error : " + e.getMessage());
+                this.logger.log("Error: " + e.getMessage());
             }
         }
     }
@@ -81,7 +81,7 @@ public class Server {
             kvRequest.putAllNodes(this.nodes);
             this.send(Utils.generateMessageID(this.node), kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
         } catch (UnknownHostException e) {
-            this.logger.log("Epidemic " + e.getMessage());
+            this.logger.log("Epidemic: " + e.getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ public class Server {
             kvRequest.setCommand(Utils.REPLICA_CONFIRMED);
             this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, true);
         } catch (UnknownHostException e) {
-            this.logger.log("Confirm " + e.getMessage());
+            this.logger.log("Confirm: " + e.getMessage());
         }
     }
 
@@ -107,7 +107,7 @@ public class Server {
             CacheData cached = this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
             if (cached != null) this.queue.put(messageID, cached);
         } catch (UnknownHostException e) {
-            this.logger.log("Replica " + e.getMessage());
+            this.logger.log("Replica: " + e.getMessage());
         } finally {
             this.queueLock.writeLock().unlock();
         }
@@ -124,7 +124,7 @@ public class Server {
                 this.socket.send(new DatagramPacket(cached.data, cached.data.length, cached.address, cached.port));
             }
         } catch (IOException e) {
-            this.logger.log("Pop " + e.getMessage());
+            this.logger.log("Pop Error: " + e.getMessage());
         } finally {
             this.queueLock.writeLock().unlock();
         }
@@ -150,9 +150,9 @@ public class Server {
             byte[] response = msgClone.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, InetAddress.getLocalHost(), node));
             if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, InetAddress.getLocalHost(), node, System.currentTimeMillis()));
-            this.logger.log("Redirect: " + InetAddress.getLocalHost() + ":" + node + " " + msg.getMessageID());
+            this.logger.log("Redirect: " + InetAddress.getLocalHost() + ":" + node + " " + msg.getMessageID(), replicas);
         } catch (IOException e) {
-            this.logger.log("Redirect Error " + e.getMessage());
+            this.logger.log("Redirect Error: " + e.getMessage());
         } finally {
             this.cacheLock.writeLock().unlock();
         }
@@ -173,7 +173,7 @@ public class Server {
             this.logger.log("Send: " + address + ":" + port + " " + messageID);
             return cached;
         } catch (IOException e) {
-            this.logger.log("Send Error " + e.getMessage());
+            this.logger.log("Send Error: " + e.getMessage());
         } finally {
             this.cacheLock.writeLock().unlock();
         }
@@ -189,7 +189,7 @@ public class Server {
             this.logger.log("Check: " + cached.address + ":" + cached.port + " " + messageID);
             return true;
         } catch (IOException e) {
-            this.logger.log("Check Error " + e.getMessage());
+            this.logger.log("Check Error: " + e.getMessage());
         } finally {
             this.cacheLock.readLock().unlock();
         }
@@ -336,7 +336,7 @@ public class Server {
                 this.redirect(msg, kvRequest, node, replicas, request.address, request.port, replicas.contains(this.node));
             }
         } catch (Exception e) {
-            this.logger.log("Request: " + e.getMessage(), Utils.getFreeMemory(), this.cache.size());
+            this.logger.log("Request Error: " + e.getMessage(), Utils.getFreeMemory(), this.cache.size());
             if (msg != null && kvResponse != null)  {
                 kvResponse.setErrCode(Utils.STORE_ERROR);
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
