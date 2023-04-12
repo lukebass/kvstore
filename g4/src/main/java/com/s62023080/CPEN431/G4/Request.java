@@ -5,9 +5,9 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 public class Request {
+    public byte[] data;
     public InetAddress address;
     public int port;
-    public byte[] data;
 
     public Request(DatagramPacket packet) {
         ByteBuffer buffer = ByteBuffer.wrap(packet.getData());

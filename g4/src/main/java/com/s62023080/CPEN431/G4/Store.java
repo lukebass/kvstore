@@ -46,7 +46,6 @@ public class Store {
     }
 
     public void bulkRemove(ArrayList<ByteString> keys) {
-        if (keys.size() == 0) return;
         this.lock.writeLock().lock();
         try {
             for (ByteString key : keys) this.store.remove(key);

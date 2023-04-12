@@ -80,14 +80,33 @@ public final class KeyValueRequest {
     /**
      * <code>map&lt;int32, int64&gt; nodes = 5;</code>
      */
+
     long getNodesOrDefault(
         int key,
         long defaultValue);
     /**
      * <code>map&lt;int32, int64&gt; nodes = 5;</code>
      */
+
     long getNodesOrThrow(
         int key);
+
+    /**
+     * <code>repeated int32 replicas = 6;</code>
+     * @return A list containing the replicas.
+     */
+    java.util.List<java.lang.Integer> getReplicasList();
+    /**
+     * <code>repeated int32 replicas = 6;</code>
+     * @return The count of replicas.
+     */
+    int getReplicasCount();
+    /**
+     * <code>repeated int32 replicas = 6;</code>
+     * @param index The index of the element to return.
+     * @return The replicas at the given index.
+     */
+    int getReplicas(int index);
   }
   /**
    * Protobuf type {@code KVRequest}
@@ -104,6 +123,7 @@ public final class KeyValueRequest {
     private KVRequest() {
       key_ = com.google.protobuf.ByteString.EMPTY;
       value_ = com.google.protobuf.ByteString.EMPTY;
+      replicas_ = emptyIntList();
     }
 
     @java.lang.Override
@@ -145,7 +165,7 @@ public final class KeyValueRequest {
 
     private int bitField0_;
     public static final int COMMAND_FIELD_NUMBER = 1;
-    private int command_ = 0;
+    private int command_;
     /**
      * <code>uint32 command = 1;</code>
      * @return The command.
@@ -156,7 +176,7 @@ public final class KeyValueRequest {
     }
 
     public static final int KEY_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
+    private com.google.protobuf.ByteString key_;
     /**
      * <code>optional bytes key = 2;</code>
      * @return Whether the key field is set.
@@ -175,7 +195,7 @@ public final class KeyValueRequest {
     }
 
     public static final int VALUE_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
+    private com.google.protobuf.ByteString value_;
     /**
      * <code>optional bytes value = 3;</code>
      * @return Whether the value field is set.
@@ -194,7 +214,7 @@ public final class KeyValueRequest {
     }
 
     public static final int VERSION_FIELD_NUMBER = 4;
-    private int version_ = 0;
+    private int version_;
     /**
      * <code>optional int32 version = 4;</code>
      * @return Whether the version field is set.
@@ -224,7 +244,6 @@ public final class KeyValueRequest {
                   com.google.protobuf.WireFormat.FieldType.INT64,
                   0L);
     }
-    @SuppressWarnings("serial")
     private com.google.protobuf.MapField<
         java.lang.Integer, java.lang.Long> nodes_;
     private com.google.protobuf.MapField<java.lang.Integer, java.lang.Long>
@@ -235,12 +254,14 @@ public final class KeyValueRequest {
       }
       return nodes_;
     }
+
     public int getNodesCount() {
       return internalGetNodes().getMap().size();
     }
     /**
      * <code>map&lt;int32, int64&gt; nodes = 5;</code>
      */
+
     @java.lang.Override
     public boolean containsNodes(
         int key) {
@@ -259,6 +280,7 @@ public final class KeyValueRequest {
      * <code>map&lt;int32, int64&gt; nodes = 5;</code>
      */
     @java.lang.Override
+
     public java.util.Map<java.lang.Integer, java.lang.Long> getNodesMap() {
       return internalGetNodes().getMap();
     }
@@ -266,6 +288,7 @@ public final class KeyValueRequest {
      * <code>map&lt;int32, int64&gt; nodes = 5;</code>
      */
     @java.lang.Override
+
     public long getNodesOrDefault(
         int key,
         long defaultValue) {
@@ -278,6 +301,7 @@ public final class KeyValueRequest {
      * <code>map&lt;int32, int64&gt; nodes = 5;</code>
      */
     @java.lang.Override
+
     public long getNodesOrThrow(
         int key) {
       
@@ -288,6 +312,34 @@ public final class KeyValueRequest {
       }
       return map.get(key);
     }
+
+    public static final int REPLICAS_FIELD_NUMBER = 6;
+    private com.google.protobuf.Internal.IntList replicas_;
+    /**
+     * <code>repeated int32 replicas = 6;</code>
+     * @return A list containing the replicas.
+     */
+    @java.lang.Override
+    public java.util.List<java.lang.Integer>
+        getReplicasList() {
+      return replicas_;
+    }
+    /**
+     * <code>repeated int32 replicas = 6;</code>
+     * @return The count of replicas.
+     */
+    public int getReplicasCount() {
+      return replicas_.size();
+    }
+    /**
+     * <code>repeated int32 replicas = 6;</code>
+     * @param index The index of the element to return.
+     * @return The replicas at the given index.
+     */
+    public int getReplicas(int index) {
+      return replicas_.getInt(index);
+    }
+    private int replicasMemoizedSerializedSize = -1;
 
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
@@ -303,6 +355,7 @@ public final class KeyValueRequest {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      getSerializedSize();
       if (command_ != 0) {
         output.writeUInt32(1, command_);
       }
@@ -321,6 +374,13 @@ public final class KeyValueRequest {
           internalGetNodes(),
           NodesDefaultEntryHolder.defaultEntry,
           5);
+      if (getReplicasList().size() > 0) {
+        output.writeUInt32NoTag(50);
+        output.writeUInt32NoTag(replicasMemoizedSerializedSize);
+      }
+      for (int i = 0; i < replicas_.size(); i++) {
+        output.writeInt32NoTag(replicas_.getInt(i));
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -356,6 +416,20 @@ public final class KeyValueRequest {
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(5, nodes__);
       }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < replicas_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(replicas_.getInt(i));
+        }
+        size += dataSize;
+        if (!getReplicasList().isEmpty()) {
+          size += 1;
+          size += com.google.protobuf.CodedOutputStream
+              .computeInt32SizeNoTag(dataSize);
+        }
+        replicasMemoizedSerializedSize = dataSize;
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -390,6 +464,8 @@ public final class KeyValueRequest {
       }
       if (!internalGetNodes().equals(
           other.internalGetNodes())) return false;
+      if (!getReplicasList()
+          .equals(other.getReplicasList())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -418,6 +494,10 @@ public final class KeyValueRequest {
       if (!internalGetNodes().getMap().isEmpty()) {
         hash = (37 * hash) + NODES_FIELD_NUMBER;
         hash = (53 * hash) + internalGetNodes().hashCode();
+      }
+      if (getReplicasCount() > 0) {
+        hash = (37 * hash) + REPLICAS_FIELD_NUMBER;
+        hash = (53 * hash) + getReplicasList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -569,12 +649,17 @@ public final class KeyValueRequest {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        bitField0_ = 0;
         command_ = 0;
+
         key_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
         value_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
         version_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
         internalGetMutableNodes().clear();
+        replicas_ = emptyIntList();
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -601,34 +686,31 @@ public final class KeyValueRequest {
       @java.lang.Override
       public ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest buildPartial() {
         ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest result = new ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest(this);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartial0(ca.NetSysLab.ProtocolBuffers.KeyValueRequest.KVRequest result) {
         int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.command_ = command_;
-        }
         int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.key_ = key_;
+        result.command_ = command_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
           to_bitField0_ |= 0x00000001;
         }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.value_ = value_;
+        result.key_ = key_;
+        if (((from_bitField0_ & 0x00000002) != 0)) {
           to_bitField0_ |= 0x00000002;
         }
-        if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.value_ = value_;
+        if (((from_bitField0_ & 0x00000004) != 0)) {
           result.version_ = version_;
           to_bitField0_ |= 0x00000004;
         }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.nodes_ = internalGetNodes();
-          result.nodes_.makeImmutable();
+        result.nodes_ = internalGetNodes();
+        result.nodes_.makeImmutable();
+        if (((bitField0_ & 0x00000010) != 0)) {
+          replicas_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000010);
         }
-        result.bitField0_ |= to_bitField0_;
+        result.replicas_ = replicas_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
       }
 
       @java.lang.Override
@@ -689,7 +771,16 @@ public final class KeyValueRequest {
         }
         internalGetMutableNodes().mergeFrom(
             other.internalGetNodes());
-        bitField0_ |= 0x00000010;
+        if (!other.replicas_.isEmpty()) {
+          if (replicas_.isEmpty()) {
+            replicas_ = other.replicas_;
+            bitField0_ = (bitField0_ & ~0x00000010);
+          } else {
+            ensureReplicasIsMutable();
+            replicas_.addAll(other.replicas_);
+          }
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -718,22 +809,22 @@ public final class KeyValueRequest {
                 break;
               case 8: {
                 command_ = input.readUInt32();
-                bitField0_ |= 0x00000001;
+
                 break;
               } // case 8
               case 18: {
                 key_ = input.readBytes();
-                bitField0_ |= 0x00000002;
+                bitField0_ |= 0x00000001;
                 break;
               } // case 18
               case 26: {
                 value_ = input.readBytes();
-                bitField0_ |= 0x00000004;
+                bitField0_ |= 0x00000002;
                 break;
               } // case 26
               case 32: {
                 version_ = input.readInt32();
-                bitField0_ |= 0x00000008;
+                bitField0_ |= 0x00000004;
                 break;
               } // case 32
               case 42: {
@@ -742,9 +833,24 @@ public final class KeyValueRequest {
                     NodesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
                 internalGetMutableNodes().getMutableMap().put(
                     nodes__.getKey(), nodes__.getValue());
-                bitField0_ |= 0x00000010;
                 break;
               } // case 42
+              case 48: {
+                int v = input.readInt32();
+                ensureReplicasIsMutable();
+                replicas_.addInt(v);
+                break;
+              } // case 48
+              case 50: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureReplicasIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  replicas_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 50
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -779,7 +885,6 @@ public final class KeyValueRequest {
       public Builder setCommand(int value) {
         
         command_ = value;
-        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -788,7 +893,7 @@ public final class KeyValueRequest {
        * @return This builder for chaining.
        */
       public Builder clearCommand() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        
         command_ = 0;
         onChanged();
         return this;
@@ -801,7 +906,7 @@ public final class KeyValueRequest {
        */
       @java.lang.Override
       public boolean hasKey() {
-        return ((bitField0_ & 0x00000002) != 0);
+        return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>optional bytes key = 2;</code>
@@ -817,9 +922,11 @@ public final class KeyValueRequest {
        * @return This builder for chaining.
        */
       public Builder setKey(com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
         key_ = value;
-        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -828,7 +935,7 @@ public final class KeyValueRequest {
        * @return This builder for chaining.
        */
       public Builder clearKey() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         key_ = getDefaultInstance().getKey();
         onChanged();
         return this;
@@ -841,7 +948,7 @@ public final class KeyValueRequest {
        */
       @java.lang.Override
       public boolean hasValue() {
-        return ((bitField0_ & 0x00000004) != 0);
+        return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>optional bytes value = 3;</code>
@@ -857,9 +964,11 @@ public final class KeyValueRequest {
        * @return This builder for chaining.
        */
       public Builder setValue(com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
         value_ = value;
-        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -868,7 +977,7 @@ public final class KeyValueRequest {
        * @return This builder for chaining.
        */
       public Builder clearValue() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000002);
         value_ = getDefaultInstance().getValue();
         onChanged();
         return this;
@@ -881,7 +990,7 @@ public final class KeyValueRequest {
        */
       @java.lang.Override
       public boolean hasVersion() {
-        return ((bitField0_ & 0x00000008) != 0);
+        return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional int32 version = 4;</code>
@@ -897,9 +1006,8 @@ public final class KeyValueRequest {
        * @return This builder for chaining.
        */
       public Builder setVersion(int value) {
-        
+        bitField0_ |= 0x00000004;
         version_ = value;
-        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -908,7 +1016,7 @@ public final class KeyValueRequest {
        * @return This builder for chaining.
        */
       public Builder clearVersion() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000004);
         version_ = 0;
         onChanged();
         return this;
@@ -917,7 +1025,7 @@ public final class KeyValueRequest {
       private com.google.protobuf.MapField<
           java.lang.Integer, java.lang.Long> nodes_;
       private com.google.protobuf.MapField<java.lang.Integer, java.lang.Long>
-          internalGetNodes() {
+      internalGetNodes() {
         if (nodes_ == null) {
           return com.google.protobuf.MapField.emptyMapField(
               NodesDefaultEntryHolder.defaultEntry);
@@ -925,7 +1033,8 @@ public final class KeyValueRequest {
         return nodes_;
       }
       private com.google.protobuf.MapField<java.lang.Integer, java.lang.Long>
-          internalGetMutableNodes() {
+      internalGetMutableNodes() {
+        onChanged();;
         if (nodes_ == null) {
           nodes_ = com.google.protobuf.MapField.newMapField(
               NodesDefaultEntryHolder.defaultEntry);
@@ -933,16 +1042,16 @@ public final class KeyValueRequest {
         if (!nodes_.isMutable()) {
           nodes_ = nodes_.copy();
         }
-        bitField0_ |= 0x00000010;
-        onChanged();
         return nodes_;
       }
+
       public int getNodesCount() {
         return internalGetNodes().getMap().size();
       }
       /**
        * <code>map&lt;int32, int64&gt; nodes = 5;</code>
        */
+
       @java.lang.Override
       public boolean containsNodes(
           int key) {
@@ -961,6 +1070,7 @@ public final class KeyValueRequest {
        * <code>map&lt;int32, int64&gt; nodes = 5;</code>
        */
       @java.lang.Override
+
       public java.util.Map<java.lang.Integer, java.lang.Long> getNodesMap() {
         return internalGetNodes().getMap();
       }
@@ -968,6 +1078,7 @@ public final class KeyValueRequest {
        * <code>map&lt;int32, int64&gt; nodes = 5;</code>
        */
       @java.lang.Override
+
       public long getNodesOrDefault(
           int key,
           long defaultValue) {
@@ -980,6 +1091,7 @@ public final class KeyValueRequest {
        * <code>map&lt;int32, int64&gt; nodes = 5;</code>
        */
       @java.lang.Override
+
       public long getNodesOrThrow(
           int key) {
         
@@ -990,8 +1102,8 @@ public final class KeyValueRequest {
         }
         return map.get(key);
       }
+
       public Builder clearNodes() {
-        bitField0_ = (bitField0_ & ~0x00000010);
         internalGetMutableNodes().getMutableMap()
             .clear();
         return this;
@@ -999,6 +1111,7 @@ public final class KeyValueRequest {
       /**
        * <code>map&lt;int32, int64&gt; nodes = 5;</code>
        */
+
       public Builder removeNodes(
           int key) {
         
@@ -1011,8 +1124,7 @@ public final class KeyValueRequest {
        */
       @java.lang.Deprecated
       public java.util.Map<java.lang.Integer, java.lang.Long>
-          getMutableNodes() {
-        bitField0_ |= 0x00000010;
+      getMutableNodes() {
         return internalGetMutableNodes().getMutableMap();
       }
       /**
@@ -1025,17 +1137,95 @@ public final class KeyValueRequest {
         
         internalGetMutableNodes().getMutableMap()
             .put(key, value);
-        bitField0_ |= 0x00000010;
         return this;
       }
       /**
        * <code>map&lt;int32, int64&gt; nodes = 5;</code>
        */
+
       public Builder putAllNodes(
           java.util.Map<java.lang.Integer, java.lang.Long> values) {
         internalGetMutableNodes().getMutableMap()
             .putAll(values);
-        bitField0_ |= 0x00000010;
+        return this;
+      }
+
+      private com.google.protobuf.Internal.IntList replicas_ = emptyIntList();
+      private void ensureReplicasIsMutable() {
+        if (!((bitField0_ & 0x00000010) != 0)) {
+          replicas_ = mutableCopy(replicas_);
+          bitField0_ |= 0x00000010;
+         }
+      }
+      /**
+       * <code>repeated int32 replicas = 6;</code>
+       * @return A list containing the replicas.
+       */
+      public java.util.List<java.lang.Integer>
+          getReplicasList() {
+        return ((bitField0_ & 0x00000010) != 0) ?
+                 java.util.Collections.unmodifiableList(replicas_) : replicas_;
+      }
+      /**
+       * <code>repeated int32 replicas = 6;</code>
+       * @return The count of replicas.
+       */
+      public int getReplicasCount() {
+        return replicas_.size();
+      }
+      /**
+       * <code>repeated int32 replicas = 6;</code>
+       * @param index The index of the element to return.
+       * @return The replicas at the given index.
+       */
+      public int getReplicas(int index) {
+        return replicas_.getInt(index);
+      }
+      /**
+       * <code>repeated int32 replicas = 6;</code>
+       * @param index The index to set the value at.
+       * @param value The replicas to set.
+       * @return This builder for chaining.
+       */
+      public Builder setReplicas(
+          int index, int value) {
+        ensureReplicasIsMutable();
+        replicas_.setInt(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 replicas = 6;</code>
+       * @param value The replicas to add.
+       * @return This builder for chaining.
+       */
+      public Builder addReplicas(int value) {
+        ensureReplicasIsMutable();
+        replicas_.addInt(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 replicas = 6;</code>
+       * @param values The replicas to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllReplicas(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureReplicasIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, replicas_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 replicas = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearReplicas() {
+        replicas_ = emptyIntList();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -1121,14 +1311,14 @@ public final class KeyValueRequest {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\025KeyValueRequest.proto\"\312\001\n\tKVRequest\022\017\n" +
+      "\n\025KeyValueRequest.proto\"\334\001\n\tKVRequest\022\017\n" +
       "\007command\030\001 \001(\r\022\020\n\003key\030\002 \001(\014H\000\210\001\001\022\022\n\005valu" +
       "e\030\003 \001(\014H\001\210\001\001\022\024\n\007version\030\004 \001(\005H\002\210\001\001\022$\n\005no" +
-      "des\030\005 \003(\0132\025.KVRequest.NodesEntry\032,\n\nNode" +
-      "sEntry\022\013\n\003key\030\001 \001(\005\022\r\n\005value\030\002 \001(\003:\0028\001B\006" +
-      "\n\004_keyB\010\n\006_valueB\n\n\010_versionB/\n\034ca.NetSy" +
-      "sLab.ProtocolBuffersB\017KeyValueRequestb\006p" +
-      "roto3"
+      "des\030\005 \003(\0132\025.KVRequest.NodesEntry\022\020\n\010repl" +
+      "icas\030\006 \003(\005\032,\n\nNodesEntry\022\013\n\003key\030\001 \001(\005\022\r\n" +
+      "\005value\030\002 \001(\003:\0028\001B\006\n\004_keyB\010\n\006_valueB\n\n\010_v" +
+      "ersionB/\n\034ca.NetSysLab.ProtocolBuffersB\017" +
+      "KeyValueRequestb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1139,7 +1329,7 @@ public final class KeyValueRequest {
     internal_static_KVRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_KVRequest_descriptor,
-        new java.lang.String[] { "Command", "Key", "Value", "Version", "Nodes", "Key", "Value", "Version", });
+        new java.lang.String[] { "Command", "Key", "Value", "Version", "Nodes", "Replicas", "Key", "Value", "Version", });
     internal_static_KVRequest_NodesEntry_descriptor =
       internal_static_KVRequest_descriptor.getNestedTypes().get(0);
     internal_static_KVRequest_NodesEntry_fieldAccessorTable = new
