@@ -107,6 +107,40 @@ public final class KeyValueRequest {
      * @return The replicas at the given index.
      */
     int getReplicas(int index);
+
+    /**
+     * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+     */
+    int getClocksCount();
+    /**
+     * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+     */
+    boolean containsClocks(
+        int key);
+    /**
+     * Use {@link #getClocksMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.Integer, java.lang.Long>
+    getClocks();
+    /**
+     * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+     */
+    java.util.Map<java.lang.Integer, java.lang.Long>
+    getClocksMap();
+    /**
+     * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+     */
+
+    long getClocksOrDefault(
+        int key,
+        long defaultValue);
+    /**
+     * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+     */
+
+    long getClocksOrThrow(
+        int key);
   }
   /**
    * Protobuf type {@code KVRequest}
@@ -150,6 +184,8 @@ public final class KeyValueRequest {
       switch (number) {
         case 5:
           return internalGetNodes();
+        case 7:
+          return internalGetClocks();
         default:
           throw new RuntimeException(
               "Invalid map field number: " + number);
@@ -341,6 +377,87 @@ public final class KeyValueRequest {
     }
     private int replicasMemoizedSerializedSize = -1;
 
+    public static final int CLOCKS_FIELD_NUMBER = 7;
+    private static final class ClocksDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.Integer, java.lang.Long> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.Integer, java.lang.Long>newDefaultInstance(
+                  ca.NetSysLab.ProtocolBuffers.KeyValueRequest.internal_static_KVRequest_ClocksEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.INT32,
+                  0,
+                  com.google.protobuf.WireFormat.FieldType.INT64,
+                  0L);
+    }
+    private com.google.protobuf.MapField<
+        java.lang.Integer, java.lang.Long> clocks_;
+    private com.google.protobuf.MapField<java.lang.Integer, java.lang.Long>
+    internalGetClocks() {
+      if (clocks_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ClocksDefaultEntryHolder.defaultEntry);
+      }
+      return clocks_;
+    }
+
+    public int getClocksCount() {
+      return internalGetClocks().getMap().size();
+    }
+    /**
+     * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+     */
+
+    @java.lang.Override
+    public boolean containsClocks(
+        int key) {
+      
+      return internalGetClocks().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getClocksMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.Integer, java.lang.Long> getClocks() {
+      return getClocksMap();
+    }
+    /**
+     * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+     */
+    @java.lang.Override
+
+    public java.util.Map<java.lang.Integer, java.lang.Long> getClocksMap() {
+      return internalGetClocks().getMap();
+    }
+    /**
+     * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+     */
+    @java.lang.Override
+
+    public long getClocksOrDefault(
+        int key,
+        long defaultValue) {
+      
+      java.util.Map<java.lang.Integer, java.lang.Long> map =
+          internalGetClocks().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+     */
+    @java.lang.Override
+
+    public long getClocksOrThrow(
+        int key) {
+      
+      java.util.Map<java.lang.Integer, java.lang.Long> map =
+          internalGetClocks().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -381,6 +498,12 @@ public final class KeyValueRequest {
       for (int i = 0; i < replicas_.size(); i++) {
         output.writeInt32NoTag(replicas_.getInt(i));
       }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeIntegerMapTo(
+          output,
+          internalGetClocks(),
+          ClocksDefaultEntryHolder.defaultEntry,
+          7);
       getUnknownFields().writeTo(output);
     }
 
@@ -430,6 +553,16 @@ public final class KeyValueRequest {
         }
         replicasMemoizedSerializedSize = dataSize;
       }
+      for (java.util.Map.Entry<java.lang.Integer, java.lang.Long> entry
+           : internalGetClocks().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.Integer, java.lang.Long>
+        clocks__ = ClocksDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(7, clocks__);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -466,6 +599,8 @@ public final class KeyValueRequest {
           other.internalGetNodes())) return false;
       if (!getReplicasList()
           .equals(other.getReplicasList())) return false;
+      if (!internalGetClocks().equals(
+          other.internalGetClocks())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -498,6 +633,10 @@ public final class KeyValueRequest {
       if (getReplicasCount() > 0) {
         hash = (37 * hash) + REPLICAS_FIELD_NUMBER;
         hash = (53 * hash) + getReplicasList().hashCode();
+      }
+      if (!internalGetClocks().getMap().isEmpty()) {
+        hash = (37 * hash) + CLOCKS_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetClocks().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -612,6 +751,8 @@ public final class KeyValueRequest {
         switch (number) {
           case 5:
             return internalGetNodes();
+          case 7:
+            return internalGetClocks();
           default:
             throw new RuntimeException(
                 "Invalid map field number: " + number);
@@ -623,6 +764,8 @@ public final class KeyValueRequest {
         switch (number) {
           case 5:
             return internalGetMutableNodes();
+          case 7:
+            return internalGetMutableClocks();
           default:
             throw new RuntimeException(
                 "Invalid map field number: " + number);
@@ -660,6 +803,7 @@ public final class KeyValueRequest {
         internalGetMutableNodes().clear();
         replicas_ = emptyIntList();
         bitField0_ = (bitField0_ & ~0x00000010);
+        internalGetMutableClocks().clear();
         return this;
       }
 
@@ -708,6 +852,8 @@ public final class KeyValueRequest {
           bitField0_ = (bitField0_ & ~0x00000010);
         }
         result.replicas_ = replicas_;
+        result.clocks_ = internalGetClocks();
+        result.clocks_.makeImmutable();
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -781,6 +927,8 @@ public final class KeyValueRequest {
           }
           onChanged();
         }
+        internalGetMutableClocks().mergeFrom(
+            other.internalGetClocks());
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -851,6 +999,14 @@ public final class KeyValueRequest {
                 input.popLimit(limit);
                 break;
               } // case 50
+              case 58: {
+                com.google.protobuf.MapEntry<java.lang.Integer, java.lang.Long>
+                clocks__ = input.readMessage(
+                    ClocksDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableClocks().getMutableMap().put(
+                    clocks__.getKey(), clocks__.getValue());
+                break;
+              } // case 58
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -1228,6 +1384,134 @@ public final class KeyValueRequest {
         onChanged();
         return this;
       }
+
+      private com.google.protobuf.MapField<
+          java.lang.Integer, java.lang.Long> clocks_;
+      private com.google.protobuf.MapField<java.lang.Integer, java.lang.Long>
+      internalGetClocks() {
+        if (clocks_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              ClocksDefaultEntryHolder.defaultEntry);
+        }
+        return clocks_;
+      }
+      private com.google.protobuf.MapField<java.lang.Integer, java.lang.Long>
+      internalGetMutableClocks() {
+        onChanged();;
+        if (clocks_ == null) {
+          clocks_ = com.google.protobuf.MapField.newMapField(
+              ClocksDefaultEntryHolder.defaultEntry);
+        }
+        if (!clocks_.isMutable()) {
+          clocks_ = clocks_.copy();
+        }
+        return clocks_;
+      }
+
+      public int getClocksCount() {
+        return internalGetClocks().getMap().size();
+      }
+      /**
+       * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+       */
+
+      @java.lang.Override
+      public boolean containsClocks(
+          int key) {
+        
+        return internalGetClocks().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getClocksMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.Integer, java.lang.Long> getClocks() {
+        return getClocksMap();
+      }
+      /**
+       * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+       */
+      @java.lang.Override
+
+      public java.util.Map<java.lang.Integer, java.lang.Long> getClocksMap() {
+        return internalGetClocks().getMap();
+      }
+      /**
+       * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+       */
+      @java.lang.Override
+
+      public long getClocksOrDefault(
+          int key,
+          long defaultValue) {
+        
+        java.util.Map<java.lang.Integer, java.lang.Long> map =
+            internalGetClocks().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+       */
+      @java.lang.Override
+
+      public long getClocksOrThrow(
+          int key) {
+        
+        java.util.Map<java.lang.Integer, java.lang.Long> map =
+            internalGetClocks().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
+      public Builder clearClocks() {
+        internalGetMutableClocks().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+       */
+
+      public Builder removeClocks(
+          int key) {
+        
+        internalGetMutableClocks().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.Integer, java.lang.Long>
+      getMutableClocks() {
+        return internalGetMutableClocks().getMutableMap();
+      }
+      /**
+       * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+       */
+      public Builder putClocks(
+          int key,
+          long value) {
+        
+        
+        internalGetMutableClocks().getMutableMap()
+            .put(key, value);
+        return this;
+      }
+      /**
+       * <code>map&lt;int32, int64&gt; clocks = 7;</code>
+       */
+
+      public Builder putAllClocks(
+          java.util.Map<java.lang.Integer, java.lang.Long> values) {
+        internalGetMutableClocks().getMutableMap()
+            .putAll(values);
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1302,6 +1586,11 @@ public final class KeyValueRequest {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_KVRequest_NodesEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_KVRequest_ClocksEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_KVRequest_ClocksEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1311,14 +1600,16 @@ public final class KeyValueRequest {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\025KeyValueRequest.proto\"\334\001\n\tKVRequest\022\017\n" +
+      "\n\025KeyValueRequest.proto\"\263\002\n\tKVRequest\022\017\n" +
       "\007command\030\001 \001(\r\022\020\n\003key\030\002 \001(\014H\000\210\001\001\022\022\n\005valu" +
       "e\030\003 \001(\014H\001\210\001\001\022\024\n\007version\030\004 \001(\005H\002\210\001\001\022$\n\005no" +
       "des\030\005 \003(\0132\025.KVRequest.NodesEntry\022\020\n\010repl" +
-      "icas\030\006 \003(\005\032,\n\nNodesEntry\022\013\n\003key\030\001 \001(\005\022\r\n" +
-      "\005value\030\002 \001(\003:\0028\001B\006\n\004_keyB\010\n\006_valueB\n\n\010_v" +
-      "ersionB/\n\034ca.NetSysLab.ProtocolBuffersB\017" +
-      "KeyValueRequestb\006proto3"
+      "icas\030\006 \003(\005\022&\n\006clocks\030\007 \003(\0132\026.KVRequest.C" +
+      "locksEntry\032,\n\nNodesEntry\022\013\n\003key\030\001 \001(\005\022\r\n" +
+      "\005value\030\002 \001(\003:\0028\001\032-\n\013ClocksEntry\022\013\n\003key\030\001" +
+      " \001(\005\022\r\n\005value\030\002 \001(\003:\0028\001B\006\n\004_keyB\010\n\006_valu" +
+      "eB\n\n\010_versionB/\n\034ca.NetSysLab.ProtocolBu" +
+      "ffersB\017KeyValueRequestb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1329,12 +1620,18 @@ public final class KeyValueRequest {
     internal_static_KVRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_KVRequest_descriptor,
-        new java.lang.String[] { "Command", "Key", "Value", "Version", "Nodes", "Replicas", "Key", "Value", "Version", });
+        new java.lang.String[] { "Command", "Key", "Value", "Version", "Nodes", "Replicas", "Clocks", "Key", "Value", "Version", });
     internal_static_KVRequest_NodesEntry_descriptor =
       internal_static_KVRequest_descriptor.getNestedTypes().get(0);
     internal_static_KVRequest_NodesEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_KVRequest_NodesEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_KVRequest_ClocksEntry_descriptor =
+      internal_static_KVRequest_descriptor.getNestedTypes().get(1);
+    internal_static_KVRequest_ClocksEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_KVRequest_ClocksEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
   }
 

@@ -18,10 +18,10 @@ public class Store {
         return this.store.keySet();
     }
 
-    public void put(ByteString key, ByteString value, int version) {
+    public void put(ByteString key, ByteString value, int version, ConcurrentHashMap<Integer, Long> clock) {
         this.lock.writeLock().lock();
         try {
-            this.store.put(key, new Data(value, version));
+            this.store.put(key, new Data(value, version, clock));
         } finally {
             this.lock.writeLock().unlock();
         }

@@ -78,38 +78,6 @@ public final class KeyValueResponse {
      * @return The membershipCount.
      */
     int getMembershipCount();
-
-    /**
-     * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-     */
-    int getNodesCount();
-    /**
-     * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-     */
-    boolean containsNodes(
-        int key);
-    /**
-     * Use {@link #getNodesMap()} instead.
-     */
-    @java.lang.Deprecated
-    java.util.Map<java.lang.Integer, java.lang.Long>
-    getNodes();
-    /**
-     * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-     */
-    java.util.Map<java.lang.Integer, java.lang.Long>
-    getNodesMap();
-    /**
-     * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-     */
-    long getNodesOrDefault(
-        int key,
-        long defaultValue);
-    /**
-     * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-     */
-    long getNodesOrThrow(
-        int key);
   }
   /**
    * Protobuf type {@code KVResponse}
@@ -144,18 +112,6 @@ public final class KeyValueResponse {
       return ca.NetSysLab.ProtocolBuffers.KeyValueResponse.internal_static_KVResponse_descriptor;
     }
 
-    @SuppressWarnings({"rawtypes"})
-    @java.lang.Override
-    protected com.google.protobuf.MapField internalGetMapField(
-        int number) {
-      switch (number) {
-        case 7:
-          return internalGetNodes();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -166,7 +122,7 @@ public final class KeyValueResponse {
 
     private int bitField0_;
     public static final int ERRCODE_FIELD_NUMBER = 1;
-    private int errCode_ = 0;
+    private int errCode_;
     /**
      * <code>uint32 errCode = 1;</code>
      * @return The errCode.
@@ -177,7 +133,7 @@ public final class KeyValueResponse {
     }
 
     public static final int VALUE_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
+    private com.google.protobuf.ByteString value_;
     /**
      * <code>optional bytes value = 2;</code>
      * @return Whether the value field is set.
@@ -196,7 +152,7 @@ public final class KeyValueResponse {
     }
 
     public static final int PID_FIELD_NUMBER = 3;
-    private int pid_ = 0;
+    private int pid_;
     /**
      * <code>optional int32 pid = 3;</code>
      * @return Whether the pid field is set.
@@ -215,7 +171,7 @@ public final class KeyValueResponse {
     }
 
     public static final int VERSION_FIELD_NUMBER = 4;
-    private int version_ = 0;
+    private int version_;
     /**
      * <code>optional int32 version = 4;</code>
      * @return Whether the version field is set.
@@ -234,7 +190,7 @@ public final class KeyValueResponse {
     }
 
     public static final int OVERLOADWAITTIME_FIELD_NUMBER = 5;
-    private int overloadWaitTime_ = 0;
+    private int overloadWaitTime_;
     /**
      * <code>optional int32 overloadWaitTime = 5;</code>
      * @return Whether the overloadWaitTime field is set.
@@ -253,7 +209,7 @@ public final class KeyValueResponse {
     }
 
     public static final int MEMBERSHIPCOUNT_FIELD_NUMBER = 6;
-    private int membershipCount_ = 0;
+    private int membershipCount_;
     /**
      * <code>optional int32 membershipCount = 6;</code>
      * @return Whether the membershipCount field is set.
@@ -269,83 +225,6 @@ public final class KeyValueResponse {
     @java.lang.Override
     public int getMembershipCount() {
       return membershipCount_;
-    }
-
-    public static final int NODES_FIELD_NUMBER = 7;
-    private static final class NodesDefaultEntryHolder {
-      static final com.google.protobuf.MapEntry<
-          java.lang.Integer, java.lang.Long> defaultEntry =
-              com.google.protobuf.MapEntry
-              .<java.lang.Integer, java.lang.Long>newDefaultInstance(
-                  ca.NetSysLab.ProtocolBuffers.KeyValueResponse.internal_static_KVResponse_NodesEntry_descriptor, 
-                  com.google.protobuf.WireFormat.FieldType.INT32,
-                  0,
-                  com.google.protobuf.WireFormat.FieldType.INT64,
-                  0L);
-    }
-    @SuppressWarnings("serial")
-    private com.google.protobuf.MapField<
-        java.lang.Integer, java.lang.Long> nodes_;
-    private com.google.protobuf.MapField<java.lang.Integer, java.lang.Long>
-    internalGetNodes() {
-      if (nodes_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            NodesDefaultEntryHolder.defaultEntry);
-      }
-      return nodes_;
-    }
-    public int getNodesCount() {
-      return internalGetNodes().getMap().size();
-    }
-    /**
-     * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-     */
-    @java.lang.Override
-    public boolean containsNodes(
-        int key) {
-      
-      return internalGetNodes().getMap().containsKey(key);
-    }
-    /**
-     * Use {@link #getNodesMap()} instead.
-     */
-    @java.lang.Override
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.Integer, java.lang.Long> getNodes() {
-      return getNodesMap();
-    }
-    /**
-     * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-     */
-    @java.lang.Override
-    public java.util.Map<java.lang.Integer, java.lang.Long> getNodesMap() {
-      return internalGetNodes().getMap();
-    }
-    /**
-     * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-     */
-    @java.lang.Override
-    public long getNodesOrDefault(
-        int key,
-        long defaultValue) {
-      
-      java.util.Map<java.lang.Integer, java.lang.Long> map =
-          internalGetNodes().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-     */
-    @java.lang.Override
-    public long getNodesOrThrow(
-        int key) {
-      
-      java.util.Map<java.lang.Integer, java.lang.Long> map =
-          internalGetNodes().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
-      }
-      return map.get(key);
     }
 
     private byte memoizedIsInitialized = -1;
@@ -380,12 +259,6 @@ public final class KeyValueResponse {
       if (((bitField0_ & 0x00000010) != 0)) {
         output.writeInt32(6, membershipCount_);
       }
-      com.google.protobuf.GeneratedMessageV3
-        .serializeIntegerMapTo(
-          output,
-          internalGetNodes(),
-          NodesDefaultEntryHolder.defaultEntry,
-          7);
       getUnknownFields().writeTo(output);
     }
 
@@ -418,16 +291,6 @@ public final class KeyValueResponse {
       if (((bitField0_ & 0x00000010) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(6, membershipCount_);
-      }
-      for (java.util.Map.Entry<java.lang.Integer, java.lang.Long> entry
-           : internalGetNodes().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.Integer, java.lang.Long>
-        nodes__ = NodesDefaultEntryHolder.defaultEntry.newBuilderForType()
-            .setKey(entry.getKey())
-            .setValue(entry.getValue())
-            .build();
-        size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(7, nodes__);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -471,8 +334,6 @@ public final class KeyValueResponse {
         if (getMembershipCount()
             != other.getMembershipCount()) return false;
       }
-      if (!internalGetNodes().equals(
-          other.internalGetNodes())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -505,10 +366,6 @@ public final class KeyValueResponse {
       if (hasMembershipCount()) {
         hash = (37 * hash) + MEMBERSHIPCOUNT_FIELD_NUMBER;
         hash = (53 * hash) + getMembershipCount();
-      }
-      if (!internalGetNodes().getMap().isEmpty()) {
-        hash = (37 * hash) + NODES_FIELD_NUMBER;
-        hash = (53 * hash) + internalGetNodes().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -617,28 +474,6 @@ public final class KeyValueResponse {
         return ca.NetSysLab.ProtocolBuffers.KeyValueResponse.internal_static_KVResponse_descriptor;
       }
 
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMapField(
-          int number) {
-        switch (number) {
-          case 7:
-            return internalGetNodes();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
-        }
-      }
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMutableMapField(
-          int number) {
-        switch (number) {
-          case 7:
-            return internalGetMutableNodes();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
-        }
-      }
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
@@ -660,14 +495,18 @@ public final class KeyValueResponse {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        bitField0_ = 0;
         errCode_ = 0;
+
         value_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
         pid_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
         version_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
         overloadWaitTime_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
         membershipCount_ = 0;
-        internalGetMutableNodes().clear();
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -694,42 +533,32 @@ public final class KeyValueResponse {
       @java.lang.Override
       public ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse buildPartial() {
         ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse result = new ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse(this);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartial0(ca.NetSysLab.ProtocolBuffers.KeyValueResponse.KVResponse result) {
         int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.errCode_ = errCode_;
-        }
         int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.value_ = value_;
+        result.errCode_ = errCode_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
           to_bitField0_ |= 0x00000001;
         }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.value_ = value_;
+        if (((from_bitField0_ & 0x00000002) != 0)) {
           result.pid_ = pid_;
           to_bitField0_ |= 0x00000002;
         }
-        if (((from_bitField0_ & 0x00000008) != 0)) {
+        if (((from_bitField0_ & 0x00000004) != 0)) {
           result.version_ = version_;
           to_bitField0_ |= 0x00000004;
         }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
+        if (((from_bitField0_ & 0x00000008) != 0)) {
           result.overloadWaitTime_ = overloadWaitTime_;
           to_bitField0_ |= 0x00000008;
         }
-        if (((from_bitField0_ & 0x00000020) != 0)) {
+        if (((from_bitField0_ & 0x00000010) != 0)) {
           result.membershipCount_ = membershipCount_;
           to_bitField0_ |= 0x00000010;
         }
-        if (((from_bitField0_ & 0x00000040) != 0)) {
-          result.nodes_ = internalGetNodes();
-          result.nodes_.makeImmutable();
-        }
-        result.bitField0_ |= to_bitField0_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
       }
 
       @java.lang.Override
@@ -794,9 +623,6 @@ public final class KeyValueResponse {
         if (other.hasMembershipCount()) {
           setMembershipCount(other.getMembershipCount());
         }
-        internalGetMutableNodes().mergeFrom(
-            other.internalGetNodes());
-        bitField0_ |= 0x00000040;
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -825,43 +651,34 @@ public final class KeyValueResponse {
                 break;
               case 8: {
                 errCode_ = input.readUInt32();
-                bitField0_ |= 0x00000001;
+
                 break;
               } // case 8
               case 18: {
                 value_ = input.readBytes();
-                bitField0_ |= 0x00000002;
+                bitField0_ |= 0x00000001;
                 break;
               } // case 18
               case 24: {
                 pid_ = input.readInt32();
-                bitField0_ |= 0x00000004;
+                bitField0_ |= 0x00000002;
                 break;
               } // case 24
               case 32: {
                 version_ = input.readInt32();
-                bitField0_ |= 0x00000008;
+                bitField0_ |= 0x00000004;
                 break;
               } // case 32
               case 40: {
                 overloadWaitTime_ = input.readInt32();
-                bitField0_ |= 0x00000010;
+                bitField0_ |= 0x00000008;
                 break;
               } // case 40
               case 48: {
                 membershipCount_ = input.readInt32();
-                bitField0_ |= 0x00000020;
+                bitField0_ |= 0x00000010;
                 break;
               } // case 48
-              case 58: {
-                com.google.protobuf.MapEntry<java.lang.Integer, java.lang.Long>
-                nodes__ = input.readMessage(
-                    NodesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-                internalGetMutableNodes().getMutableMap().put(
-                    nodes__.getKey(), nodes__.getValue());
-                bitField0_ |= 0x00000040;
-                break;
-              } // case 58
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -896,7 +713,6 @@ public final class KeyValueResponse {
       public Builder setErrCode(int value) {
         
         errCode_ = value;
-        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -905,7 +721,7 @@ public final class KeyValueResponse {
        * @return This builder for chaining.
        */
       public Builder clearErrCode() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        
         errCode_ = 0;
         onChanged();
         return this;
@@ -918,7 +734,7 @@ public final class KeyValueResponse {
        */
       @java.lang.Override
       public boolean hasValue() {
-        return ((bitField0_ & 0x00000002) != 0);
+        return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>optional bytes value = 2;</code>
@@ -934,9 +750,11 @@ public final class KeyValueResponse {
        * @return This builder for chaining.
        */
       public Builder setValue(com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
         value_ = value;
-        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -945,7 +763,7 @@ public final class KeyValueResponse {
        * @return This builder for chaining.
        */
       public Builder clearValue() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         value_ = getDefaultInstance().getValue();
         onChanged();
         return this;
@@ -958,7 +776,7 @@ public final class KeyValueResponse {
        */
       @java.lang.Override
       public boolean hasPid() {
-        return ((bitField0_ & 0x00000004) != 0);
+        return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>optional int32 pid = 3;</code>
@@ -974,9 +792,8 @@ public final class KeyValueResponse {
        * @return This builder for chaining.
        */
       public Builder setPid(int value) {
-        
+        bitField0_ |= 0x00000002;
         pid_ = value;
-        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -985,7 +802,7 @@ public final class KeyValueResponse {
        * @return This builder for chaining.
        */
       public Builder clearPid() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000002);
         pid_ = 0;
         onChanged();
         return this;
@@ -998,7 +815,7 @@ public final class KeyValueResponse {
        */
       @java.lang.Override
       public boolean hasVersion() {
-        return ((bitField0_ & 0x00000008) != 0);
+        return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional int32 version = 4;</code>
@@ -1014,9 +831,8 @@ public final class KeyValueResponse {
        * @return This builder for chaining.
        */
       public Builder setVersion(int value) {
-        
+        bitField0_ |= 0x00000004;
         version_ = value;
-        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -1025,7 +841,7 @@ public final class KeyValueResponse {
        * @return This builder for chaining.
        */
       public Builder clearVersion() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000004);
         version_ = 0;
         onChanged();
         return this;
@@ -1038,7 +854,7 @@ public final class KeyValueResponse {
        */
       @java.lang.Override
       public boolean hasOverloadWaitTime() {
-        return ((bitField0_ & 0x00000010) != 0);
+        return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional int32 overloadWaitTime = 5;</code>
@@ -1054,9 +870,8 @@ public final class KeyValueResponse {
        * @return This builder for chaining.
        */
       public Builder setOverloadWaitTime(int value) {
-        
+        bitField0_ |= 0x00000008;
         overloadWaitTime_ = value;
-        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -1065,7 +880,7 @@ public final class KeyValueResponse {
        * @return This builder for chaining.
        */
       public Builder clearOverloadWaitTime() {
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000008);
         overloadWaitTime_ = 0;
         onChanged();
         return this;
@@ -1078,7 +893,7 @@ public final class KeyValueResponse {
        */
       @java.lang.Override
       public boolean hasMembershipCount() {
-        return ((bitField0_ & 0x00000020) != 0);
+        return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional int32 membershipCount = 6;</code>
@@ -1094,9 +909,8 @@ public final class KeyValueResponse {
        * @return This builder for chaining.
        */
       public Builder setMembershipCount(int value) {
-        
+        bitField0_ |= 0x00000010;
         membershipCount_ = value;
-        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -1105,134 +919,9 @@ public final class KeyValueResponse {
        * @return This builder for chaining.
        */
       public Builder clearMembershipCount() {
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000010);
         membershipCount_ = 0;
         onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.MapField<
-          java.lang.Integer, java.lang.Long> nodes_;
-      private com.google.protobuf.MapField<java.lang.Integer, java.lang.Long>
-          internalGetNodes() {
-        if (nodes_ == null) {
-          return com.google.protobuf.MapField.emptyMapField(
-              NodesDefaultEntryHolder.defaultEntry);
-        }
-        return nodes_;
-      }
-      private com.google.protobuf.MapField<java.lang.Integer, java.lang.Long>
-          internalGetMutableNodes() {
-        if (nodes_ == null) {
-          nodes_ = com.google.protobuf.MapField.newMapField(
-              NodesDefaultEntryHolder.defaultEntry);
-        }
-        if (!nodes_.isMutable()) {
-          nodes_ = nodes_.copy();
-        }
-        bitField0_ |= 0x00000040;
-        onChanged();
-        return nodes_;
-      }
-      public int getNodesCount() {
-        return internalGetNodes().getMap().size();
-      }
-      /**
-       * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-       */
-      @java.lang.Override
-      public boolean containsNodes(
-          int key) {
-        
-        return internalGetNodes().getMap().containsKey(key);
-      }
-      /**
-       * Use {@link #getNodesMap()} instead.
-       */
-      @java.lang.Override
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.Integer, java.lang.Long> getNodes() {
-        return getNodesMap();
-      }
-      /**
-       * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-       */
-      @java.lang.Override
-      public java.util.Map<java.lang.Integer, java.lang.Long> getNodesMap() {
-        return internalGetNodes().getMap();
-      }
-      /**
-       * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-       */
-      @java.lang.Override
-      public long getNodesOrDefault(
-          int key,
-          long defaultValue) {
-        
-        java.util.Map<java.lang.Integer, java.lang.Long> map =
-            internalGetNodes().getMap();
-        return map.containsKey(key) ? map.get(key) : defaultValue;
-      }
-      /**
-       * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-       */
-      @java.lang.Override
-      public long getNodesOrThrow(
-          int key) {
-        
-        java.util.Map<java.lang.Integer, java.lang.Long> map =
-            internalGetNodes().getMap();
-        if (!map.containsKey(key)) {
-          throw new java.lang.IllegalArgumentException();
-        }
-        return map.get(key);
-      }
-      public Builder clearNodes() {
-        bitField0_ = (bitField0_ & ~0x00000040);
-        internalGetMutableNodes().getMutableMap()
-            .clear();
-        return this;
-      }
-      /**
-       * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-       */
-      public Builder removeNodes(
-          int key) {
-        
-        internalGetMutableNodes().getMutableMap()
-            .remove(key);
-        return this;
-      }
-      /**
-       * Use alternate mutation accessors instead.
-       */
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.Integer, java.lang.Long>
-          getMutableNodes() {
-        bitField0_ |= 0x00000040;
-        return internalGetMutableNodes().getMutableMap();
-      }
-      /**
-       * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-       */
-      public Builder putNodes(
-          int key,
-          long value) {
-        
-        
-        internalGetMutableNodes().getMutableMap()
-            .put(key, value);
-        bitField0_ |= 0x00000040;
-        return this;
-      }
-      /**
-       * <code>map&lt;int32, int64&gt; nodes = 7;</code>
-       */
-      public Builder putAllNodes(
-          java.util.Map<java.lang.Integer, java.lang.Long> values) {
-        internalGetMutableNodes().getMutableMap()
-            .putAll(values);
-        bitField0_ |= 0x00000040;
         return this;
       }
       @java.lang.Override
@@ -1304,11 +993,6 @@ public final class KeyValueResponse {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_KVResponse_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_KVResponse_NodesEntry_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_KVResponse_NodesEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1318,16 +1002,14 @@ public final class KeyValueResponse {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\026KeyValueResponse.proto\"\262\002\n\nKVResponse\022" +
+      "\n\026KeyValueResponse.proto\"\335\001\n\nKVResponse\022" +
       "\017\n\007errCode\030\001 \001(\r\022\022\n\005value\030\002 \001(\014H\000\210\001\001\022\020\n\003" +
       "pid\030\003 \001(\005H\001\210\001\001\022\024\n\007version\030\004 \001(\005H\002\210\001\001\022\035\n\020" +
       "overloadWaitTime\030\005 \001(\005H\003\210\001\001\022\034\n\017membershi" +
-      "pCount\030\006 \001(\005H\004\210\001\001\022%\n\005nodes\030\007 \003(\0132\026.KVRes" +
-      "ponse.NodesEntry\032,\n\nNodesEntry\022\013\n\003key\030\001 " +
-      "\001(\005\022\r\n\005value\030\002 \001(\003:\0028\001B\010\n\006_valueB\006\n\004_pid" +
-      "B\n\n\010_versionB\023\n\021_overloadWaitTimeB\022\n\020_me" +
-      "mbershipCountB0\n\034ca.NetSysLab.ProtocolBu" +
-      "ffersB\020KeyValueResponseb\006proto3"
+      "pCount\030\006 \001(\005H\004\210\001\001B\010\n\006_valueB\006\n\004_pidB\n\n\010_" +
+      "versionB\023\n\021_overloadWaitTimeB\022\n\020_members" +
+      "hipCountB0\n\034ca.NetSysLab.ProtocolBuffers" +
+      "B\020KeyValueResponseb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1338,13 +1020,7 @@ public final class KeyValueResponse {
     internal_static_KVResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_KVResponse_descriptor,
-        new java.lang.String[] { "ErrCode", "Value", "Pid", "Version", "OverloadWaitTime", "MembershipCount", "Nodes", "Value", "Pid", "Version", "OverloadWaitTime", "MembershipCount", });
-    internal_static_KVResponse_NodesEntry_descriptor =
-      internal_static_KVResponse_descriptor.getNestedTypes().get(0);
-    internal_static_KVResponse_NodesEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_KVResponse_NodesEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
+        new java.lang.String[] { "ErrCode", "Value", "Pid", "Version", "OverloadWaitTime", "MembershipCount", "Value", "Pid", "Version", "OverloadWaitTime", "MembershipCount", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

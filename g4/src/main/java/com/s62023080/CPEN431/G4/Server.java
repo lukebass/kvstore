@@ -28,10 +28,12 @@ public class Server {
     private final ReentrantReadWriteLock nodesLock;
     private final ReentrantReadWriteLock addressesLock;
     private final ReentrantReadWriteLock queueLock;
+    private final ReentrantReadWriteLock clockLock;
     private final Cache<ByteString, CacheData> cache;
     private final ConcurrentHashMap<Integer, Long> nodes;
     private ConcurrentSkipListMap<Integer, Integer> addresses;
     private final ConcurrentHashMap<ByteString, CacheData> queue;
+    private Long clock;
 
     public Server(ArrayList<Integer> nodes, int node, int threads, int weight) throws IOException {
         this.running = true;
@@ -47,8 +49,10 @@ public class Server {
         this.nodesLock = new ReentrantReadWriteLock();
         this.addressesLock = new ReentrantReadWriteLock();
         this.queueLock = new ReentrantReadWriteLock();
+        this.clockLock = new ReentrantReadWriteLock();
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
         this.queue = new ConcurrentHashMap<>();
+        this.clock = 0L;
         this.nodes = new ConcurrentHashMap<>();
         for (int n : nodes) this.nodes.put(n, System.currentTimeMillis());
         this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
@@ -212,6 +216,17 @@ public class Server {
             if (kvResponse.getErrCode() != 0) {
                 if (!Utils.isReplicaRequest(kvRequest.getCommand())) this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
                 return;
+            }
+
+            ConcurrentHashMap<Integer, Long> clocks;
+            this.clockLock.writeLock().lock();
+            try {
+                this.clock += 1;
+                clocks = new ConcurrentHashMap<>(kvRequest.getClocksMap());
+                clocks.put(this.node, this.clock);
+            } finally {
+                this.clockLock.writeLock().unlock();
+
             }
 
             // Node request
