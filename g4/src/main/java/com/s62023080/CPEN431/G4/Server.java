@@ -107,6 +107,7 @@ public class Server {
             kvRequest.setKey(key);
             kvRequest.setValue(data.value);
             kvRequest.setVersion(data.version);
+            kvRequest.putAllClocks(data.clocks);
             ByteString messageID = Utils.generateMessageID(this.node);
             CacheData cached = this.send(messageID, kvRequest.build().toByteString(), InetAddress.getLocalHost(), port, false);
             if (cached != null) this.queue.put(messageID, cached);
@@ -260,7 +261,7 @@ public class Server {
             if (Utils.isReplicaRequest(kvRequest.getCommand())) {
                 switch (kvRequest.getCommand()) {
                     case Utils.REPLICA_PUSH -> {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
                         this.sendConfirm(msg.getMessageID(), request.port);
                     }
                     case Utils.REPLICA_CONFIRMED -> {
@@ -314,7 +315,7 @@ public class Server {
                 int node = replicas.get(replicas.size() - 1);
                 if (replicas.contains(this.node)) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion());
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
                         Data data = this.store.remove(kvRequest.getKey());
                         if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
