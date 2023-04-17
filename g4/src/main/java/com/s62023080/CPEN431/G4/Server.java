@@ -135,13 +135,14 @@ public class Server {
         }
     }
 
-    public void redirect(Msg msg, KVRequest kvRequest, int node, ArrayList<Integer> replicas, InetAddress address, int port, boolean cache) {
+    public void redirect(Msg msg, KVRequest kvRequest, int node, ArrayList<Integer> replicas, ConcurrentHashMap<Integer, Long> clocks, InetAddress address, int port, boolean cache) {
         if (node == this.node || node == -1) return;
         this.cacheLock.writeLock().lock();
         try {
             KVRequest.Builder reqClone = KVRequest.newBuilder();
             reqClone.setCommand(kvRequest.getCommand());
             reqClone.addAllReplicas(replicas);
+            reqClone.putAllClocks(clocks);
             if (kvRequest.hasKey()) reqClone.setKey(kvRequest.getKey());
             if (kvRequest.hasValue()) reqClone.setValue(kvRequest.getValue());
             if (kvRequest.hasVersion()) reqClone.setVersion(kvRequest.getVersion());
@@ -299,7 +300,7 @@ public class Server {
                     return;
                 }
 
-                this.redirect(msg, kvRequest, node, replicas, request.address, request.port, false);
+                this.redirect(msg, kvRequest, node, replicas, clocks, request.address, request.port, false);
             }
 
             // Change request
@@ -315,10 +316,11 @@ public class Server {
                 int node = replicas.get(replicas.size() - 1);
                 if (replicas.contains(this.node)) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
+                        clocks = this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
-                        Data data = this.store.remove(kvRequest.getKey());
+                        Data data = this.store.get(kvRequest.getKey());
                         if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
+                        else this.store.remove(kvRequest.getKey(), clocks);
                     }
 
                     if (node == this.node) {
@@ -337,7 +339,7 @@ public class Server {
                     }
                 }
 
-                this.redirect(msg, kvRequest, node, replicas, request.address, request.port, replicas.contains(this.node));
+                this.redirect(msg, kvRequest, node, replicas, clocks, request.address, request.port, replicas.contains(this.node));
             }
         } catch (Exception e) {
             this.logger.log("Request Error: " + e.getMessage(), Utils.getFreeMemory(), this.cache.size());

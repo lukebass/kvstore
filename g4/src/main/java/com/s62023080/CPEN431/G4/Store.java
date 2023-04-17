@@ -18,10 +18,21 @@ public class Store {
         return this.store.keySet();
     }
 
-    public void put(ByteString key, ByteString value, int version, ConcurrentHashMap<Integer, Long> clocks) {
+    public ConcurrentHashMap<Integer, Long> put(ByteString key, ByteString value, int version, ConcurrentHashMap<Integer, Long> clocks) {
+        ConcurrentHashMap<Integer, Long> clone = new ConcurrentHashMap<>(clocks);
         this.lock.writeLock().lock();
         try {
-            this.store.put(key, new Data(value, version, clocks));
+            if (this.store.containsKey(key)) {
+                ConcurrentHashMap<Integer, Long> dataClocks = this.store.get(key).clocks;
+                for (int clock : dataClocks.keySet()) {
+                    if (clone.containsKey(clock) && clone.get(clock) < dataClocks.get(clock)) return clocks;
+                    else if (!clone.containsKey(clock)) clone.put(clock, dataClocks.get(clock));
+                }
+            }
+
+            if (!clocks.containsKey(0)) clone.put(0, clone.get(0) == null ? 1L : clone.get(0) + 1);
+            this.store.put(key, new Data(value, version, clone));
+            return clone;
         } finally {
             this.lock.writeLock().unlock();
         }
@@ -36,10 +47,16 @@ public class Store {
         }
     }
 
-    public Data remove(ByteString key) {
+    public void remove(ByteString key, ConcurrentHashMap<Integer, Long> clocks) {
         this.lock.writeLock().lock();
         try {
-            return this.store.remove(key);
+            if (this.store.containsKey(key)) {
+                ConcurrentHashMap<Integer, Long> dataClocks = this.store.get(key).clocks;
+                for (int clock : dataClocks.keySet()) {
+                    if (clocks.containsKey(clock) && clocks.get(clock) < dataClocks.get(clock)) return;
+                }
+            }
+            this.store.remove(key);
         } finally {
             this.lock.writeLock().unlock();
         }
