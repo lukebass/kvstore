@@ -30,7 +30,7 @@ public class Store {
                 }
             }
 
-            if (!clocks.containsKey(0)) clone.put(0, clone.get(0) == null ? 1L : clone.get(0) + 1);
+            if (!clocks.containsKey(0)) clone.put(0, clone.containsKey(0) ? clone.get(0) + 1 : 1L);
             this.store.put(key, new Data(value, version, clone));
             return clone;
         } finally {
