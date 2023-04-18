@@ -16,6 +16,8 @@ import java.util.*;
 
 public class Server {
     private boolean running;
+    private final boolean replication;
+    private Long clock;
     private final int pid;
     private final int node;
     private final int weight;
@@ -33,10 +35,11 @@ public class Server {
     private final ConcurrentHashMap<Integer, Long> nodes;
     private ConcurrentSkipListMap<Integer, Integer> addresses;
     private final ConcurrentHashMap<ByteString, CacheData> queue;
-    private Long clock;
 
     public Server(ArrayList<Integer> nodes, int node, int threads, int weight) throws IOException {
         this.running = true;
+        this.replication = nodes.size() > 1;
+        this.clock = 0L;
         this.pid = (int) ProcessHandle.current().pid();
         this.node = node;
         this.weight = weight;
@@ -52,15 +55,16 @@ public class Server {
         this.clockLock = new ReentrantReadWriteLock();
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
         this.queue = new ConcurrentHashMap<>();
-        this.clock = 0L;
         this.nodes = new ConcurrentHashMap<>();
         for (int n : nodes) this.nodes.put(n, System.currentTimeMillis());
         this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
         this.logger.log(this.addresses);
 
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
-        scheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
-        scheduler.scheduleAtFixedRate(this::pop, 250, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
+        if (this.replication) {
+            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+            scheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
+            scheduler.scheduleAtFixedRate(this::pop, 250, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
+        }
 
         while (this.running) {
             try {
@@ -278,6 +282,18 @@ public class Server {
 
             // Get request
             if (kvRequest.getCommand() == Utils.GET_REQUEST) {
+                if (!this.replication) {
+                    Data data = this.store.get(kvRequest.getKey());
+                    if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
+                    else {
+                        kvResponse.setValue(data.value);
+                        kvResponse.setVersion(data.version);
+                    }
+
+                    this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                    return;
+                }
+
                 ArrayList<Integer> replicas = new ArrayList<>();
                 this.addressesLock.writeLock().lock();
                 try {
@@ -304,6 +320,19 @@ public class Server {
 
             // Change request
             if (Utils.isChangeRequest(kvRequest.getCommand())) {
+                if (!this.replication) {
+                    if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
+                    } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
+                        Data data = this.store.get(kvRequest.getKey());
+                        if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
+                        else this.store.remove(kvRequest.getKey(), clocks);
+                    }
+
+                    this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
+                    return;
+                }
+
                 ArrayList<Integer> replicas = new ArrayList<>(kvRequest.getReplicasList());
                 this.addressesLock.writeLock().lock();
                 try {
