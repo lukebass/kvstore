@@ -1,6 +1,8 @@
 package com.s62023080.CPEN431.G4;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.google.protobuf.ByteString;
@@ -18,10 +20,22 @@ public class Store {
         return this.store.keySet();
     }
 
-    public void put(ByteString key, ByteString value, int version) {
+    public Map<Integer, Long> put(ByteString key, ByteString value, int version, Map<Integer, Long> clocks) {
+        Map<Integer, Long> clone = new HashMap<>(clocks);
+
         this.lock.writeLock().lock();
         try {
-            this.store.put(key, new Data(value, version));
+            if (this.store.containsKey(key)) {
+                Map<Integer, Long> dataClocks = this.store.get(key).clocks;
+                for (int clock : dataClocks.keySet()) {
+                    if (clone.containsKey(clock) && clone.get(clock) < dataClocks.get(clock)) return clocks;
+                    else if (!clone.containsKey(clock)) clone.put(clock, dataClocks.get(clock));
+                }
+            }
+
+            if (!clocks.containsKey(0)) clone.put(0, clone.containsKey(0) ? clone.get(0) + 1 : 1L);
+            this.store.put(key, new Data(value, version, clone));
+            return clone;
         } finally {
             this.lock.writeLock().unlock();
         }
@@ -36,10 +50,16 @@ public class Store {
         }
     }
 
-    public Data remove(ByteString key) {
+    public void remove(ByteString key, Map<Integer, Long> clocks) {
         this.lock.writeLock().lock();
         try {
-            return this.store.remove(key);
+            if (this.store.containsKey(key)) {
+                Map<Integer, Long> dataClocks = this.store.get(key).clocks;
+                for (int clock : dataClocks.keySet()) {
+                    if (clocks.containsKey(clock) && clocks.get(clock) < dataClocks.get(clock)) return;
+                }
+            }
+            this.store.remove(key);
         } finally {
             this.lock.writeLock().unlock();
         }

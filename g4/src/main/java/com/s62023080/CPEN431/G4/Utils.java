@@ -20,10 +20,10 @@ public class Utils {
     public static final int CACHE_EXPIRATION = 1000;
     public static final int OVERLOAD_TIME = 1000;
     public static final int EPIDEMIC_TIMEOUT = 10000;
-    public static final int EPIDEMIC_PERIOD = 500;
+    public static final int EPIDEMIC_PERIOD = 300;
     public static final int EPIDEMIC_BUFFER = 10;
-    public static final int QUEUE_EXPIRATION = 2000;
-    public static final int POP_PERIOD = 500;
+    public static final int QUEUE_EXPIRATION = 1500;
+    public static final int POP_PERIOD = 300;
     public static final int REPLICATION_FACTOR = 4;
     public static final int PUT_REQUEST = 1;
     public static final int GET_REQUEST = 2;
@@ -119,11 +119,11 @@ public class Utils {
         return msg.getCheckSum() != createCheckSum(msg.getMessageID().toByteArray(), msg.getPayload().toByteArray());
     }
 
-    public static ByteString generateMessageID(int port) throws UnknownHostException {
+    public static ByteString generateMessageID(InetAddress address, int port) {
         byte[] messageID = new byte[16];
         ByteBuffer buffer = ByteBuffer.wrap(messageID);
         // First 4 bytes are client IP
-        buffer.put(InetAddress.getLocalHost().getAddress());
+        buffer.put(address.getAddress());
         // Next 2 bytes are client port
         buffer.putShort((short) port);
         // Next 2 bytes are random
