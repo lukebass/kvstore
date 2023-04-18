@@ -20,6 +20,7 @@ public class Store {
 
     public ConcurrentHashMap<Integer, Long> put(ByteString key, ByteString value, int version, ConcurrentHashMap<Integer, Long> clocks) {
         ConcurrentHashMap<Integer, Long> clone = new ConcurrentHashMap<>(clocks);
+
         this.lock.writeLock().lock();
         try {
             if (this.store.containsKey(key)) {
