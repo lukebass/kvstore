@@ -135,7 +135,7 @@ public class Server {
         }
     }
 
-    public void redirect(Msg msg, KVRequest kvRequest, int node, InetAddress address, int port, ArrayList<Integer> replicas, ConcurrentHashMap<Integer, Long> clocks, boolean cache) {
+    public void redirect(Msg msg, KVRequest kvRequest, int node, InetAddress address, int port, ArrayList<Integer> replicas, Map<Integer, Long> clocks, boolean cache) {
         if (node == this.node || node == -1) return;
         this.cacheLock.writeLock().lock();
         try {
@@ -220,16 +220,6 @@ public class Server {
                 return;
             }
 
-            // Parse clocks
-            ConcurrentHashMap<Integer, Long> clocks = new ConcurrentHashMap<>(kvRequest.getClocksMap());
-            this.clockLock.writeLock().lock();
-            try {
-                this.clock += 1;
-                clocks.put(this.node, this.clock);
-            } finally {
-                this.clockLock.writeLock().unlock();
-            }
-
             // Node request
             if (Utils.isNodeRequest(kvRequest.getCommand())) {
                 switch (kvRequest.getCommand()) {
@@ -261,7 +251,7 @@ public class Server {
             if (Utils.isReplicaRequest(kvRequest.getCommand())) {
                 switch (kvRequest.getCommand()) {
                     case Utils.REPLICA_PUSH -> {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), kvRequest.getClocksMap());
                         this.sendConfirm(msg.getMessageID(), request.port);
                     }
                     case Utils.REPLICA_CONFIRMED -> {
@@ -274,6 +264,16 @@ public class Server {
                         }
                     }
                 }
+            }
+
+            // Parse clocks
+            Map<Integer, Long> clocks = new HashMap<>(kvRequest.getClocksMap());
+            this.clockLock.writeLock().lock();
+            try {
+                this.clock += 1;
+                clocks.put(this.node, this.clock);
+            } finally {
+                this.clockLock.writeLock().unlock();
             }
 
             // Get request

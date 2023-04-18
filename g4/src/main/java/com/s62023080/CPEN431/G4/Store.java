@@ -1,6 +1,8 @@
 package com.s62023080.CPEN431.G4;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.google.protobuf.ByteString;
@@ -18,13 +20,13 @@ public class Store {
         return this.store.keySet();
     }
 
-    public ConcurrentHashMap<Integer, Long> put(ByteString key, ByteString value, int version, ConcurrentHashMap<Integer, Long> clocks) {
-        ConcurrentHashMap<Integer, Long> clone = new ConcurrentHashMap<>(clocks);
+    public Map<Integer, Long> put(ByteString key, ByteString value, int version, Map<Integer, Long> clocks) {
+        Map<Integer, Long> clone = new HashMap<>(clocks);
 
         this.lock.writeLock().lock();
         try {
             if (this.store.containsKey(key)) {
-                ConcurrentHashMap<Integer, Long> dataClocks = this.store.get(key).clocks;
+                Map<Integer, Long> dataClocks = this.store.get(key).clocks;
                 for (int clock : dataClocks.keySet()) {
                     if (clone.containsKey(clock) && clone.get(clock) < dataClocks.get(clock)) return clocks;
                     else if (!clone.containsKey(clock)) clone.put(clock, dataClocks.get(clock));
@@ -48,11 +50,11 @@ public class Store {
         }
     }
 
-    public void remove(ByteString key, ConcurrentHashMap<Integer, Long> clocks) {
+    public void remove(ByteString key, Map<Integer, Long> clocks) {
         this.lock.writeLock().lock();
         try {
             if (this.store.containsKey(key)) {
-                ConcurrentHashMap<Integer, Long> dataClocks = this.store.get(key).clocks;
+                Map<Integer, Long> dataClocks = this.store.get(key).clocks;
                 for (int clock : dataClocks.keySet()) {
                     if (clocks.containsKey(clock) && clocks.get(clock) < dataClocks.get(clock)) return;
                 }
