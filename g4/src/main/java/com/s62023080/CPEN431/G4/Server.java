@@ -135,17 +135,17 @@ public class Server {
         }
     }
 
-    public void redirect(Msg msg, KVRequest kvRequest, int node, ArrayList<Integer> replicas, ConcurrentHashMap<Integer, Long> clocks, InetAddress address, int port, boolean cache) {
+    public void redirect(Msg msg, KVRequest kvRequest, int node, InetAddress address, int port, ArrayList<Integer> replicas, ConcurrentHashMap<Integer, Long> clocks, boolean cache) {
         if (node == this.node || node == -1) return;
         this.cacheLock.writeLock().lock();
         try {
             KVRequest.Builder reqClone = KVRequest.newBuilder();
             reqClone.setCommand(kvRequest.getCommand());
-            reqClone.addAllReplicas(replicas);
-            reqClone.putAllClocks(clocks);
             if (kvRequest.hasKey()) reqClone.setKey(kvRequest.getKey());
             if (kvRequest.hasValue()) reqClone.setValue(kvRequest.getValue());
             if (kvRequest.hasVersion()) reqClone.setVersion(kvRequest.getVersion());
+            if (replicas != null) reqClone.addAllReplicas(replicas);
+            if (clocks != null) reqClone.putAllClocks(clocks);
             ByteString payload = reqClone.build().toByteString();
             Msg.Builder msgClone = Msg.newBuilder();
             msgClone.setMessageID(msg.getMessageID());
@@ -299,7 +299,7 @@ public class Server {
                     return;
                 }
 
-                this.redirect(msg, kvRequest, node, replicas, clocks, request.address, request.port, false);
+                this.redirect(msg, kvRequest, node, request.address, request.port, null, null, false);
             }
 
             // Change request
@@ -338,7 +338,7 @@ public class Server {
                     }
                 }
 
-                this.redirect(msg, kvRequest, node, replicas, clocks, request.address, request.port, replicas.contains(this.node));
+                this.redirect(msg, kvRequest, node, request.address, request.port, replicas, clocks, replicas.contains(this.node));
             }
         } catch (Exception e) {
             this.logger.log("Request Error: " + e.getMessage(), Utils.getFreeMemory(), this.cache.size());
