@@ -220,15 +220,14 @@ public class Server {
                 return;
             }
 
-            ConcurrentHashMap<Integer, Long> clocks;
+            // Parse clocks
+            ConcurrentHashMap<Integer, Long> clocks = new ConcurrentHashMap<>(kvRequest.getClocksMap());
             this.clockLock.writeLock().lock();
             try {
                 this.clock += 1;
-                clocks = new ConcurrentHashMap<>(kvRequest.getClocksMap());
                 clocks.put(this.node, this.clock);
             } finally {
                 this.clockLock.writeLock().unlock();
-
             }
 
             // Node request
