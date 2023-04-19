@@ -17,7 +17,6 @@ import java.util.*;
 public class Server {
     private InetAddress address;
     private boolean running;
-    private final boolean replication;
     private Long clock;
     private final int pid;
     private final int node;
@@ -32,8 +31,8 @@ public class Server {
     private final ReentrantReadWriteLock queueLock;
     private final ReentrantReadWriteLock nodesLock;
     private final ReentrantReadWriteLock addressesLock;
-    private final Cache<ByteString, CacheData> cache;
-    private final ConcurrentHashMap<ByteString, CacheData> queue;
+    private Cache<ByteString, CacheData> cache;
+    private ConcurrentHashMap<ByteString, CacheData> queue;
     private final ConcurrentHashMap<Integer, Long> nodes;
     private ConcurrentSkipListMap<Integer, Integer> addresses;
 
@@ -46,7 +45,6 @@ public class Server {
         }
 
         this.running = true;
-        this.replication = nodes.size() > 1;
         this.pid = (int) ProcessHandle.current().pid();
         this.node = node;
         this.weight = weight;
@@ -68,11 +66,9 @@ public class Server {
         this.addresses = Utils.generateAddresses(new ArrayList<>(this.nodes.keySet()), this.weight);
         this.logger.log(this.addresses);
 
-        if (this.replication) {
-            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
-            scheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
-            scheduler.scheduleAtFixedRate(this::pop, 250, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
-        }
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+        scheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
+        scheduler.scheduleAtFixedRate(this::pop, 1000, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
 
         while (this.running) {
             try {
@@ -137,17 +133,17 @@ public class Server {
         }
     }
 
-    public void redirect(Msg msg, KVRequest kvRequest, int node, InetAddress address, int port, ArrayList<Integer> replicas, Map<Integer, Long> clocks, boolean cache) {
+    public void redirect(Msg msg, KVRequest kvRequest, int node, InetAddress address, int port, ArrayList<Integer> replicas, ConcurrentHashMap<Integer, Long> clocks, boolean cache) {
         if (node == this.node || node == -1) return;
         this.cacheLock.writeLock().lock();
         try {
             KVRequest.Builder reqClone = KVRequest.newBuilder();
             reqClone.setCommand(kvRequest.getCommand());
+            reqClone.addAllReplicas(replicas);
+            reqClone.putAllClocks(clocks);
             if (kvRequest.hasKey()) reqClone.setKey(kvRequest.getKey());
             if (kvRequest.hasValue()) reqClone.setValue(kvRequest.getValue());
             if (kvRequest.hasVersion()) reqClone.setVersion(kvRequest.getVersion());
-            if (replicas != null) reqClone.addAllReplicas(replicas);
-            if (clocks != null) reqClone.putAllClocks(clocks);
             ByteString payload = reqClone.build().toByteString();
             Msg.Builder msgClone = Msg.newBuilder();
             msgClone.setMessageID(msg.getMessageID());
@@ -222,14 +218,21 @@ public class Server {
                 return;
             }
 
+            // Parse clocks
+            ConcurrentHashMap<Integer, Long> clocks = new ConcurrentHashMap<>(kvRequest.getClocksMap());
+            this.clockLock.writeLock().lock();
+            try {
+                this.clock += 1;
+                clocks.putIfAbsent(this.node, this.clock);
+            } finally {
+                this.clockLock.writeLock().unlock();
+            }
+
             // Node request
             if (Utils.isNodeRequest(kvRequest.getCommand())) {
                 switch (kvRequest.getCommand()) {
                     case Utils.SHUTDOWN_REQUEST -> System.exit(0);
-                    case Utils.CLEAR_REQUEST -> {
-                        this.store.clear();
-                        this.cache.invalidateAll();
-                    }
+                    case Utils.CLEAR_REQUEST -> this.clear();
                     case Utils.HEALTH_REQUEST -> kvResponse.setErrCode(Utils.SUCCESS);
                     case Utils.PID_REQUEST -> kvResponse.setPid(this.pid);
                     case Utils.MEMBERSHIP_REQUEST -> kvResponse.setMembershipCount(this.nodes.size());
@@ -253,14 +256,14 @@ public class Server {
             if (Utils.isReplicaRequest(kvRequest.getCommand())) {
                 switch (kvRequest.getCommand()) {
                     case Utils.REPLICA_PUSH -> {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), kvRequest.getClocksMap());
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
                         this.sendConfirm(msg.getMessageID(), request.port);
                     }
                     case Utils.REPLICA_CONFIRMED -> {
                         this.queueLock.writeLock().lock();
                         try {
                             this.queue.remove(msg.getMessageID());
-                            this.cache.put(msg.getMessageID(), new CacheData(null, null, -1, System.currentTimeMillis()));
+                            this.cache.put(msg.getMessageID(), new CacheData(null, null, 0, 0));
                         } finally {
                             this.queueLock.writeLock().unlock();
                         }
@@ -268,30 +271,8 @@ public class Server {
                 }
             }
 
-            // Parse clocks
-            Map<Integer, Long> clocks = new HashMap<>(kvRequest.getClocksMap());
-            this.clockLock.writeLock().lock();
-            try {
-                this.clock += 1;
-                clocks.put(this.node, this.clock);
-            } finally {
-                this.clockLock.writeLock().unlock();
-            }
-
             // Get request
             if (kvRequest.getCommand() == Utils.GET_REQUEST) {
-                if (!this.replication) {
-                    Data data = this.store.get(kvRequest.getKey());
-                    if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
-                    else {
-                        kvResponse.setValue(data.value);
-                        kvResponse.setVersion(data.version);
-                    }
-
-                    this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
-                    return;
-                }
-
                 ArrayList<Integer> replicas = new ArrayList<>();
                 this.addressesLock.writeLock().lock();
                 try {
@@ -313,24 +294,11 @@ public class Server {
                     return;
                 }
 
-                this.redirect(msg, kvRequest, node, request.address, request.port, null, null, false);
+                this.redirect(msg, kvRequest, node, request.address, request.port, replicas, clocks, false);
             }
 
             // Change request
             if (Utils.isChangeRequest(kvRequest.getCommand())) {
-                if (!this.replication) {
-                    if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
-                    } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
-                        Data data = this.store.get(kvRequest.getKey());
-                        if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
-                        else this.store.remove(kvRequest.getKey(), clocks);
-                    }
-
-                    this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
-                    return;
-                }
-
                 ArrayList<Integer> replicas = new ArrayList<>(kvRequest.getReplicasList());
                 this.addressesLock.writeLock().lock();
                 try {
@@ -342,11 +310,11 @@ public class Server {
                 int node = replicas.get(replicas.size() - 1);
                 if (replicas.contains(this.node)) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
-                        clocks = this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
+                        Data data = this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
+                        if (data != null && data.clocks.containsKey(0)) clocks.putIfAbsent(0, data.clocks.get(0));
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
-                        Data data = this.store.get(kvRequest.getKey());
+                        Data data = this.store.remove(kvRequest.getKey());
                         if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
-                        else this.store.remove(kvRequest.getKey(), clocks);
                     }
 
                     if (node == this.node) {
@@ -484,9 +452,10 @@ public class Server {
     }
 
     public void clear() {
+        this.clock = 0L;
         this.store.clear();
-        this.cache.invalidateAll();
-        this.addresses.clear();
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
+        this.queue = new ConcurrentHashMap<>();
     }
 
     public void shutdown() {
