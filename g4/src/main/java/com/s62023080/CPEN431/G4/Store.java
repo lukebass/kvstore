@@ -38,6 +38,9 @@ public class Store {
                         System.out.println("Store Clocks: " + key);
                         System.out.println(dataClocks.keySet());
                         System.out.println(dataClocks.values());
+                        System.out.println("==========");
+                        System.out.println("Replicas: " + key);
+                        System.out.println(replicas.toString());
                         return;
                     }
                     else if (!clone.containsKey(clock)) clone.put(clock, dataClocks.get(clock));
