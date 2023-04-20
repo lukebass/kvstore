@@ -120,10 +120,9 @@ public class Server {
     }
 
     public void pop() {
-        if (this.cleared) return;
+        if (this.cleared || this.queue.size() == 0) return;
         this.queueLock.writeLock().lock();
         try {
-            if (this.queue.size() == 0) return;
             this.queue.values().removeIf(cached -> Utils.isDeadQueue(cached.time));
             for (ByteString messageID : this.queue.keySet()) {
                 CacheData cached = this.queue.get(messageID);
@@ -202,7 +201,6 @@ public class Server {
     }
 
     public void handleRequest(Request request) {
-        this.cleared = false;
         Msg msg = null;
         KVResponse.Builder kvResponse = null;
 
@@ -212,6 +210,13 @@ public class Server {
             if (msg.hasPort()) request.port = msg.getPort();
 
             KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
+
+            // Parse cleared
+            if (Utils.isReplicaRequest(kvRequest.getCommand()) && this.cleared) {
+                return;
+            } else {
+                this.cleared = false;
+            }
 
             // Parse clocks
             ConcurrentHashMap<Integer, Long> clocks = new ConcurrentHashMap<>(kvRequest.getClocksMap());
