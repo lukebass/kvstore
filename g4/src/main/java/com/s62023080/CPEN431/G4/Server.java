@@ -139,11 +139,11 @@ public class Server {
         try {
             KVRequest.Builder reqClone = KVRequest.newBuilder();
             reqClone.setCommand(kvRequest.getCommand());
-            reqClone.addAllReplicas(replicas);
-            reqClone.putAllClocks(clocks);
             if (kvRequest.hasKey()) reqClone.setKey(kvRequest.getKey());
             if (kvRequest.hasValue()) reqClone.setValue(kvRequest.getValue());
             if (kvRequest.hasVersion()) reqClone.setVersion(kvRequest.getVersion());
+            if (replicas != null) reqClone.addAllReplicas(replicas);
+            if (clocks != null) reqClone.putAllClocks(clocks);
             ByteString payload = reqClone.build().toByteString();
             Msg.Builder msgClone = Msg.newBuilder();
             msgClone.setMessageID(msg.getMessageID());
@@ -208,16 +208,6 @@ public class Server {
 
             KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
 
-            // Cache check
-            if (this.check(msg.getMessageID(), !Utils.isReplicaRequest(kvRequest.getCommand()))) return;
-
-            // Parse request
-            kvResponse = Utils.parseRequest(kvRequest, this.cache.size());
-            if (kvResponse.getErrCode() != 0) {
-                if (!Utils.isReplicaRequest(kvRequest.getCommand())) this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
-                return;
-            }
-
             // Parse clocks
             ConcurrentHashMap<Integer, Long> clocks = new ConcurrentHashMap<>(kvRequest.getClocksMap());
             this.clockLock.writeLock().lock();
@@ -226,6 +216,16 @@ public class Server {
                 clocks.putIfAbsent(this.node, this.clock);
             } finally {
                 this.clockLock.writeLock().unlock();
+            }
+
+            // Cache check
+            if (this.check(msg.getMessageID(), !Utils.isReplicaRequest(kvRequest.getCommand()))) return;
+
+            // Parse request
+            kvResponse = Utils.parseRequest(kvRequest, this.cache.size());
+            if (kvResponse.getErrCode() != 0) {
+                if (!Utils.isReplicaRequest(kvRequest.getCommand())) this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
+                return;
             }
 
             // Node request
@@ -294,7 +294,7 @@ public class Server {
                     return;
                 }
 
-                this.redirect(msg, kvRequest, node, request.address, request.port, replicas, clocks, false);
+                this.redirect(msg, kvRequest, node, request.address, request.port, null, null, false);
             }
 
             // Change request
@@ -336,7 +336,7 @@ public class Server {
                 this.redirect(msg, kvRequest, node, request.address, request.port, replicas, clocks, replicas.contains(this.node));
             }
         } catch (Exception e) {
-            this.logger.log("Request Error: " + e.getMessage(), Utils.getFreeMemory(), this.cache.size());
+            this.logger.log("Request Error: " + e.getMessage(), this.store.size(), this.cache.size(), this.queue.size());
             if (msg != null && kvResponse != null)  {
                 kvResponse.setErrCode(Utils.STORE_ERROR);
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
@@ -452,7 +452,6 @@ public class Server {
     }
 
     public void clear() {
-        this.clock = 0L;
         this.store.clear();
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
         this.queue = new ConcurrentHashMap<>();

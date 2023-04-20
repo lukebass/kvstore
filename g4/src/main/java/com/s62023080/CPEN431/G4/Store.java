@@ -19,10 +19,10 @@ public class Store {
     }
 
     public Data put(ByteString key, ByteString value, int version, ConcurrentHashMap<Integer, Long> clocks) {
-        ConcurrentHashMap<Integer, Long> clone = new ConcurrentHashMap<>(clocks);
-
         this.lock.writeLock().lock();
         try {
+            ConcurrentHashMap<Integer, Long> clone = new ConcurrentHashMap<>(clocks);
+
             if (this.store.containsKey(key)) {
                 ConcurrentHashMap<Integer, Long> dataClocks = this.store.get(key).clocks;
                 for (int clock : dataClocks.keySet()) {
@@ -34,7 +34,7 @@ public class Store {
             clone.putIfAbsent(0, 0L);
             if (!clocks.containsKey(0)) clone.put(0, clone.get(0) + 1);
             Data data = new Data(value, version, clone);
-            this.store.put(key, new Data(value, version, clone));
+            this.store.put(key, data);
             return data;
         } finally {
             this.lock.writeLock().unlock();
