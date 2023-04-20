@@ -15,10 +15,15 @@ public class Store {
     }
 
     public ConcurrentHashMap.KeySetView<ByteString, Data> getKeys() {
-        return this.store.keySet();
+        this.lock.readLock().lock();
+        try {
+            return this.store.keySet();
+        } finally {
+            this.lock.readLock().unlock();
+        }
     }
 
-    public void put(ByteString key, ByteString value, int version, ConcurrentHashMap<Integer, Long> clocks, String type, ArrayList<Integer> replicas) {
+    public void put(ByteString key, ByteString value, int version, ConcurrentHashMap<Integer, Long> clocks) {
         this.lock.writeLock().lock();
         try {
             ConcurrentHashMap<Integer, Long> clone = new ConcurrentHashMap<>(clocks);
@@ -26,23 +31,7 @@ public class Store {
             if (this.store.containsKey(key)) {
                 ConcurrentHashMap<Integer, Long> dataClocks = this.store.get(key).clocks;
                 for (int clock : dataClocks.keySet()) {
-                    if (clone.containsKey(clock) && clone.get(clock) < dataClocks.get(clock)) {
-                        System.out.println("==========");
-                        System.out.println("Mismatched Clocks: " + key);
-                        System.out.println("Request Type: " + type);
-                        System.out.println("Time: " + System.currentTimeMillis());
-                        System.out.println("==========");
-                        System.out.println(clocks.keySet());
-                        System.out.println(clocks.values());
-                        System.out.println("==========");
-                        System.out.println("Store Clocks: " + key);
-                        System.out.println(dataClocks.keySet());
-                        System.out.println(dataClocks.values());
-                        System.out.println("==========");
-                        System.out.println("Replicas: " + key);
-                        System.out.println(replicas.toString());
-                        return;
-                    }
+                    if (clone.containsKey(clock) && clone.get(clock) < dataClocks.get(clock)) return;
                     else if (!clone.containsKey(clock)) clone.put(clock, dataClocks.get(clock));
                 }
             }
@@ -83,7 +72,12 @@ public class Store {
     }
 
     public void clear() {
-        this.store = new ConcurrentHashMap<>();
+        this.lock.writeLock().lock();
+        try {
+            this.store = new ConcurrentHashMap<>();
+        } finally {
+            this.lock.writeLock().unlock();
+        }
     }
 
     public int size() { return this.store.size(); }

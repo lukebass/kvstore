@@ -31,7 +31,7 @@ public class Server {
     private final ReentrantReadWriteLock queueLock;
     private final ReentrantReadWriteLock nodesLock;
     private final ReentrantReadWriteLock addressesLock;
-    private Cache<ByteString, CacheData> cache;
+    private final Cache<ByteString, CacheData> cache;
     private ConcurrentHashMap<ByteString, CacheData> queue;
     private final ConcurrentHashMap<Integer, Long> nodes;
     private ConcurrentSkipListMap<Integer, Integer> addresses;
@@ -117,9 +117,9 @@ public class Server {
     }
 
     public void pop() {
-        if (this.queue.size() == 0) return;
         this.queueLock.writeLock().lock();
         try {
+            if (this.queue.size() == 0) return;
             this.queue.values().removeIf(cached -> Utils.isDeadQueue(cached.time));
             for (ByteString messageID : this.queue.keySet()) {
                 CacheData cached = this.queue.get(messageID);
@@ -256,7 +256,7 @@ public class Server {
             if (Utils.isReplicaRequest(kvRequest.getCommand())) {
                 switch (kvRequest.getCommand()) {
                     case Utils.REPLICA_PUSH -> {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks, "replica_push", null);
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
                         this.sendConfirm(msg.getMessageID(), request.port);
                     }
                     case Utils.REPLICA_CONFIRMED -> {
@@ -310,7 +310,7 @@ public class Server {
                 int node = replicas.get(replicas.size() - 1);
                 if (replicas.contains(this.node)) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks, "put_request", replicas);
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
                         Data data = this.store.get(kvRequest.getKey());
                         if (data != null && data.clocks.containsKey(0)) clocks.putIfAbsent(0, data.clocks.get(0));
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
@@ -453,9 +453,14 @@ public class Server {
     }
 
     public void clear() {
-        this.store.clear();
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
-        this.queue = new ConcurrentHashMap<>();
+        this.queueLock.writeLock().lock();
+        try {
+            this.queue = new ConcurrentHashMap<>();
+            this.store.clear();
+        } finally {
+            this.queueLock.writeLock().unlock();
+        }
+
         this.logger.log("Clear Request", this.store.size(), this.cache.size(), this.queue.size());
     }
 
