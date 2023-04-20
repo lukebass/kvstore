@@ -18,6 +18,7 @@ public class Server {
     private InetAddress address;
     private boolean running;
     private Long clock;
+    private boolean cleared;
     private final int pid;
     private final int node;
     private final int weight;
@@ -45,6 +46,8 @@ public class Server {
         }
 
         this.running = true;
+        this.clock = 0L;
+        this.cleared = false;
         this.pid = (int) ProcessHandle.current().pid();
         this.node = node;
         this.weight = weight;
@@ -58,7 +61,6 @@ public class Server {
         this.nodesLock = new ReentrantReadWriteLock();
         this.addressesLock = new ReentrantReadWriteLock();
         this.queueLock = new ReentrantReadWriteLock();
-        this.clock = 0L;
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
         this.queue = new ConcurrentHashMap<>();
         this.nodes = new ConcurrentHashMap<>();
@@ -100,6 +102,7 @@ public class Server {
     }
 
     public void sendReplica(ByteString key, Data data, int port) {
+        if (this.cleared) return;
         this.queueLock.writeLock().lock();
         try {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
@@ -117,6 +120,7 @@ public class Server {
     }
 
     public void pop() {
+        if (this.cleared) return;
         this.queueLock.writeLock().lock();
         try {
             if (this.queue.size() == 0) return;
@@ -153,7 +157,7 @@ public class Server {
             msgClone.setPort(port);
             byte[] response = msgClone.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, this.address, node));
-            if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, this.address, node, System.currentTimeMillis()));
+            if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, this.address, node));
         } catch (Exception e) {
             this.logger.log("Redirect Error: " + e.getMessage());
         } finally {
@@ -171,7 +175,7 @@ public class Server {
             msg.setCheckSum(Utils.createCheckSum(messageID.toByteArray(), payload.toByteArray()));
             byte[] response = msg.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, address, port));
-            CacheData cached = new CacheData(response, address, port, System.currentTimeMillis());
+            CacheData cached = new CacheData(response, address, port);
             if (cache) this.cache.put(msg.getMessageID(), cached);
             return cached;
         } catch (Exception e) {
@@ -198,6 +202,7 @@ public class Server {
     }
 
     public void handleRequest(Request request) {
+        this.cleared = false;
         Msg msg = null;
         KVResponse.Builder kvResponse = null;
 
@@ -263,7 +268,7 @@ public class Server {
                         this.queueLock.writeLock().lock();
                         try {
                             this.queue.remove(msg.getMessageID());
-                            this.cache.put(msg.getMessageID(), new CacheData(null, null, 0, 0));
+                            this.cache.put(msg.getMessageID(), new CacheData(null, null, 0));
                         } finally {
                             this.queueLock.writeLock().unlock();
                         }
@@ -381,7 +386,7 @@ public class Server {
                 if (!newReplicas.contains(this.node)) keys.add(key);
             }
 
-            if (keys.size() != 0) this.store.bulkRemove(keys);
+           this.store.bulkRemove(keys);
         } catch (Exception e) {
             this.logger.log("Regen Error: " + e.getMessage());
         }
@@ -453,6 +458,7 @@ public class Server {
     }
 
     public void clear() {
+        this.cleared = true;
         this.queueLock.writeLock().lock();
         try {
             this.queue = new ConcurrentHashMap<>();
@@ -460,7 +466,6 @@ public class Server {
         } finally {
             this.queueLock.writeLock().unlock();
         }
-
         this.logger.log("Clear Request", this.store.size(), this.cache.size(), this.queue.size());
     }
 

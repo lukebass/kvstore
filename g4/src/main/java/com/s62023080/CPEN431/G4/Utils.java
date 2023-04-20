@@ -21,8 +21,8 @@ public class Utils {
     public static final int EPIDEMIC_TIMEOUT = 5000;
     public static final int EPIDEMIC_PERIOD = 300;
     public static final int EPIDEMIC_BUFFER = 10;
-    public static final int QUEUE_EXPIRATION = 100;
-    public static final int POP_PERIOD = 25;
+    public static final int QUEUE_EXPIRATION = 500;
+    public static final int POP_PERIOD = 100;
     public static final int REPLICATION_FACTOR = 4;
     public static final int PUT_REQUEST = 1;
     public static final int GET_REQUEST = 2;
