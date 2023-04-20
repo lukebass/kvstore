@@ -213,7 +213,7 @@ public class Server {
             this.clockLock.writeLock().lock();
             try {
                 this.clock += 1;
-                clocks.putIfAbsent(this.node, this.clock);
+                if (!clocks.containsKey(this.node)) clocks.put(this.node, this.clock);
             } finally {
                 this.clockLock.writeLock().unlock();
             }
@@ -310,8 +310,9 @@ public class Server {
                 int node = replicas.get(replicas.size() - 1);
                 if (replicas.contains(this.node)) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
-                        Data data = this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
-                        if (data != null && data.clocks.containsKey(0)) clocks.putIfAbsent(0, data.clocks.get(0));
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
+                        Data data = this.store.get(kvRequest.getKey());
+                        if (data != null && data.clocks.containsKey(0) && !clocks.containsKey(0)) clocks.put(0, data.clocks.get(0));
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
                         Data data = this.store.remove(kvRequest.getKey());
                         if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
