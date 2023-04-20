@@ -213,7 +213,7 @@ public class Server {
             this.clockLock.writeLock().lock();
             try {
                 this.clock += 1;
-                if (!clocks.containsKey(this.node)) clocks.put(this.node, this.clock);
+                clocks.putIfAbsent(this.node, this.clock);
             } finally {
                 this.clockLock.writeLock().unlock();
             }
@@ -256,7 +256,7 @@ public class Server {
             if (Utils.isReplicaRequest(kvRequest.getCommand())) {
                 switch (kvRequest.getCommand()) {
                     case Utils.REPLICA_PUSH -> {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks, "replica_push", null);
                         this.sendConfirm(msg.getMessageID(), request.port);
                     }
                     case Utils.REPLICA_CONFIRMED -> {
@@ -310,9 +310,9 @@ public class Server {
                 int node = replicas.get(replicas.size() - 1);
                 if (replicas.contains(this.node)) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks, "put_request", replicas);
                         Data data = this.store.get(kvRequest.getKey());
-                        if (data != null && data.clocks.containsKey(0) && !clocks.containsKey(0)) clocks.put(0, data.clocks.get(0));
+                        if (data != null && data.clocks.containsKey(0)) clocks.putIfAbsent(0, data.clocks.get(0));
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
                         Data data = this.store.remove(kvRequest.getKey());
                         if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
@@ -337,7 +337,7 @@ public class Server {
                 this.redirect(msg, kvRequest, node, request.address, request.port, replicas, clocks, replicas.contains(this.node));
             }
         } catch (Exception e) {
-            this.logger.log("Request Error: " + e.getMessage(), this.store.size(), this.cache.size(), this.queue.size());
+            this.logger.log("Request Error: " + e.getMessage());
             if (msg != null && kvResponse != null)  {
                 kvResponse.setErrCode(Utils.STORE_ERROR);
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
@@ -456,6 +456,7 @@ public class Server {
         this.store.clear();
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
         this.queue = new ConcurrentHashMap<>();
+        this.logger.log("Clear Request", this.store.size(), this.cache.size(), this.queue.size());
     }
 
     public void shutdown() {
