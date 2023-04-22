@@ -294,7 +294,7 @@ public class Server {
 
             // Get request
             if (kvRequest.getCommand() == Utils.GET_REQUEST) {
-                if (!replication) {
+                if (!this.replication) {
                     Data data = this.store.get(kvRequest.getKey());
                     if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
                     else {
@@ -332,7 +332,7 @@ public class Server {
 
             // Change request
             if (Utils.isChangeRequest(kvRequest.getCommand())) {
-                if (!replication) {
+                if (!this.replication) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
                         this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
