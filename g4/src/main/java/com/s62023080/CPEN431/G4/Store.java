@@ -23,22 +23,23 @@ public class Store {
         }
     }
 
-    public void put(ByteString key, ByteString value, int version, ConcurrentHashMap<Integer, Long> clocks) {
+    public Data put(ByteString key, ByteString value, int version, ConcurrentHashMap<Integer, Long> clocks) {
         this.lock.writeLock().lock();
         try {
             ConcurrentHashMap<Integer, Long> clone = new ConcurrentHashMap<>(clocks);
 
             if (this.store.containsKey(key)) {
-                ConcurrentHashMap<Integer, Long> dataClocks = this.store.get(key).clocks;
-                for (int clock : dataClocks.keySet()) {
-                    if (clone.containsKey(clock) && clone.get(clock) < dataClocks.get(clock)) return;
-                    else if (!clone.containsKey(clock)) clone.put(clock, dataClocks.get(clock));
+                Data data = this.store.get(key);
+                for (int clock : data.clocks.keySet()) {
+                    if (clone.containsKey(clock) && clone.get(clock) < data.clocks.get(clock)) return data;
+                    else if (!clone.containsKey(clock)) clone.put(clock, data.clocks.get(clock));
                 }
             }
 
-            clone.putIfAbsent(0, 0L);
-            if (!clocks.containsKey(0)) clone.put(0, clone.get(0) + 1);
-            this.store.put(key, new Data(value, version, clone));
+            if (!clocks.containsKey(0)) clone.put(0, clone.containsKey(0) ? clone.get(0) + 1 : 1);
+            Data data = new Data(value, version, clone);
+            this.store.put(key, data);
+            return data;
         } finally {
             this.lock.writeLock().unlock();
         }
