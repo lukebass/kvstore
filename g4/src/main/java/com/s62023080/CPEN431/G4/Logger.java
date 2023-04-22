@@ -1,6 +1,5 @@
 package com.s62023080.CPEN431.G4;
 
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class Logger {
@@ -17,18 +16,12 @@ public class Logger {
         System.out.println("\n");
     }
 
-    public void log(String message, int memory, long cache) {
+    public void log(String message, int storeSize, long cacheSize, int queueSize) {
         System.out.println(message);
-        System.out.println("Memory: " + memory);
-        System.out.println("Cache: " + cache);
-        System.out.println("Log: " + System.currentTimeMillis());
-        System.out.println("PID: " + pid);
-        System.out.println("\n");
-    }
-
-    public void log(String message, ArrayList<Integer> replicas) {
-        System.out.println(message);
-        System.out.println("Replicas: " + replicas.toString());
+        System.out.println("Store: " + storeSize);
+        System.out.println("Cache: " + cacheSize);
+        System.out.println("Queue: " + queueSize);
+        System.out.println("Memory: " + Utils.getFreeMemory());
         System.out.println("Log: " + System.currentTimeMillis());
         System.out.println("PID: " + pid);
         System.out.println("\n");
@@ -36,7 +29,9 @@ public class Logger {
 
     public void log(ConcurrentSkipListMap<Integer, Integer> addresses) {
         System.out.println("Addresses Size: " + addresses.size());
+        System.out.println("Node IDs:");
         System.out.println(addresses.keySet());
+        System.out.println("Node Addresses:");
         System.out.println(addresses.values());
         System.out.println("\n");
     }

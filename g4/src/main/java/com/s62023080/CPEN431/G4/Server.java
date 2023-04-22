@@ -17,8 +17,9 @@ import java.util.*;
 public class Server {
     private InetAddress address;
     private boolean running;
-    private final boolean replication;
+    private boolean cleared;
     private Long clock;
+    private final boolean replication;
     private final int pid;
     private final int node;
     private final int weight;
@@ -27,13 +28,13 @@ public class Server {
     private final DatagramSocket socket;
     private final ExecutorService executor;
     private final Store store;
+    private Cache<ByteString, CacheData> cache;
+    private final ReentrantReadWriteLock clearedLock;
     private final ReentrantReadWriteLock clockLock;
-    private final ReentrantReadWriteLock cacheLock;
     private final ReentrantReadWriteLock queueLock;
     private final ReentrantReadWriteLock nodesLock;
     private final ReentrantReadWriteLock addressesLock;
-    private final Cache<ByteString, CacheData> cache;
-    private final ConcurrentHashMap<ByteString, CacheData> queue;
+    private ConcurrentHashMap<ByteString, CacheData> queue;
     private final ConcurrentHashMap<Integer, Long> nodes;
     private ConcurrentSkipListMap<Integer, Integer> addresses;
 
@@ -46,6 +47,8 @@ public class Server {
         }
 
         this.running = true;
+        this.cleared = false;
+        this.clock = 0L;
         this.replication = nodes.size() > 1;
         this.pid = (int) ProcessHandle.current().pid();
         this.node = node;
@@ -55,12 +58,11 @@ public class Server {
         this.socket = new DatagramSocket(this.node);
         this.executor = Executors.newFixedThreadPool(threads);
         this.store = new Store();
+        this.clearedLock = new ReentrantReadWriteLock();
         this.clockLock = new ReentrantReadWriteLock();
-        this.cacheLock = new ReentrantReadWriteLock();
         this.nodesLock = new ReentrantReadWriteLock();
         this.addressesLock = new ReentrantReadWriteLock();
         this.queueLock = new ReentrantReadWriteLock();
-        this.clock = 0L;
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
         this.queue = new ConcurrentHashMap<>();
         this.nodes = new ConcurrentHashMap<>();
@@ -71,7 +73,7 @@ public class Server {
         if (this.replication) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
             scheduler.scheduleAtFixedRate(this::push, 0, Utils.EPIDEMIC_PERIOD, TimeUnit.MILLISECONDS);
-            scheduler.scheduleAtFixedRate(this::pop, 250, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
+            scheduler.scheduleAtFixedRate(this::pop, 1000, Utils.POP_PERIOD, TimeUnit.MILLISECONDS);
         }
 
         while (this.running) {
@@ -103,7 +105,19 @@ public class Server {
         this.send(messageID, kvRequest.build().toByteString(), this.address, port, true);
     }
 
+    public boolean checkCleared() {
+        this.clearedLock.readLock().lock();
+        try {
+            if (this.cleared) return true;
+        }
+        finally {
+            this.clearedLock.readLock().unlock();
+        }
+        return false;
+    }
+
     public void sendReplica(ByteString key, Data data, int port) {
+        if (checkCleared()) return;
         this.queueLock.writeLock().lock();
         try {
             KVRequest.Builder kvRequest = KVRequest.newBuilder();
@@ -121,9 +135,10 @@ public class Server {
     }
 
     public void pop() {
-        if (this.queue.size() == 0) return;
+        if (checkCleared()) return;
         this.queueLock.writeLock().lock();
         try {
+            if (this.queue.size() == 0) return;
             this.queue.values().removeIf(cached -> Utils.isDeadQueue(cached.time));
             for (ByteString messageID : this.queue.keySet()) {
                 CacheData cached = this.queue.get(messageID);
@@ -137,9 +152,8 @@ public class Server {
         }
     }
 
-    public void redirect(Msg msg, KVRequest kvRequest, int node, InetAddress address, int port, ArrayList<Integer> replicas, Map<Integer, Long> clocks, boolean cache) {
+    public void redirect(Msg msg, KVRequest kvRequest, int node, InetAddress address, int port, ArrayList<Integer> replicas, ConcurrentHashMap<Integer, Long> clocks, boolean cache) {
         if (node == this.node || node == -1) return;
-        this.cacheLock.writeLock().lock();
         try {
             KVRequest.Builder reqClone = KVRequest.newBuilder();
             reqClone.setCommand(kvRequest.getCommand());
@@ -157,17 +171,14 @@ public class Server {
             msgClone.setPort(port);
             byte[] response = msgClone.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, this.address, node));
-            if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, this.address, node, System.currentTimeMillis()));
+            if (cache) this.cache.put(msg.getMessageID(), new CacheData(response, this.address, node));
         } catch (Exception e) {
             this.logger.log("Redirect Error: " + e.getMessage());
-        } finally {
-            this.cacheLock.writeLock().unlock();
         }
     }
 
     public CacheData send(ByteString messageID, ByteString payload, InetAddress address, int port, boolean cache) {
         if (port == this.node || port == -1) return null;
-        this.cacheLock.writeLock().lock();
         try {
             Msg.Builder msg = Msg.newBuilder();
             msg.setMessageID(messageID);
@@ -175,19 +186,16 @@ public class Server {
             msg.setCheckSum(Utils.createCheckSum(messageID.toByteArray(), payload.toByteArray()));
             byte[] response = msg.build().toByteArray();
             this.socket.send(new DatagramPacket(response, response.length, address, port));
-            CacheData cached = new CacheData(response, address, port, System.currentTimeMillis());
+            CacheData cached = new CacheData(response, address, port);
             if (cache) this.cache.put(msg.getMessageID(), cached);
             return cached;
         } catch (Exception e) {
             this.logger.log("Send Error: " + e.getMessage());
-        } finally {
-            this.cacheLock.writeLock().unlock();
         }
         return null;
     }
 
     public boolean check(ByteString messageID, boolean send) {
-        this.cacheLock.writeLock().lock();
         try {
             CacheData cached = this.cache.getIfPresent(messageID);
             if (cached == null) return false;
@@ -195,8 +203,6 @@ public class Server {
             return true;
         } catch (Exception e) {
             this.logger.log("Check Error: " + e.getMessage());
-        } finally {
-            this.cacheLock.writeLock().unlock();
         }
         return false;
     }
@@ -212,6 +218,27 @@ public class Server {
 
             KVRequest kvRequest = KVRequest.parseFrom(msg.getPayload());
 
+            // Parse clocks
+            ConcurrentHashMap<Integer, Long> clocks = new ConcurrentHashMap<>(kvRequest.getClocksMap());
+            this.clockLock.writeLock().lock();
+            try {
+                this.clock += 1;
+                if (!clocks.containsKey(this.node)) clocks.put(this.node, this.clock);
+            } finally {
+                this.clockLock.writeLock().unlock();
+            }
+
+            // Parse cleared
+            this.clearedLock.writeLock().lock();
+            try {
+                if (this.cleared) {
+                    if (Utils.isReplicaRequest(kvRequest.getCommand())) return;
+                    else if (!Utils.isEpidemicRequest(kvRequest.getCommand())) this.cleared = false;
+                }
+            } finally {
+                this.clearedLock.writeLock().unlock();
+            }
+
             // Cache check
             if (this.check(msg.getMessageID(), !Utils.isReplicaRequest(kvRequest.getCommand()))) return;
 
@@ -226,10 +253,7 @@ public class Server {
             if (Utils.isNodeRequest(kvRequest.getCommand())) {
                 switch (kvRequest.getCommand()) {
                     case Utils.SHUTDOWN_REQUEST -> System.exit(0);
-                    case Utils.CLEAR_REQUEST -> {
-                        this.store.clear();
-                        this.cache.invalidateAll();
-                    }
+                    case Utils.CLEAR_REQUEST -> this.clear();
                     case Utils.HEALTH_REQUEST -> kvResponse.setErrCode(Utils.SUCCESS);
                     case Utils.PID_REQUEST -> kvResponse.setPid(this.pid);
                     case Utils.MEMBERSHIP_REQUEST -> kvResponse.setMembershipCount(this.nodes.size());
@@ -253,29 +277,19 @@ public class Server {
             if (Utils.isReplicaRequest(kvRequest.getCommand())) {
                 switch (kvRequest.getCommand()) {
                     case Utils.REPLICA_PUSH -> {
-                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), kvRequest.getClocksMap());
+                        this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
                         this.sendConfirm(msg.getMessageID(), request.port);
                     }
                     case Utils.REPLICA_CONFIRMED -> {
                         this.queueLock.writeLock().lock();
                         try {
                             this.queue.remove(msg.getMessageID());
-                            this.cache.put(msg.getMessageID(), new CacheData(null, null, -1, System.currentTimeMillis()));
+                            this.cache.put(msg.getMessageID(), new CacheData(null, null, 0));
                         } finally {
                             this.queueLock.writeLock().unlock();
                         }
                     }
                 }
-            }
-
-            // Parse clocks
-            Map<Integer, Long> clocks = new HashMap<>(kvRequest.getClocksMap());
-            this.clockLock.writeLock().lock();
-            try {
-                this.clock += 1;
-                clocks.put(this.node, this.clock);
-            } finally {
-                this.clockLock.writeLock().unlock();
             }
 
             // Get request
@@ -322,9 +336,8 @@ public class Server {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
                         this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
-                        Data data = this.store.get(kvRequest.getKey());
+                        Data data = this.store.remove(kvRequest.getKey());
                         if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
-                        else this.store.remove(kvRequest.getKey(), clocks);
                     }
 
                     this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, true);
@@ -342,11 +355,11 @@ public class Server {
                 int node = replicas.get(replicas.size() - 1);
                 if (replicas.contains(this.node)) {
                     if (kvRequest.getCommand() == Utils.PUT_REQUEST) {
-                        clocks = this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
+                        Data data = this.store.put(kvRequest.getKey(), kvRequest.getValue(), kvRequest.getVersion(), clocks);
+                        if (!clocks.containsKey(0)) clocks.put(0, data.clocks.get(0));
                     } else if (kvRequest.getCommand() == Utils.REMOVE_REQUEST) {
-                        Data data = this.store.get(kvRequest.getKey());
+                        Data data = this.store.remove(kvRequest.getKey());
                         if (data == null) kvResponse.setErrCode(Utils.MISSING_KEY_ERROR);
-                        else this.store.remove(kvRequest.getKey(), clocks);
                     }
 
                     if (node == this.node) {
@@ -368,7 +381,7 @@ public class Server {
                 this.redirect(msg, kvRequest, node, request.address, request.port, replicas, clocks, replicas.contains(this.node));
             }
         } catch (Exception e) {
-            this.logger.log("Request Error: " + e.getMessage(), Utils.getFreeMemory(), this.cache.size());
+            this.logger.log("Request Error: " + e.getMessage());
             if (msg != null && kvResponse != null)  {
                 kvResponse.setErrCode(Utils.STORE_ERROR);
                 this.send(msg.getMessageID(), kvResponse.build().toByteString(), request.address, request.port, false);
@@ -412,7 +425,7 @@ public class Server {
                 if (!newReplicas.contains(this.node)) keys.add(key);
             }
 
-            if (keys.size() != 0) this.store.bulkRemove(keys);
+           this.store.bulkRemove(keys);
         } catch (Exception e) {
             this.logger.log("Regen Error: " + e.getMessage());
         }
@@ -484,9 +497,23 @@ public class Server {
     }
 
     public void clear() {
-        this.store.clear();
-        this.cache.invalidateAll();
-        this.addresses.clear();
+        this.clearedLock.writeLock().lock();
+        try {
+            this.cleared = true;
+        } finally {
+            this.clearedLock.writeLock().unlock();
+        }
+
+        this.queueLock.writeLock().lock();
+        try {
+            this.queue = new ConcurrentHashMap<>();
+            this.store.clear();
+            this.cache = CacheBuilder.newBuilder().expireAfterWrite(Utils.CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
+        } finally {
+            this.queueLock.writeLock().unlock();
+        }
+
+        this.logger.log("Clear Request", this.store.size(), this.cache.size(), this.queue.size());
     }
 
     public void shutdown() {
