@@ -21,7 +21,6 @@ public class App
             BufferedReader reader = new BufferedReader(new FileReader(args[1]));
             String line = reader.readLine();
             while (line != null) {
-                // java -Xmx64m -jar server.jar servers.txt port threads weight
                 ProcessBuilder pb = new ProcessBuilder(
                         "java",
                         "-Xmx" + args[2] + "m",
